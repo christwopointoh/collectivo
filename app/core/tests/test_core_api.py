@@ -1,6 +1,5 @@
-"""
-Tests for the core API.
-"""
+"""Tests for the core API."""
+
 from django.test import TestCase
 from django.urls import reverse
 
@@ -13,6 +12,7 @@ class PublicCoreApiTests(TestCase):
     """Test the public features of the core API."""
 
     def setUp(self):
+        """Set up the test client."""
         self.client = APIClient()
 
     def testGetVersion(self):

@@ -1,8 +1,6 @@
-# MachMit Backend
+# collectivo
 
-Dockerized Django REST API with a PostgreSQL database.
-
-Based on https://github.com/LondonAppDeveloper/recipe-app-api
+A dockerized Django REST API with a PostgreSQL database, using [collectivo-ux](https://github.com/MILA-Wien/collectivo-ux/) as a frontend.
 
 ## Development
 

@@ -110,8 +110,8 @@ jobs:
         uses: actions/checkout@v3
       - name: Build container image
         run: |
-          docker build -t milawien/mach-mit-backend:pr-${GITHUB_REF#refs/heads/} .
-          docker push milawien/mach-mit-backend:pr-${GITHUB_REF#refs/heads/}
+          docker build -t milawien/collectivo:pr-${GITHUB_REF#refs/heads/} .
+          docker push milawien/collectivo:pr-${GITHUB_REF#refs/heads/}
 
   build-collectivo-ux:
     runs-on: ubuntu-latest
@@ -131,5 +131,5 @@ jobs:
       - name: Build container image
         run: |
           cd collectivo-ux
-          docker build -t milawien/mach-mit:pr-${GITHUB_REF#refs/heads/} .
-          docker push milawien/mach-mit:pr-${GITHUB_REF#refs/heads/}
+          docker build -t milawien/collectivo-ux:c-pr-${GITHUB_REF#refs/heads/} .
+          docker push milawien/collectivo-ux:c-pr-${GITHUB_REF#refs/heads/}

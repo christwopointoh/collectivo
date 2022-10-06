@@ -37,8 +37,13 @@ RUN apk del .tmp-build-deps && \
     --no-create-home \
     django-user
 
+
 # TODO What does this do?
 ENV PATH="/py/bin:$PATH"
 
 # Set new user (this prevents root access to the server)
 USER django-user
+
+CMD while ! nc -z db 5432; do sleep 1; done && \
+             python manage.py migrate && \
+             python manage.py runserver 0.0.0.0:8000

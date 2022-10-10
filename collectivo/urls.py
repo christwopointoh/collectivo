@@ -6,17 +6,18 @@ from drf_spectacular.views import (
     SpectacularSwaggerView
 )
 
-
 app_name = 'collectivo'
 
 
 urlpatterns = [
-    path('api/version/', views.GetVersion.as_view(), name='version'),
-
-    path('api/user/', include('collectivo.user.urls')),
+    path('api/collectivo/v1/version/',
+         views.VersionView.as_view(), name='version'),
+    path('api/auth/', include('collectivo.auth.urls')),
 
     # API Documentation
-    path('api/schema/', SpectacularAPIView.as_view(), name='api-schema'),
+    path('api/collectivo/v1/schema/',
+         SpectacularAPIView.as_view(),
+         name='api-schema'),
     path('api/docs/',
          SpectacularSwaggerView.as_view(url_name='collectivo:api-schema'),
          name='api-docs'),

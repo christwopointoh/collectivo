@@ -7,4 +7,5 @@ app_name = 'test_extension'
 
 urlpatterns = [
     path('test/', views.TestView.as_view(), name='test_view'),
+    path('ux/', views.fetch_ux, name='ux'),
 ]

@@ -16,7 +16,7 @@ class ExtensionManager:
 
         for app in apps.get_app_configs():
             if hasattr(app, 'collectivo_extension') \
-                    and app.collectivo_extension == True:
+                    and app.collectivo_extension is True:
                 self._extensions.append(app)
 
     def get_configs(self):

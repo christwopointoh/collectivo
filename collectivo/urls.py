@@ -27,6 +27,6 @@ urlpatterns = [
 
 
 for ext in extensions.get_configs():
-     urlpatterns.append(
-          path(f'api/{ext.name}/', include(f'{ext.name}.urls')),
-     )
+    urlpatterns.append(
+        path(f'api/{ext.name}/', include(f'{ext.name}.urls')),
+    )

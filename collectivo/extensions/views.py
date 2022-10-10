@@ -9,7 +9,7 @@ class ExtensionView(APIView):
     """API views of the keycloak token."""
 
     def get(self, request):
-        """Return access/bearer token for given credentials."""
+        """Return list of installed extensions."""
         data = {
             'extensions': str([ext.name for ext in extensions.get_configs()]),
         }

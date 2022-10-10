@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'collectivo',
+    'test_extension',
 
     'rest_framework',
     'drf_spectacular',

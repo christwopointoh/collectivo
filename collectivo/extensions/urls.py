@@ -6,5 +6,6 @@ app_name = 'collectivo.extensions'
 
 
 urlpatterns = [
-    path('extensions/', views.ExtensionView.as_view(), name='extensions'),
+    path('v1/extensions/', views.ExtensionView.as_view(),
+         name='extensions'),
 ]

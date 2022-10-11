@@ -30,6 +30,7 @@ ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "testserver"]
 # Application definition
 
 INSTALLED_APPS = [
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,16 +39,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'collectivo',
-    'collectivo.user',
 
     'rest_framework',
-    'rest_framework.authtoken',
     'drf_spectacular',
+
+    # DEBUG
     'corsheaders',
 ]
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+
+    'collectivo.auth.middleware.KeycloakMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,19 +60,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-CORS_ALLOW_HEADERS = [
-'accept',
-'accept-encoding',
-'authorization',
-'content-type',
-'dnt',
-'origin',
-'user-agent',
-'x-csrftoken',
-'x-requested-with',
-]
-CORS_ORIGIN_ALLOW_ALL = True
 
 ROOT_URLCONF = 'collectivo-test-app.urls'
 
@@ -103,7 +94,7 @@ DATABASES = {
         'PASSWORD': os.environ.get('DB_PASS'),
     }
 }
-# os.environ.get('DB_HOST')
+
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
@@ -143,15 +134,57 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Settings for collectivo
 
-AUTH_USER_MODEL = 'user.User'
+# CORS Settings - TODO Remove?
+
+CORS_ALLOW_HEADERS = [
+'accept',
+'accept-encoding',
+'authorization',
+'content-type',
+'dnt',
+'origin',
+'user-agent',
+'x-csrftoken',
+'x-requested-with',
+]
+CORS_ORIGIN_ALLOW_ALL = True
+
+
+# Django Rest Framework (DRF)
 
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
+
+
+# DRF Spectacular (OpenAPI)
+
+SPECTACULAR_SETTINGS = {
+    # Allow for authentication via token in the SwaggerUI interface
+    "APPEND_COMPONENTS": {
+        "securitySchemes": {
+            "ApiKeyAuth": {
+                "type": "apiKey",
+                "in": "header",
+                "name": "Authorization"
+            }
+        }
+    },
+    "SECURITY": [{"ApiKeyAuth": [], }],
+}
+
+# Configuration for auth.middleware.KeycloakMiddleware
+
+KEYCLOAK_CONFIG = dict(
+    SERVER_URL='http://host.docker.internal:8080/',
+    REALM_NAME='collectivo',
+    CLIENT_ID='collectivo',
+    CLIENT_SECRET_KEY='ygFXfQ8x6yUkgPTccQyqIC0OIHe9oWmI'
+)

@@ -1,3 +1,7 @@
+# Javascript
+node_modules
+dist
+
 # Automatic copy of collectivo into collectivo-test-app
 collectivo-test-app/collectivo
 

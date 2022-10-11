@@ -47,4 +47,3 @@ if settings.DEBUG:
         # Test authentication
         path('api/collectivo-dev/', include('collectivo.auth.urls')),
     ]
-

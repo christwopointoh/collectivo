@@ -13,4 +13,3 @@ class TestView(APIView):
             'message': 'Hi! I am the test_extension :)',
         }
         return Response(data)
-

@@ -11,7 +11,10 @@ Requirements for the development environment that is used in our team:
 
 To run and test the app with docker:
 
-- To build the micro-frontend components, run: `yarn build`
+- To build the micro-frontend components (TODO: Perform this with docker build):
+    - Move to `cd collectivo-test-app/test_extension/ux_component`
+    - Run `yarn`
+    - Run `yarn build`
 - To build a development server, run: `docker compose build`
 - To run a development server:
     - If you want to develop just the backend, run: `docker compose up -d`

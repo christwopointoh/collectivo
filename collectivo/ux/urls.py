@@ -7,7 +7,7 @@ app_name = 'collectivo.ux'
 api_path = f'api/{app_name}/'
 
 urlpatterns = [
-    path(api_path+'v1/menu/<str:menu_name>',
+    path(api_path+'v1/menus/<str:menu_name>',
          views.MenuItemsReadView.as_view(), name='menu'),
 ]
 

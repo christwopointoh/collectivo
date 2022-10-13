@@ -7,7 +7,6 @@ from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularSwaggerView
 )
-from collectivo.extensions import extensions
 
 app_name = 'collectivo'
 
@@ -17,7 +16,6 @@ urlpatterns = [
     # Core API views
     path('api/collectivo/v1/version/',
          views.VersionView.as_view(), name='version'),
-    path('api/collectivo/', include('collectivo.extensions.urls')),
 
     # API Documentation
     path('api/collectivo/v1/schema/',
@@ -27,15 +25,6 @@ urlpatterns = [
          name='api-docs'),
 
 ]
-
-
-# Add registered extensions to urlpatterns
-# TODO Handle namespace conflicts
-for ext in extensions.get_configs():
-    urlpatterns += [
-        path('', include(f'{ext.name}.urls')),
-    ]
-
 
 # For development
 if settings.DEBUG:

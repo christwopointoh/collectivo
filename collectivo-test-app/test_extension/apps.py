@@ -9,5 +9,6 @@ class TestExtensionConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'test_extension'
 
-    # This registers the app as a collectivo extension
-    collectivo_extension = True
+    def ready(self):
+        """Import modules that should be loaded at start."""
+        from . import menus, urls  # noqa

@@ -21,7 +21,7 @@ services:
              python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     # Environment variables to connect django with the database.
-    restart: always
+    # restart: always
     environment:
       DB_HOST: db
       DB_NAME: devdb

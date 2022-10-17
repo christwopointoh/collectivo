@@ -7,3 +7,8 @@ class AuthConfig(AppConfig):
 
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'collectivo.auth'
+    label = 'collectivo_auth'
+
+    def ready(self):
+        """Run startup scripts when django is ready."""
+        from . import rights  # noqa

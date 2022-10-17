@@ -37,12 +37,13 @@ class KeycloakMiddleware(MiddlewareMixin):
         # Check for authorization data in header
         # Return error to client if it is missing
         if "HTTP_AUTHORIZATION" not in request.META:
-            return JsonResponse(
-                {
-                    "detail": "Authentication credentials were not provided.",
-                },
-                status=NotAuthenticated.status_code,
-            )
+            request.is_authenticated = False
+            # return JsonResponse(
+            #     {
+            #         "detail": "Authentication credentials were not provided.",
+            #     },
+            #     status=NotAuthenticated.status_code,
+            # )
 
         else:
 
@@ -67,7 +68,10 @@ class KeycloakMiddleware(MiddlewareMixin):
             #     last_name=parsed_token["family_name"]
             # )
 
-        # TODO Check if user has permissions to access this view
+            # TODO Check if user has permissions to access this view
+            permissions = self.keycloak.uma_permissions(token)
+            print(permissions)
+
         has_permissions = True
         if has_permissions:
             return None

@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "scripts": {
     "dev": "vite --port 5001 --strictPort",
-    "build": "vite build && cp -R dist ../static/test_extension/ux_component/dist",
+    "build": "vite build && cp -R dist ../static/test_extension/ux_component",
     "serve": "vite preview --port 5001 --strictPort"
   },
   "dependencies": {

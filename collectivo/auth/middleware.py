@@ -23,8 +23,8 @@ class KeycloakMiddleware(MiddlewareMixin):
         # Create Keycloak OpenID client
         self.keycloak = KeycloakOpenID(
             server_url=self.config["SERVER_URL"],
-            client_id=self.config["REALM_NAME"],
-            realm_name=self.config["CLIENT_ID"],
+            realm_name=self.config["REALM_NAME"],
+            client_id=self.config["CLIENT_ID"],
             client_secret_key=self.config["CLIENT_SECRET_KEY"],
         )
 
@@ -37,9 +37,12 @@ class KeycloakMiddleware(MiddlewareMixin):
         # Check for authorization data in header
         # Return error to client if it is missing
         if "HTTP_AUTHORIZATION" not in request.META:
-
-            # TODO Set user to anonymous user
-            request.is_authenticated = False
+            return JsonResponse(
+                {
+                    "detail": "Authentication credentials were not provided.",
+                },
+                status=NotAuthenticated.status_code,
+            )
 
         else:
 
@@ -47,11 +50,10 @@ class KeycloakMiddleware(MiddlewareMixin):
             auth_header = request.META.get("HTTP_AUTHORIZATION").split()
             token = auth_header[1] if len(auth_header) == 2 else auth_header[0]
 
-            # Verify token
             try:
-                # TODO Verify through decoding token instead
-                _ = self.keycloak.userinfo(token)
-                request.is_authenticated = True
+                parsed_token = self.keycloak.introspect(token)
+                if parsed_token["active"]:
+                    request.is_authenticated = True
             except KeycloakAuthenticationError:
                 return JsonResponse(
                     {"detail": AuthenticationFailed.default_detail},

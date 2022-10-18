@@ -187,8 +187,8 @@ SPECTACULAR_SETTINGS = {
 # Configuration for auth.middleware.KeycloakMiddleware
 
 KEYCLOAK_CONFIG = dict(
-    SERVER_URL='http://host.docker.internal:8080/',
+    SERVER_URL='http://keycloak:8080',
     REALM_NAME='collectivo',
     CLIENT_ID='collectivo',
-    CLIENT_SECRET_KEY='ygFXfQ8x6yUkgPTccQyqIC0OIHe9oWmI'
+    CLIENT_SECRET_KEY='**********'
 )

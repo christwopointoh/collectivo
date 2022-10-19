@@ -1,17 +1,15 @@
-"""URL patterns of the test_extension."""
+"""URL patterns of the user experience module."""
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from . import views
-from collectivo.urls import urlpatterns as collectivo_urlpatterns
 
 app_name = 'collectivo.ux'
-api_path = f'api/{app_name}/'
+
+router = DefaultRouter()
+router.register('microfrontends', views.MicroFrontendViewSet)
 
 urlpatterns = [
-    path(api_path+'v1/menus/<str:menu_name>',
+    path('api/ux/v1/', include(router.urls)),
+    path('api/ux/v1/menus/<str:menu_name>',
          views.MenuItemsReadView.as_view(), name='menu'),
-]
-
-# Include URL namespace in parent module
-collectivo_urlpatterns += [
-    path('', include('collectivo.ux.urls')),
 ]

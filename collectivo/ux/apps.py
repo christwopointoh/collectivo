@@ -1,13 +1,9 @@
-"""Configuration file for the collectivo ux extension."""
+"""Configuration file of the user experience module."""
 from django.apps import AppConfig
 
 
 class CollectivoUxConfig(AppConfig):
-    """Configuration class of the collectivo ux extension."""
+    """Configuration class of the user experience module."""
 
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'collectivo.ux'
-
-    def ready(self):
-        """Import modules that should be loaded at start."""
-        from . import urls  # noqa

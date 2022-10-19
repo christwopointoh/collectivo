@@ -1,4 +1,4 @@
-"""Middlewares to authenticate with the collectivo API."""
+"""Middlewares of the authentication module."""
 from django.conf import settings
 from django.http.response import JsonResponse
 from django.utils.deprecation import MiddlewareMixin

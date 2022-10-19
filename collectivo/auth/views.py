@@ -1,4 +1,4 @@
-"""Views of the auth extension."""
+"""Views of the authentication module."""
 
 from rest_framework.views import APIView
 from rest_framework.response import Response

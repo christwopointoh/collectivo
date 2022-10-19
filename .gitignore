@@ -1,8 +1,9 @@
 # Javascript
 node_modules/
 
-# Ignore copy of collectivo in collectivo-test-app made by docker
+# Collectivo
 collectivo-test-app/collectivo
+collectivo-test-app/test_extension/static/test_extension
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

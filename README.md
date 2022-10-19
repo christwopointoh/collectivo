@@ -23,3 +23,4 @@ To run and test the app with docker:
 - The API documentation will be available at `/api/docs/`.
 - To test the frontend, you can use the API call `GET` at `/api/version/`.
 - To test backend and frontend together, see [machmit](https://github.com/MILA-Wien/machmit).
+- To export the keycloak realm including users run `docker compose exec -u 0 keycloak /opt/keycloak/bin/kc.sh export --dir /tmp/export --realm collectivo --users realm_file` Note: exporting the realm via the gui doesn't include the users. The exported files is then in the `./docker/keycloak/export` folder.

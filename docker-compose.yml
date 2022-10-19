@@ -82,7 +82,8 @@ services:
       KEYCLOAK_LOGLEVEL: DEBUG
       # KEYCLOAK_IMPORT: /var/keycloak/master.json
     volumes:
-      - ./docker/keycloak:/opt/keycloak/data/import:ro
+      - ./docker/keycloak/import:/opt/keycloak/data/import:ro
+      - ./docker/keycloak/export:/tmp/export
     command:
       start-dev --import-realm
     ports:

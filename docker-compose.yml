@@ -5,6 +5,7 @@ services:
   # A sample django project that has installed collectivo.
   collectivo:
     container_name: collectivo-test-app
+    restart: "no"
     build:
       context: .
     ports:

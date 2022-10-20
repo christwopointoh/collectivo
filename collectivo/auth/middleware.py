@@ -39,7 +39,7 @@ class KeycloakMiddleware(MiddlewareMixin):
         if "HTTP_AUTHORIZATION" not in request.META:
             # return JsonResponse(
             #     {
-            #         "detail": "Authentication credentials were not provided.",
+            #         "detail": "Authentication credentials not provided.",
             #     },
             #     status=NotAuthenticated.status_code,
             # )

@@ -4,6 +4,7 @@ FROM python:3.9-alpine3.13
 # Send stdout and sterr messages directly to the terminal
 ENV PYTHONUNBUFFERED 1
 
+
 # Install temporary packages to build the postgresql database
 RUN apk add --update --no-cache postgresql-client  && \
     apk add --update --no-cache --virtual .tmp-build-deps \
@@ -40,7 +41,12 @@ RUN apk del .tmp-build-deps && \
 # TODO What does this do?
 ENV PATH="/py/bin:$PATH"
 
-# Set new user (this prevents root access to the server)
+# Create a static folder for the app
+RUN mkdir /collectivo-test-app/static && \
+    chown -R django-user:django-user /collectivo-test-app && \
+    chmod -R 755 /collectivo-test-app/static
+
+# Switch to the new user
 USER django-user
 
 # Set default command

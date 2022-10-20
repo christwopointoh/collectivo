@@ -137,3 +137,6 @@ dmypy.json
 
 # static files
 docker/static
+
+# keycloak export
+docker/keycloak/export

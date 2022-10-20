@@ -1,15 +1,20 @@
-"""Views of the test_extension extension."""
-
+"""Views of the test_extension app."""
+from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 
-class TestView(APIView):
-    """A view of the test_extension extension."""
+class TestAPIView(APIView):
+    """An API view of the test_extension app."""
 
     def get(self, request):
-        """Return success."""
+        """Return success message."""
         data = {
-            'message': 'Hi! I am the test_extension :)',
+            'message': 'Hi! I am the test_extension.',
         }
         return Response(data)
+
+
+def test_html_view(request):
+    """An HTML view of the test_extension app."""
+    return render(request, "test_extension/test_page.html")

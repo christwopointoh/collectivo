@@ -15,10 +15,17 @@ def post_migrate_callback(sender, **kwargs):
     )
 
     register_microfrontend(
-        name=sender.name,
+        name=sender.name+'_modules',
         extension=sender.name,
         path='http://localhost/static/test_extension/remoteEntry.js',
-        type='components'
+        method='modules'
+    )
+
+    register_microfrontend(
+        name=sender.name+'_iframe',
+        extension=sender.name,
+        path='http://localhost/test_extension/',
+        method='iframe'
     )
 
 

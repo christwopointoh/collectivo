@@ -139,6 +139,10 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+STATIC_DIR = os.path.realpath(os.path.join(BASE_DIR, 'static'))
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.realpath(os.path.join(BASE_DIR, 'static'))
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -188,8 +192,8 @@ SPECTACULAR_SETTINGS = {
 # Configuration for auth.middleware.KeycloakMiddleware
 
 KEYCLOAK_CONFIG = dict(
-    SERVER_URL='http://host.docker.internal:8080/',
+    SERVER_URL='http://keycloak:8080',
     REALM_NAME='collectivo',
     CLIENT_ID='collectivo',
-    CLIENT_SECRET_KEY='ygFXfQ8x6yUkgPTccQyqIC0OIHe9oWmI'
+    CLIENT_SECRET_KEY='**********'
 )

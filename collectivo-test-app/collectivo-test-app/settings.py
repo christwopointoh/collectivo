@@ -39,7 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'collectivo',
+    'collectivo.ux',
     'collectivo.auth',
+    'collectivo.extensions',
+
+    'test_extension',
 
     'rest_framework',
     'drf_spectacular',
@@ -134,6 +138,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_DIR = os.path.realpath(os.path.join(BASE_DIR, 'static'))
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.realpath(os.path.join(BASE_DIR, 'static'))
 
 
 # Default primary key field type

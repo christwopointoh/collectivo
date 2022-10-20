@@ -1,4 +1,4 @@
-"""Middlewares to authenticate with the collectivo API."""
+"""Middlewares of the authentication module."""
 from django.conf import settings
 from django.http.response import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
@@ -37,6 +37,7 @@ class KeycloakMiddleware(MiddlewareMixin):
         # Check for authorization data in header
         # Return error to client if it is missing
         if "HTTP_AUTHORIZATION" not in request.META:
+
             request.is_authenticated = False
             # return JsonResponse(
             #     {

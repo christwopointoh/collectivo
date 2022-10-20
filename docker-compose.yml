@@ -5,6 +5,7 @@ services:
   # A sample django project that has installed collectivo.
   collectivo:
     container_name: collectivo-test-app
+    restart: "no"
     build:
       context: .
     ports:
@@ -14,6 +15,7 @@ services:
     volumes:
       - ./collectivo-test-app:/collectivo-test-app
       - ./collectivo:/collectivo-test-app/collectivo
+      - ./docker/static:/collectivo-test-app/static
     # Wait for database to be ready (this command will work only on linux),
     # migrate the database changes and start a development server.
     command: > #
@@ -33,6 +35,18 @@ services:
     extra_hosts:
       # Allow for direct communication between services.
       - host.docker.internal:host-gateway
+
+  collectivo-static:
+    container_name: colletivo-static
+    image: nginx:alpine
+    ports:
+      - "8002:80"
+    volumes:
+      - ./docker/static:/app/static
+      - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - ./docker/nginx/error.html:/usr/share/nginx/html/index.html
+    restart: always
+    
 
   # A PostgreSQL database.
   db:
@@ -69,7 +83,8 @@ services:
       KEYCLOAK_LOGLEVEL: DEBUG
       # KEYCLOAK_IMPORT: /var/keycloak/master.json
     volumes:
-      - ./docker/keycloak:/opt/keycloak/data/import:ro
+      - ./docker/keycloak/import:/opt/keycloak/data/import:ro
+      - ./docker/keycloak/export:/tmp/export
     command:
       start-dev --import-realm
     ports:

@@ -1,4 +1,4 @@
-"""Serializers of the auth extension."""
+"""Serializers of the authentication module."""
 from rest_framework import serializers
 
 

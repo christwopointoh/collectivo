@@ -8,8 +8,14 @@ class MicroFrontend(models.Model):
     name = models.CharField(max_length=255, unique=True, primary_key=True)
     extension = models.ForeignKey(
         'extensions.Extension', on_delete=models.CASCADE, blank=True)
-    path = models.URLField(max_length=255, blank=True)
-    type = models.CharField(max_length=50, blank=True)
+    path = models.URLField(max_length=255)
+    method = models.CharField(
+        max_length=50,
+        choices=[
+            ('modules', 'Integration of web components via remote entry.'),
+            ('iframe', 'Integration of target link as an iframe.')
+        ]
+    )
 
     def __str__(self):
         """Return string representation of the model."""

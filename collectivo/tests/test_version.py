@@ -15,7 +15,7 @@ class PublicCoreApiTests(TestCase):
         """Set up the test client."""
         self.client = APIClient()
 
-    # def testGetVersion(self):
-    #     """Test getting current version is correct."""
-    #     res = self.client.get(reverse('collectivo:version'))
-    #     self.assertEqual(res.data['version'], __version__)
+    def testGetVersion(self):
+        """Test getting current version is correct."""
+        res = self.client.get(reverse('collectivo:version'))
+        self.assertEqual(res.data['version'], __version__)

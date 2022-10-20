@@ -37,12 +37,13 @@ class KeycloakMiddleware(MiddlewareMixin):
         # Check for authorization data in header
         # Return error to client if it is missing
         if "HTTP_AUTHORIZATION" not in request.META:
-            return JsonResponse(
-                {
-                    "detail": "Authentication credentials were not provided.",
-                },
-                status=NotAuthenticated.status_code,
-            )
+            # return JsonResponse(
+            #     {
+            #         "detail": "Authentication credentials were not provided.",
+            #     },
+            #     status=NotAuthenticated.status_code,
+            # )
+            pass
 
         else:
 

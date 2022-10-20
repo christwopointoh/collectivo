@@ -11,8 +11,8 @@ EXTENSIONS_URL = reverse('collectivo:collectivo.extensions:extension-list')
 MICROFRONTEND_URL = reverse('collectivo:collectivo.ux:microfrontend-list')
 
 
-class PublicExtensionsApiTests(TestCase):
-    """Test the publicly available micro-frontend API."""
+class PublicMicroFrontendsApiTests(TestCase):
+    """Test the publicly available micro-frontends API."""
 
     def setUp(self):
         """Prepare client, extension, & micro-frontend."""
@@ -24,7 +24,7 @@ class PublicExtensionsApiTests(TestCase):
             'name': self.mf_name,
             'extension': self.ext_name,
             'path': 'http://example.com',
-            'type': 'components',
+            'type': 'modules',
         }
         self.client.post(MICROFRONTEND_URL, payload)
 

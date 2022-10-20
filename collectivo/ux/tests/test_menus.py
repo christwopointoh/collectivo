@@ -1,54 +1,48 @@
 """Test the features of the menu API."""
-
-from django.test import TestCase, SimpleTestCase
+from django.test import TestCase
 from django.urls import reverse
-
 from rest_framework.test import APIClient
-from collectivo.ux.menus import Menu, MenuItem, menus, main_menu
-from collectivo.ux.serializers import MenuItemSerializer
+from collectivo.ux.models import Menu, MenuItem
 
 
-def create_menu_item():
-    """Return a menu item."""
-    return MenuItem(
-        display='This is a menu item',
-        path='static/tests/hello_world',
-    )
+EXTENSIONS_URL = reverse('collectivo:collectivo.extensions:extension-list')
+MENUS_URL = reverse('collectivo:collectivo.ux:menu-list')
+ITEMS_URL = reverse('collectivo:collectivo.ux:menuitem-list')
 
 
-class MenuCreationTests(SimpleTestCase):
-    """Test features of the menus module."""
-
-    def testCreateMenu(self):
-        """Test that new menu is registered in menus."""
-        mymenu = Menu('mymenu')
-        self.assertIn(('mymenu', mymenu), menus.items())
-
-    def testCreateMenuItem(self):
-        """Test that items can be added to menus."""
-        mymenu = Menu('mymenu')
-        myitem = create_menu_item()
-        mymenu.add_item(myitem)
-        self.assertIn(myitem, mymenu.items)
-
-    # TODO Test Subitems
-
-
-class PublicMenuApiTests(TestCase):
-    """Test public features of the menus API."""
+class PublicMenusApiTests(TestCase):
+    """Test the publicly available menus API."""
 
     def setUp(self):
-        """Set up the test client."""
+        """Prepare client, extension, & micro-frontend."""
         self.client = APIClient()
-        myitem = create_menu_item()
-        main_menu.add_item(myitem)
+        self.ext_name = 'my_extension'
+        self.client.post(EXTENSIONS_URL, {'name': self.ext_name})
 
-    def testGetMenuItems(self):
-        """Test getting items of a menu."""
-        url = reverse(
-            'collectivo:collectivo.ux:menu',
-            kwargs={'menu_name': 'main_menu'}
-        )
-        res = self.client.get(url)
-        menu_items = MenuItemSerializer(main_menu.items, many=True).data
-        self.assertEqual(menu_items, res.data)
+    def test_default_menus(self):
+        """Test default menus exist."""
+        default_menus = ['main_menu']
+        for menu in default_menus:
+            self.assertTrue(Menu.objects.filter(name=menu).exists())
+
+    def test_create_menu(self):
+        """Test creating menu."""
+        payload = {
+            'name': 'my_menu',
+            'extension': self.ext_name,
+        }
+        self.client.post(MENUS_URL, payload)
+        exists = Menu.objects.filter(name='my_menu').exists()
+        self.assertTrue(exists)
+
+    def test_create_menu_item(self):
+        """Test creating item for a menu."""
+        payload = {
+            'name': 'my_menu_item',
+            'label': 'My menu item',
+            'menu': 'main_menu',
+            'extension': self.ext_name,
+        }
+        self.client.post(ITEMS_URL, payload)
+        exists = MenuItem.objects.filter(name='my_menu_item').exists()
+        self.assertTrue(exists)

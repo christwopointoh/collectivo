@@ -7,9 +7,10 @@ app_name = 'collectivo.ux'
 
 router = DefaultRouter()
 router.register('microfrontends', views.MicroFrontendViewSet)
+router.register('menus', views.MenuViewSet)
+router.register('menu-items', views.MenuItemViewSet)
+
 
 urlpatterns = [
     path('api/ux/v1/', include(router.urls)),
-    path('api/ux/v1/menus/<str:menu_name>',
-         views.MenuItemsReadView.as_view(), name='menu'),
 ]

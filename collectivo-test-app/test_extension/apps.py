@@ -6,7 +6,7 @@ from django.db.models.signals import post_migrate
 def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
     from collectivo.extensions.utils import register_extension
-    from collectivo.ux.utils import register_microfrontend
+    from collectivo.ux.utils import register_microfrontend, register_menuitem
 
     register_extension(
         name=sender.name,
@@ -26,6 +26,24 @@ def post_migrate_callback(sender, **kwargs):
         extension=sender.name,
         path='http://localhost/test_extension/',
         method='iframe'
+    )
+
+    register_menuitem(
+        name='menuitem_'+sender.name+'_modules',
+        label='Open test webcomponent',
+        extension=sender.name,
+        menu='main_menu',
+        microfrontend=sender.name+'_modules'
+    )
+    # res.render()
+    # print(res.content)
+
+    register_menuitem(
+        name='menuitem_'+sender.name+'_iframe',
+        label='Open test iframe',
+        extension=sender.name,
+        menu='main_menu',
+        microfrontend=sender.name+'_iframe'
     )
 
 

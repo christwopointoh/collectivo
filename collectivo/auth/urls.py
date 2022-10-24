@@ -8,7 +8,7 @@ app_name = 'collectivo.auth'
 
 urlpatterns = []
 
-if settings.DEBUG:
+if settings.DEVELOPMENT:
 
     urlpatterns += [
         path('api/auth-dev/v1/token/',

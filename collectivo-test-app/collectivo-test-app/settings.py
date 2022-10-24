@@ -40,7 +40,7 @@ INSTALLED_APPS = [
 
     'collectivo',
     'collectivo.ux',
-    'collectivo.auth',
+    'collectivo.keycloak',
     'collectivo.extensions',
 
     'test_extension',
@@ -55,7 +55,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 
-    'collectivo.auth.middleware.KeycloakMiddleware',
+    'collectivo.keycloak.middleware.KeycloakMiddleware',
 
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',

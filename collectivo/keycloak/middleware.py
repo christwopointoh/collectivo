@@ -54,9 +54,13 @@ class KeycloakMiddleware(MiddlewareMixin):
 
             try:
                 parsed_token = self.keycloak.introspect(token)
+                #print(parsed_token) does not contain user id
                 if parsed_token["active"]:
                     request.is_authenticated = True
+                else:
+                    request.is_authenticated = False
             except KeycloakAuthenticationError:
+                request.is_authenticated = False
                 return JsonResponse(
                     {"detail": AuthenticationFailed.default_detail},
                     status=AuthenticationFailed.status_code,
@@ -70,8 +74,15 @@ class KeycloakMiddleware(MiddlewareMixin):
             # )
 
             # TODO Check if user has permissions to access this view
-            permissions = self.keycloak.uma_permissions(token)
-            print(permissions)
+            try:
+                permissions = self.keycloak.uma_permissions(token)
+                print(permissions)
+            except KeycloakAuthenticationError:
+                request.is_authenticated = False
+                return JsonResponse(
+                    {"detail": AuthenticationFailed.default_detail},
+                    status=AuthenticationFailed.status_code,
+                )
 
         has_permissions = True
         if has_permissions:

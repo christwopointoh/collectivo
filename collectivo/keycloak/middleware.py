@@ -32,66 +32,54 @@ class KeycloakMiddleware(MiddlewareMixin):
         """Handle requests.."""
         return self.get_response(request)  # Django default setting
 
-    def process_view(self, request, view_func, view_args, view_kwargs):
-        """Validate keycloak token."""
+    def authentication_failed(self):
+        """Return JSON saying that authentication has failed."""
+        return JsonResponse(
+            {"detail": AuthenticationFailed.default_detail},
+            status=AuthenticationFailed.status_code,
+        )
+
+    def not_authenticated(self):
+        """Return JSON saying that user is not authorized."""
+        return JsonResponse(
+            {"detail": NotAuthenticated.default_detail},
+            status=NotAuthenticated.status_code,
+        )
+
+    def get_token(self, request):
+        """Get token for passed authorization data."""
         # Check for authorization data in header
-        # Return error to client if it is missing
         if "HTTP_AUTHORIZATION" not in request.META:
-
             request.is_authenticated = False
-            # return JsonResponse(
-            #     {
-            #         "detail": "Authentication credentials were not provided.",
-            #     },
-            #     status=NotAuthenticated.status_code,
-            # )
-
+            return self.keycloak.token("anon", "anon")['access_token']
         else:
-
             # Read out token from header
+            request.is_authenticated = True
             auth_header = request.META.get("HTTP_AUTHORIZATION").split()
-            token = auth_header[1] if len(auth_header) == 2 else auth_header[0]
+            return auth_header[1] if len(auth_header) == 2 else auth_header[0]
 
-            try:
-                parsed_token = self.keycloak.introspect(token)
-                #print(parsed_token) does not contain user id
-                if parsed_token["active"]:
-                    request.is_authenticated = True
-                else:
-                    request.is_authenticated = False
-            except KeycloakAuthenticationError:
-                request.is_authenticated = False
-                return JsonResponse(
-                    {"detail": AuthenticationFailed.default_detail},
-                    status=AuthenticationFailed.status_code,
-                )
-
-            # TODO Get user from token
-            # user, _ = User.objects.get_or_create(
-            #     username=parsed_token['preferred_username'],
-            #     first_name=parsed_token["given_name"],
-            #     last_name=parsed_token["family_name"]
-            # )
-
-            # TODO Check if user has permissions to access this view
-            try:
-                permissions = self.keycloak.uma_permissions(token)
-                print(permissions)
-            except KeycloakAuthenticationError:
-                request.is_authenticated = False
-                return JsonResponse(
-                    {"detail": AuthenticationFailed.default_detail},
-                    status=AuthenticationFailed.status_code,
-                )
-
-        has_permissions = True
-        if has_permissions:
-            return None
-        else:
-            # TODO Which is the correct error message here?
-            return JsonResponse(
-                {
-                    "detail": NotAuthenticated.default_detail,
-                },
-                status=NotAuthenticated.status_code,
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        """Check if user is authorized for given view."""
+        try:
+            print(request.method)  # GET
+            print(request.path)  # /api/extensions/v1/extensions/
+            print(view_func.cls.__name__)  # ExtensionViewSet
+            #print(dir(view_func))
+            #print(dir(view_func.cls))
+            #print(dir(view_func.view_class))
+            #print(view_args)
+            #print(view_kwargs)
+            resource = 'test_resource'
+            scope = 'view'
+            uma = self.keycloak.has_uma_access(
+                self.get_token(request),
+                f"{resource}#{scope}"
             )
+        except KeycloakAuthenticationError:
+            return None
+            request.is_authenticated = False
+            return self.authentication_failed()
+
+        return None if uma.is_authorized else self.not_authenticated()
+
+

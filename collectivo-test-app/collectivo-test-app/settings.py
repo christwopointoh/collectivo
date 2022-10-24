@@ -24,6 +24,7 @@ SECRET_KEY = 'django-insecure-%x_1s#a=mf9rfm+@waioqu@)(2o5s3ff&*f0gas-$*8%#9kj7%
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+DEVELOPMENT = True
 
 ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "testserver"]
 
@@ -39,6 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'collectivo',
+    'collectivo.ux',
+    'collectivo.auth',
+    'collectivo.extensions',
+
+    'test_extension',
 
     'rest_framework',
     'drf_spectacular',

@@ -1,5 +1,9 @@
-# Automatic copy of collectivo into collectivo-test-app
+# Javascript
+node_modules/
+
+# Collectivo
 collectivo-test-app/collectivo
+collectivo-test-app/test_extension/static/test_extension
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

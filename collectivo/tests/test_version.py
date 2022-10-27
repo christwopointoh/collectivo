@@ -1,10 +1,7 @@
 """Tests for the core API."""
-
 from django.test import TestCase
 from django.urls import reverse
-
 from rest_framework.test import APIClient
-
 from collectivo.version import __version__
 
 

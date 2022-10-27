@@ -6,5 +6,5 @@ class AuthConfig(AppConfig):
     """Configuration class of the authentication module."""
 
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'collectivo.keycloak'
-
+    name = 'collectivo.auth'
+    label = 'collectivo_auth'

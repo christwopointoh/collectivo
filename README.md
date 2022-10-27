@@ -11,15 +11,15 @@ Requirements for the development environment that is used in our team:
 
 To run and test the app with docker:
 
-- To build the micro-frontend components (TODO: Perform this with docker build):
-    - Move to `cd collectivo-test-app/test_extension/ux_component`
+1. Build a development server and run: `docker compose build`
+2. Build micro-frontend components (TODO: Perform this with docker build):
+    - Move to `cd collectivo-test-app/test_extension/components`
     - Run `yarn`
     - Run `yarn build`
-- To build a development server, run: `docker compose build`
-- To run a development server:
+3. Run a development server:
     - If you want to develop just the backend, run: `docker compose up -d`
     - If you also want to develop the frontend, run `docker compose up -d collectivo db keycloak` and follow the instructions at [collectivo-ux](https://github.com/MILA-Wien/collectivo-ux/) to set up a development server for the frontend.
-- To perform tests and linting, run: `docker compose run --rm collectivo sh -c "python manage.py test && flake8"`
+4. To perform tests and linting, run: `docker compose run --rm collectivo sh -c "python manage.py test && flake8"`
 
 ## Documentation
 

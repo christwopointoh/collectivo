@@ -46,6 +46,9 @@ RUN mkdir -p /collectivo-test-app/static && \
     chown -R django-user:django-user /collectivo-test-app && \
     chmod -R 755 /collectivo-test-app/static
 
+# Create a static folder for microfrontends
+RUN mkdir -p /collectivo-test-app/test_extension/static/test_extension
+
 # Switch to the new user
 USER django-user
 

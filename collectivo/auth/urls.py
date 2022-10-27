@@ -24,7 +24,7 @@ urlpatterns = [
         name='is_authenticated'),
 ]
 
-if settings.DEBUG:
+if settings.DEVELOPMENT:
 
     urlpatterns += [
         path('api/keycloak/v1/token/',

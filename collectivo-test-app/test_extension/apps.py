@@ -18,14 +18,14 @@ def post_migrate_callback(sender, **kwargs):
         name=sender.name+'_modules',
         extension=sender.name,
         path='http://localhost/static/test_extension/remoteEntry.js',
-        method='modules'
+        type='modules'
     )
 
     register_microfrontend(
         name=sender.name+'_iframe',
         extension=sender.name,
         path='http://localhost/test_extension/',
-        method='iframe'
+        type='html'
     )
 
     register_menuitem(
@@ -35,8 +35,6 @@ def post_migrate_callback(sender, **kwargs):
         menu='main_menu',
         microfrontend=sender.name+'_modules'
     )
-    # res.render()
-    # print(res.content)
 
     register_menuitem(
         name='menuitem_'+sender.name+'_iframe',

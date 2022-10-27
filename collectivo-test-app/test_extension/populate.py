@@ -5,7 +5,6 @@ from collectivo.auth.manager import KeycloakManager
 def populate_keycloak_with_test_data():
     """Add users, groups, and roles to keycloak."""
     keycloak_admin = KeycloakManager().keycloak_admin
-    client_id = keycloak_admin.get_client_id('collectivo')
 
     # Define groups and roles
     groups_and_roles = {
@@ -20,12 +19,11 @@ def populate_keycloak_with_test_data():
             skip_exists=True,
         )
 
-    # Create client roles
+    # Create roles
     for role_names in groups_and_roles.values():
         for role_name in role_names:
-            keycloak_admin.create_client_role(
-                client_role_id=client_id,
-                payload={'name': role_name, 'clientRole': True},
+            keycloak_admin.create_realm_role(
+                payload={'name': role_name},
                 skip_exists=True
             )
 
@@ -33,13 +31,11 @@ def populate_keycloak_with_test_data():
     for group_name, role_names in groups_and_roles.items():
         group_id = keycloak_admin.get_group_by_path(f'/{group_name}')['id']
         for role_name in role_names:
-            role_id = keycloak_admin.get_client_role_id(
-                client_id=client_id,
+            role_id = keycloak_admin.get_realm_role(
                 role_name=role_name
-            )
-            keycloak_admin.assign_group_client_roles(
+            )['id']
+            keycloak_admin.assign_group_realm_roles(
                 group_id=group_id,
-                client_id=client_id,
                 roles=[{'name': role_name, 'id': role_id}]
             )
 
@@ -75,7 +71,7 @@ def populate_keycloak_with_test_data():
     # Add groups to users
     groups_and_users = {
         'superusers': ['test_superuser_1'],
-        'members': ['test_member_1', 'test_member_2']
+        'members': ['test_superuser_1', 'test_member_1', 'test_member_2']
     }
     for group_name, user_names in groups_and_users.items():
         group_id = keycloak_admin.get_group_by_path(f'/{group_name}')['id']

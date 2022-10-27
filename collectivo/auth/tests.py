@@ -23,8 +23,9 @@ class AuthenticationTests(TestCase):
         self.access_token = 'Token ' + self.token['access_token']
         self.middleware = KeycloakMiddleware(None)
         self.factory = RequestFactory()
-        self.private_endpoint = 'collectivo:collectivo.auth:private'
-        self.public_endpoint = 'collectivo:collectivo.auth:test_public'
+        self.private_endpoint = 'collectivo:collectivo.auth:test_view_private'
+        self.public_endpoint = 'collectivo:collectivo.auth:test_view_public'
+        self.admin_endpoint = 'collectivo:collectivo.auth:test_view_admin'
 
     def test_middleware_correct_token(self):
         """Test passing a correct token to the middleware."""
@@ -101,3 +102,21 @@ class AuthenticationTests(TestCase):
         client = APIClient()
         res = client.get(reverse(self.public_endpoint))
         self.assertEqual(res.status_code, 200)
+
+    def test_admin_access_correct_token(self):
+        """Test that admin api with admin token succeeds."""
+        client = APIClient()
+        token = self.keycloak.token('test_superuser_1', 'test')
+        access_token = token['access_token']
+        client.credentials(HTTP_AUTHORIZATION='Token ' + access_token)
+        res = client.get(reverse(self.admin_endpoint))
+        self.assertEqual(res.status_code, 200)
+
+    def test_admin_access_bad_token(self):
+        """Test that admin api with non-admin token fails."""
+        client = APIClient()
+        token = self.keycloak.token('test_member_1', 'test')
+        access_token = token['access_token']
+        client.credentials(HTTP_AUTHORIZATION='Token ' + access_token)
+        res = client.get(reverse(self.admin_endpoint))
+        self.assertEqual(res.status_code, 403)

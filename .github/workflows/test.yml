@@ -64,7 +64,7 @@ jobs:
           sudo echo "127.0.0.1 collectivo.local" | sudo tee -a /etc/hosts
           sudo echo "127.0.0.1 keycloak" | sudo tee -a /etc/hosts
           cat /etc/hosts
-          curl -v http://keycloak:8080
+          curl --connect-timeout 5 -v --max-time 10 --retry 5 --retry-delay 0 --retry-max-time 40 http://keycloak:8080
 
       - name: Run Tests
         # Step specific environment variables

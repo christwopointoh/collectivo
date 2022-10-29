@@ -47,7 +47,6 @@ jobs:
           docker network create -d bridge collectivo
           cd ${GITHUB_WORKSPACE}/docker/keycloak && docker build -t keycloak .
           /usr/bin/docker run -d -p 8080:8080 --network collectivo --name keycloak --hostname keycloak  -e GITHUB_ACTIONS=true -e CI=true keycloak
-            /usr/bin/docker run -d  --network collectivo  -p 5432:5432 --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5 --name db --hostname db -e "POSTGRES_USER=postgres" -e "POSTGRES_PASSWORD=postgres" -e "POSTGRES_DB=djtesting" -e GITHUB_ACTIONS=true -e CI=true postgres:12
       
 
       - name: Setup Python ${{ matrix.python-version }}
@@ -66,7 +65,7 @@ jobs:
           sudo echo "127.0.0.1 keycloak" | sudo tee -a /etc/hosts
           cat /etc/hosts
           curl -v http://keycloak:8080
-          
+
       - name: Run Tests
         # Step specific environment variables
         env:

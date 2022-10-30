@@ -42,7 +42,7 @@ RUN apk del .tmp-build-deps && \
 ENV PATH="/py/bin:$PATH"
 
 # Create a static folder for the app
-RUN mkdir /collectivo-test-app/static && \
+RUN mkdir /collectivo-test-app/static | true && \
     chown -R django-user:django-user /collectivo-test-app && \
     chmod -R 755 /collectivo-test-app/static
 

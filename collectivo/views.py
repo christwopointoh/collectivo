@@ -1,5 +1,4 @@
 """Views of the collectivo core."""
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from collectivo.version import __version__

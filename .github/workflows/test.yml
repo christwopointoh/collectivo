@@ -42,6 +42,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Setup keycloak
+        run: |
+          docker network create -d bridge collectivo
+          cd ${GITHUB_WORKSPACE}/docker/keycloak && docker build -t keycloak .
+          /usr/bin/docker run -d -p 8080:8080 --network collectivo --name keycloak --hostname keycloak  -e GITHUB_ACTIONS=true -e CI=true keycloak
+      
+
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -52,6 +59,19 @@ jobs:
         run: |
           pip install -r requirements.txt
           pip install coverage
+      - name: Add hosts to /etc/hosts
+        run: |
+          sudo echo "127.0.0.1 collectivo.local" | sudo tee -a /etc/hosts
+          sudo echo "127.0.0.1 keycloak" | sudo tee -a /etc/hosts
+          cat /etc/hosts
+          while ! curl --connect-timeout 5 -v --max-time 10 --retry 5 --retry-connrefused  --retry-delay 0 --retry-max-time 40 http://keycloak:8080
+          do
+              { echo "Exit status of curl: $?"
+                echo "Retrying ..."
+              } 1>&2
+              sleep 10
+          done
+
 
       - name: Run Tests
         # Step specific environment variables
@@ -75,6 +95,20 @@ jobs:
           cp -a collectivo collectivo-test-app
           cd collectivo-test-app
           flake8
+      - name: Collect docker logs on failure
+        if: failure()
+        uses: jwalton/gh-docker-logs@v1
+        with:
+          dest: './logs'
+      - name: Tar logs
+        if: failure()
+        run: tar cvzf ./logs.tgz ./logs
+      - name: Upload logs to GitHub
+        if: failure()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs.tgz
+          path: ./logs.tgz
 
   test-docker:
     name: Test docker environement
@@ -94,6 +128,8 @@ jobs:
       - name: Test
         run: |
           docker-compose up -d db
+          docker-compose build keycloak
+          docker-compose up -d keycloak
           docker-compose build collectivo
           docker-compose run --rm collectivo sh -c "python manage.py test && flake8"
 

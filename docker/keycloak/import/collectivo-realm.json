@@ -405,7 +405,7 @@
     "username" : "test_superuser_1",
     "enabled" : true,
     "totp" : false,
-    "emailVerified" : false,
+    "emailVerified" : true,
     "firstName" : "Example",
     "lastName" : "Example",
     "email" : "test_superuser_1@example.com",

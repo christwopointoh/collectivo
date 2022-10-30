@@ -46,7 +46,8 @@ def populate_keycloak_with_test_data():
             "username": "test_superuser_1",
             "enabled": True,
             "firstName": "Example",
-            "lastName": "Example"
+            "lastName": "Example",
+            "emailVerified": True
         },
         {
             "email": "test_member_1@example.com",

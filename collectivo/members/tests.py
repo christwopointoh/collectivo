@@ -4,7 +4,6 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 from collectivo.auth.tests import KeycloakAPIClient
-from collectivo.members import serializers
 from .models import Member
 
 
@@ -13,19 +12,19 @@ ME_URL = reverse('collectivo:collectivo.members:me')
 
 
 class PublicRecipeApiTests(TestCase):
-    """Test unauthenticated members API access"""
+    """Test unauthenticated members API access."""
 
     def setUp(self):
         """Prepare client."""
         self.client = APIClient()
 
     def test_auth_required_for_members(self):
-        """Test that authentication is required"""
+        """Test that authentication is required."""
         res = self.client.get(MEMBERS_URL)
         self.assertEqual(res.status_code, 403)
 
     def test_auth_required_for_me(self):
-        """Test that authentication is required"""
+        """Test that authentication is required."""
         res = self.client.get(ME_URL)
         self.assertEqual(res.status_code, 403)
 
@@ -77,9 +76,14 @@ class PrivateMemberApiTests(TestCase):
         for key in self.expected_userinfo.keys():
             self.assertEqual(str(self.expected_userinfo[key]), res.data[key])
 
+    def test_get_member_fails_if_not_exists(self):
+        """Test that a user cannot access API if they are not a member."""
+        res2 = self.client.get(ME_URL)
+        self.assertEqual(res2.status_code, 404)
+
     def test_update_member(self):
         """Test that a member can edit non-admin fields of it's own data."""
-        res1 =self.client.post(ME_URL, self.payload)
+        res1 = self.client.post(ME_URL, self.payload)
         res2 = self.client.put(ME_URL, {'user_attr': 'new_value'})
         self.assertEqual(res2.status_code, 200)
         member = Member.objects.get(id=res1.data['id'])
@@ -87,7 +91,7 @@ class PrivateMemberApiTests(TestCase):
 
     def test_update_member_create_fields_fails(self):
         """Test that a member cannot edit admin fields of it's own data."""
-        res1 =self.client.post(ME_URL, self.payload)
+        res1 = self.client.post(ME_URL, self.payload)
         res2 = self.client.put(ME_URL, {'create_attr': 'new_value'})
         self.assertEqual(res2.status_code, 400)
         member = Member.objects.get(id=res1.data['id'])
@@ -95,7 +99,7 @@ class PrivateMemberApiTests(TestCase):
 
     def test_update_member_admin_fields_fails(self):
         """Test that a member cannot edit admin fields of it's own data."""
-        res1 =self.client.post(ME_URL, self.payload)
+        res1 = self.client.post(ME_URL, self.payload)
         res2 = self.client.put(ME_URL, {'admin_attr': 'new_value'})
         self.assertEqual(res2.status_code, 400)
         member = Member.objects.get(id=res1.data['id'])
@@ -145,5 +149,3 @@ class AdminMemberApiTests(TestCase):
 
     def test_get_member_pagination(self):
         """Test that pagination works for members."""
-
-

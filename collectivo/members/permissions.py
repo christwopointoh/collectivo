@@ -11,8 +11,6 @@ class IsNotMember(permissions.BasePermission):
         print('Checking isnotmember')
         try:
             if request.userinfo is not None:
-                l = Member.objects.filter(user_id=request.userinfo['sub'])
-                print(l)
                 Member.objects.get(user_id=request.userinfo['sub'])
             return False
         except Member.DoesNotExist:

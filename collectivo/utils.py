@@ -27,6 +27,7 @@ def request(viewset: ViewSet, command='create', payload=None,
 
 class DirectDetailRouter(SimpleRouter):
     """A DRF router for detail views that don't need a primary key."""
+
     routes = [
         Route(
             url=r'^{prefix}$',

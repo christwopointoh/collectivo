@@ -2,12 +2,9 @@
 
 from . import models, serializers
 from rest_framework import viewsets, mixins
-from .permissions import IsNotMember, IsMembersAdmin
-from collectivo.auth.permissions import IsAuthenticated, IsSelf
+from .permissions import IsMembersAdmin
+from collectivo.auth.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets
-from rest_framework.response import Response
-from django.http import Http404
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from django.db.utils import IntegrityError
 
@@ -17,12 +14,14 @@ class MembersViewSet(
         mixins.RetrieveModelMixin,
         mixins.UpdateModelMixin,
         viewsets.GenericViewSet
-    ):
+        ):
     """API for members to manage themselves."""
 
+    permission_classes = [IsAuthenticated]
     queryset = models.Member.objects.all()
 
     def get_pk(self, request):
+        """Return member id."""
         if request.userinfo is None:
             raise NotAuthenticated
         return get_object_or_404(
@@ -31,12 +30,14 @@ class MembersViewSet(
         ).id
 
     def perform_create(self, serializer):
-        try :
+        """Create member with user_id."""
+        try:
             serializer.save(user_id=self.request.userinfo['sub'])
         except IntegrityError:
             raise PermissionDenied(detail='This user is already a member.')
 
     def get_object(self):
+        """Return member that corresponds with current user."""
         if self.request.userinfo is None:
             raise NotAuthenticated
         return get_object_or_404(
@@ -50,20 +51,10 @@ class MembersViewSet(
             return serializers.MemberCreateSerializer
         return serializers.MemberSerializer
 
-    def get_permissions(self):
-        if self.action == 'create':
-            permission_classes = [IsAuthenticated]
-        else:
-            permission_classes = [IsSelf]
-        return [permission() for permission in permission_classes]
-
 
 class MembersAdminViewSet(viewsets.ModelViewSet):
     """API for admins to manage members."""
 
     permission_classes = [IsMembersAdmin]
-
+    serializer_class = serializers.MemberAdminSerializer
     queryset = models.Member.objects.all()
-
-    def get_serializer_class(self):
-        return serializers.MemberAdminSerializer

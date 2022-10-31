@@ -14,6 +14,6 @@ me_router = DirectDetailRouter()
 me_router.register('me', views.MembersViewSet, basename='me')
 
 urlpatterns = [
-    path(f'api/members/v1/', include(admin_router.urls)),
-    path(f'api/members/v1/', include(me_router.urls)),
+    path('api/members/v1/', include(admin_router.urls)),
+    path('api/members/v1/', include(me_router.urls)),
 ]

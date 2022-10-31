@@ -3,6 +3,7 @@
 from django.test import RequestFactory
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
+from rest_framework.routers import Route, SimpleRouter
 
 
 def request(viewset: ViewSet, command='create', payload=None,
@@ -22,3 +23,21 @@ def request(viewset: ViewSet, command='create', payload=None,
         None, payload, content_type="application/json")
 
     return viewset.as_view({method: command})(request, **kwargs)
+
+
+class DirectDetailRouter(SimpleRouter):
+    """A DRF router for detail views that don't need a primary key."""
+    routes = [
+        Route(
+            url=r'^{prefix}$',
+            mapping={
+                'get': 'retrieve',
+                'post': 'create',
+                'patch': 'partial_update',
+                'put': 'update'
+            },
+            name='{basename}',
+            detail=False,
+            initkwargs={'suffix': 'Instance'}
+        ),
+    ]

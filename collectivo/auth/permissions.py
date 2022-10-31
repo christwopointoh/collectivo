@@ -7,4 +7,14 @@ class IsAuthenticated(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """Check if user is authenticated."""
-        return request.is_authenticated
+        return request.userinfo is not None
+
+
+class IsSelf(permissions.BasePermission):
+    """Permission to check if the object has the user's id."""
+
+    def has_object_permission(self, request, view, obj):
+        """Check if the object has the user's id."""
+        print('Checking IsSelf Permission')
+        return request.userinfo is not None and \
+            request.userinfo['sub'] == obj.user_id

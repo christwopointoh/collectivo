@@ -28,12 +28,18 @@ class KeycloakMiddleware(MiddlewareMixin):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         """Check for authentication and try to get userinfo from keycloak."""
-        request.userinfo = None
-        request.is_authenticated = False
+        # Skip authentication if userinfo is already given (e.g. by a test)
+        if hasattr(request, 'userinfo'):
+            return None
 
+        # Define unauthenticated request
+        request.userinfo = None
+
+        # Return unauthenticated request if no authorization is found
         if "HTTP_AUTHORIZATION" not in request.META:
             return None
 
+        # Retrieve token and userinfo or return failure message
         try:
             auth = request.META.get("HTTP_AUTHORIZATION").split()
             access_token = auth[1] if len(auth) == 2 else auth[0]
@@ -44,5 +50,5 @@ class KeycloakMiddleware(MiddlewareMixin):
                 status=AuthenticationFailed.status_code,
             )
 
-        request.is_authenticated = True
+        # Return authenticated request
         return None

@@ -77,4 +77,3 @@ class MembersAdminViewSet(viewsets.ModelViewSet):
     ordering_fields = member_fields
 
     permission_classes = [IsMembersAdmin]
-

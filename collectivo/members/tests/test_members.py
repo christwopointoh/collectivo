@@ -191,3 +191,15 @@ class AdminMemberApiTests(TestCase):
 
     def test_member_pagination(self):
         """Test that pagination works for members."""
+        n_users = 10
+        self.create_members(n_users)
+
+        limit = 3
+        offset = 5
+        res = self.client.get(
+            MEMBERS_URL+f'?limit={limit}&offset={offset}')
+
+        self.assertEqual(
+            [m.id for m in Member.objects.all()][offset:offset+limit],
+            [m['id'] for m in res.data['results']]
+        )

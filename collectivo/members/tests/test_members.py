@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 from collectivo.auth.tests import KeycloakAPIClient
-from .models import Member
+from ..models import Member
 
 
 MEMBERS_URL = reverse('collectivo:collectivo.members:member-list')
@@ -124,11 +124,16 @@ class AdminMemberApiTests(TestCase):
             'admin_attr': '3'
         }
 
+    def create_members(self, n_users):
+        """Create a set of members for testing."""
+        for i, user in enumerate(range(n_users)):
+            payload = {**self.payload, 'user_attr': str(i)}
+            self.client.post(MEMBERS_URL, payload)
+
     def test_create_members(self):
         """Test that admins can create members with access to all fields."""
         n_users = 5
-        for user in range(n_users):
-            self.client.post(MEMBERS_URL, self.payload)
+        self.create_members(n_users)
         self.assertEqual(len(Member.objects.all()), n_users)
 
     def test_update_member_admin_fields(self):
@@ -144,8 +149,45 @@ class AdminMemberApiTests(TestCase):
         member = Member.objects.get(id=res1.data['id'])
         self.assertEqual(getattr(member, 'admin_attr'), 'new_value')
 
-    def test_get_member_filtering(self):
-        """Test that all member fields can be filtered."""
+    def test_member_sorting(self):
+        """Test that all member fields can be sorted."""
+        n_users = 3
+        self.create_members(n_users)
 
-    def test_get_member_pagination(self):
+        res = self.client.get(MEMBERS_URL+'?orderingx=user_attr')
+        self.assertEqual(
+            [entry['user_attr'] for entry in res.data],
+            ['0', '1', '2']
+        )
+
+        res = self.client.get(MEMBERS_URL+'?ordering=-user_attr')
+        self.assertEqual(
+            [entry['user_attr'] for entry in res.data],
+            ['2', '1', '0']
+        )
+
+    def test_member_filtering(self):
+        """Test that all member fields can be filtered."""
+        n_users = 3
+        self.create_members(n_users)
+
+        res = self.client.get(MEMBERS_URL+'?user_attr=1')
+        self.assertEqual(
+            [entry['user_attr'] for entry in res.data],
+            ['1']
+        )
+
+        res = self.client.get(MEMBERS_URL+'?user_attr__gte=1')
+        self.assertEqual(
+            [entry['user_attr'] for entry in res.data],
+            ['1', '2']
+        )
+
+        res = self.client.get(MEMBERS_URL+'?user_attr__contains=1')
+        self.assertEqual(
+            [entry['user_attr'] for entry in res.data],
+            ['1']
+        )
+
+    def test_member_pagination(self):
         """Test that pagination works for members."""

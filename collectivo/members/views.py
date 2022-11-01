@@ -52,9 +52,29 @@ class MembersViewSet(
         return serializers.MemberSerializer
 
 
+# https://docs.djangoproject.com/en/4.1/ref/models/querysets/#field-lookups
+lookups = [
+    'exact', 'iexact', 'contains', 'icontains', 'in', 'gt', 'gte',
+    'lt', 'lte', 'startswith', 'istartswith', 'endswith', 'iendswith',
+    'range',  # 'date', 'year', 'iso_year', 'month', 'day', 'week',
+    # 'week_day', 'iso_week_day', 'quarter', 'time', 'hour', 'minute',
+    # 'second', 'isnull', 'regex', 'iregex',
+]
+
+
+member_fields = [
+    field.name for field in models.Member._meta.get_fields()
+]
+
+
 class MembersAdminViewSet(viewsets.ModelViewSet):
     """API for admins to manage members."""
 
-    permission_classes = [IsMembersAdmin]
-    serializer_class = serializers.MemberAdminSerializer
     queryset = models.Member.objects.all()
+    serializer_class = serializers.MemberAdminSerializer
+
+    filterset_fields = {field: lookups for field in member_fields}
+    ordering_fields = member_fields
+
+    permission_classes = [IsMembersAdmin]
+

@@ -6,8 +6,8 @@ from django.db.models.signals import post_migrate
 def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
     from collectivo.extensions.utils import register_extension
-    from collectivo.ux.utils import register_microfrontend
     from .populate import populate_keycloak_with_test_data
+    from collectivo.ux.utils import register_microfrontend, register_menuitem
 
     register_extension(
         name=sender.name,
@@ -18,15 +18,31 @@ def post_migrate_callback(sender, **kwargs):
     register_microfrontend(
         name=sender.name+'_modules',
         extension=sender.name,
-        path='http://localhost/static/test_extension/remoteEntry.js',
-        method='modules'
+        path='http://localhost:8000/static/test_extension/remoteEntry.js',
+        type='modules'
     )
 
     register_microfrontend(
         name=sender.name+'_iframe',
         extension=sender.name,
-        path='http://localhost/test_extension/',
-        method='iframe'
+        path='http://localhost:8000/test_extension/',
+        type='html'
+    )
+
+    register_menuitem(
+        name='menuitem_'+sender.name+'_modules',
+        label='Open test webcomponent',
+        extension=sender.name,
+        menu='main_menu',
+        microfrontend=sender.name+'_modules'
+    )
+
+    register_menuitem(
+        name='menuitem_'+sender.name+'_iframe',
+        label='Open test iframe',
+        extension=sender.name,
+        menu='main_menu',
+        microfrontend=sender.name+'_iframe'
     )
 
     populate_keycloak_with_test_data()

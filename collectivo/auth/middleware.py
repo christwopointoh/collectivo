@@ -44,6 +44,7 @@ class KeycloakMiddleware(MiddlewareMixin):
             auth = request.META.get("HTTP_AUTHORIZATION").split()
             access_token = auth[1] if len(auth) == 2 else auth[0]
             request.userinfo = self.keycloak.userinfo(access_token)
+
         except Exception:
             return JsonResponse(
                 {"detail": AuthenticationFailed.default_detail},

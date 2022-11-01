@@ -11,12 +11,17 @@ urlpatterns = [
     path(
         'api/keycloak/v1/test_public/',
         views.PublicTestView.as_view(),
-        name='test_public'
+        name='test_view_public'
     ),
     path(
         'api/keycloak/v1/test_private/',
         views.PrivateTestView.as_view(),
-        name='private'
+        name='test_view_private'
+    ),
+    path(
+        'api/keycloak/v1/test_admin/',
+        views.AdminTestView.as_view(),
+        name='test_view_admin'
     ),
     path(
         'api/keycloak/v1/is_authenticated/',
@@ -24,7 +29,7 @@ urlpatterns = [
         name='is_authenticated'),
 ]
 
-if settings.DEBUG:
+if settings.DEVELOPMENT:
 
     urlpatterns += [
         path('api/keycloak/v1/token/',

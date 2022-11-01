@@ -18,3 +18,4 @@ class IsSelf(permissions.BasePermission):
         print('Checking IsSelf Permission')
         return request.userinfo is not None and \
             request.userinfo['sub'] == obj.user_id
+

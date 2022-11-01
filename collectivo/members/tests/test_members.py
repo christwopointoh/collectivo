@@ -208,4 +208,3 @@ class AdminMemberApiTests(TestCase):
             [m.id for m in Member.objects.all()][offset:offset+limit],
             [m['id'] for m in res.data['results']]
         )
-

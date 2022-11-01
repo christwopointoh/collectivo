@@ -6,8 +6,8 @@ from .middleware import KeycloakMiddleware
 from rest_framework.test import APIClient, ForceAuthClientHandler
 from django.urls import reverse
 
-PUBLIC_URL = 'collectivo:collectivo.auth:test_public'
-PRIVATE_URL = 'collectivo:collectivo.auth:private'
+PUBLIC_URL = 'collectivo:collectivo.auth:test_view_public'
+PRIVATE_URL = 'collectivo:collectivo.auth:test_view_private'
 
 
 class KeycloakForceAuthClientHandler(ForceAuthClientHandler):

@@ -10,6 +10,15 @@ class IsAuthenticated(permissions.BasePermission):
         return request.userinfo is not None
 
 
+class IsCollectivoAdmin(permissions.BasePermission):
+    """Permission to check if user has the role 'is_collectivo_admin'."""
+
+    def has_permission(self, request, view):
+        """Check if user is authenticated."""
+        return hasattr(request, 'userinfo') and \
+            'collectivo_admin' in request.userinfo['roles']
+
+
 class IsSelf(permissions.BasePermission):
     """Permission to check if the object has the user's id."""
 
@@ -18,4 +27,3 @@ class IsSelf(permissions.BasePermission):
         print('Checking IsSelf Permission')
         return request.userinfo is not None and \
             request.userinfo['sub'] == obj.user_id
-

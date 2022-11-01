@@ -1,4 +1,4 @@
-"""Tests of the members extension."""
+"""Tests of the members API."""
 from uuid import UUID
 from django.test import TestCase
 from django.urls import reverse
@@ -208,3 +208,4 @@ class AdminMemberApiTests(TestCase):
             [m.id for m in Member.objects.all()][offset:offset+limit],
             [m['id'] for m in res.data['results']]
         )
+

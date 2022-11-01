@@ -11,13 +11,10 @@ class Member(models.Model):
     admin_attr = models.CharField(
         max_length=255, default='default value')
 
-    # Coop specific
+    # Future fields
     # children = models.ManyToManyField('children')
     # coshoppers = models.ManyToManyField('coshoppers')
     # capital = models.IntegerField()
     # capital_status = models.CharField()
-
-    # Admin fields
-
     # date_entered
     # date_left

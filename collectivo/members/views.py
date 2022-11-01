@@ -1,23 +1,31 @@
 """Views of the members extension."""
 
-from . import models, serializers
-from rest_framework import viewsets, mixins
-from .permissions import IsMembersAdmin
-from collectivo.auth.permissions import IsAuthenticated
-from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from django.db.utils import IntegrityError
+from django.shortcuts import get_object_or_404
+from rest_framework import viewsets, mixins
+from rest_framework.exceptions import NotAuthenticated, PermissionDenied
+
+from collectivo.utils import filter_lookups
+from .permissions import IsMembersAdmin, IsMembersUser
+from . import models, serializers
 
 
-class MembersViewSet(
+member_fields = [field.name for field in models.Member._meta.get_fields()]
+
+
+class MemberViewSet(
         mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.UpdateModelMixin,
         viewsets.GenericViewSet
         ):
-    """API for members to manage themselves."""
+    """
+    API for members to manage themselves.
 
-    permission_classes = [IsAuthenticated]
+    Requires the role 'members_user'.
+    """
+
+    permission_classes = [IsMembersUser]
     queryset = models.Member.objects.all()
 
     def get_pk(self, request):
@@ -26,7 +34,7 @@ class MembersViewSet(
             raise NotAuthenticated
         return get_object_or_404(
             self.queryset,
-            user_id=request.userinfo['sub']
+            user_id=request.userinfo['sub']  # TODO Loose coupling
         ).id
 
     def perform_create(self, serializer):
@@ -42,7 +50,7 @@ class MembersViewSet(
             raise NotAuthenticated
         return get_object_or_404(
             self.queryset,
-            user_id=self.request.userinfo['sub']
+            user_id=self.request.userinfo['sub']  # TODO Loose coupling
         )
 
     def get_serializer_class(self):
@@ -52,28 +60,17 @@ class MembersViewSet(
         return serializers.MemberSerializer
 
 
-# https://docs.djangoproject.com/en/4.1/ref/models/querysets/#field-lookups
-lookups = [
-    'exact', 'iexact', 'contains', 'icontains', 'in', 'gt', 'gte',
-    'lt', 'lte', 'startswith', 'istartswith', 'endswith', 'iendswith',
-    'range',  # 'date', 'year', 'iso_year', 'month', 'day', 'week',
-    # 'week_day', 'iso_week_day', 'quarter', 'time', 'hour', 'minute',
-    # 'second', 'isnull', 'regex', 'iregex',
-]
-
-
-member_fields = [
-    field.name for field in models.Member._meta.get_fields()
-]
-
-
 class MembersAdminViewSet(viewsets.ModelViewSet):
-    """API for admins to manage members."""
+    """
+    API for admins to manage members.
+
+    Requires the role 'members_admin'.
+    """
 
     queryset = models.Member.objects.all()
     serializer_class = serializers.MemberAdminSerializer
 
-    filterset_fields = {field: lookups for field in member_fields}
+    filterset_fields = {field: filter_lookups for field in member_fields}
     ordering_fields = member_fields
 
     permission_classes = [IsMembersAdmin]

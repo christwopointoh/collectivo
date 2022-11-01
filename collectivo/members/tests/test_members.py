@@ -52,6 +52,11 @@ class PrivateMemberApiTests(TestCase):
         }
         self.client.force_authenticate(self.user)
 
+    def test_member_cannot_access_admin_area(self):
+        """Test that a normal member cannot access admin API."""
+        res = self.client.get(MEMBERS_URL)
+        self.assertEqual(res.status_code, 403)
+
     def test_create_member_as_user(self):
         """Test that an authenticated user can create itself as a member."""
         res = self.client.post(ME_URL, self.payload)

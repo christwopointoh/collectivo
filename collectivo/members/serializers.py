@@ -3,8 +3,8 @@ from rest_framework import serializers
 from .models import Member
 
 
-admin_attrs = ('admin_attr', )
-create_attrs = ('create_attr', )
+admin_attrs = ('admin_attr', )  # Write access only for admins
+create_attrs = ('create_attr', )  # Write access only for post or admins
 
 
 class MemberCreateSerializer(serializers.ModelSerializer):

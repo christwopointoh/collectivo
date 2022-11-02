@@ -1,8 +1,17 @@
 """Utility functions of the collectivo package."""
-
 from django.test import RequestFactory
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
+
+
+# https://docs.djangoproject.com/en/4.1/ref/models/querysets/#field-lookups
+filter_lookups = [
+    'exact', 'iexact', 'contains', 'icontains', 'in', 'gt', 'gte',
+    'lt', 'lte', 'startswith', 'istartswith', 'endswith', 'iendswith',
+    'range',  # 'date', 'year', 'iso_year', 'month', 'day', 'week',
+    # 'week_day', 'iso_week_day', 'quarter', 'time', 'hour', 'minute',
+    # 'second', 'isnull', 'regex', 'iregex',
+]
 
 
 def request(viewset: ViewSet, command='create', payload=None,

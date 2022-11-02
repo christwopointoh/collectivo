@@ -8,8 +8,8 @@ def populate_keycloak_with_test_data():
 
     # Define groups and roles
     groups_and_roles = {
-        'superusers': ['is_collectivo_admin', 'is_members_admin'],
-        'members': ['is_member']
+        'superusers': ['collectivo_admin', 'members_admin'],
+        'members': ['members_user']
     }
 
     # Create groups

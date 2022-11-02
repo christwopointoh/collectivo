@@ -10,7 +10,6 @@ router.register('microfrontends', views.MicroFrontendViewSet)
 router.register('menus', views.MenuViewSet)
 router.register('menu-items', views.MenuItemViewSet)
 
-
 urlpatterns = [
     path('api/ux/v1/', include(router.urls)),
 ]

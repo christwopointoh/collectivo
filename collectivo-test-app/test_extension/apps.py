@@ -15,17 +15,19 @@ def post_migrate_callback(sender, **kwargs):
         description='A test extension.'
     )
 
+    local_url = 'http://collectivo.local:8000'
+
     register_microfrontend(
         name=sender.name+'_modules',
         extension=sender.name,
-        path='http://collectivo.local:8000/static/test_extension/remoteEntry.js',
+        path=local_url+'/static/test_extension/remoteEntry.js',
         type='modules'
     )
 
     register_microfrontend(
         name=sender.name+'_iframe',
         extension=sender.name,
-        path='http://collectivo.local:8000/test_extension/',
+        path=local_url+'/test_extension/',
         type='html'
     )
 

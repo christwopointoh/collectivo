@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from keycloak import KeycloakOpenID
 from django.conf import settings
 from .serializers import TokenSerializer
+from .permissions import IsAuthenticated, IsCollectivoAdmin
 
 
 config = settings.KEYCLOAK_CONFIG
@@ -43,7 +44,7 @@ class KeycloakTokenView(APIView):
         return Response(data)
 
 
-class IsAuthenticated(APIView):
+class IsAuthenticatedView(APIView):
     """Test authentication."""
 
     def get(self, request):
@@ -52,3 +53,31 @@ class IsAuthenticated(APIView):
             'is_authenticated': request.is_authenticated,
         }
         return Response(data)
+
+
+class PublicTestView(APIView):
+    """API view that needs no authentication."""
+
+    def get(self, request):
+        """Return empty response."""
+        return Response()
+
+
+class PrivateTestView(APIView):
+    """API view that needs authentication."""
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        """Return empty response."""
+        return Response()
+
+
+class AdminTestView(APIView):
+    """API view that needs authentication."""
+
+    permission_classes = [IsCollectivoAdmin]
+
+    def get(self, request):
+        """Return empty response."""
+        return Response()

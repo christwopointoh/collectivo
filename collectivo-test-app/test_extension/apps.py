@@ -7,6 +7,7 @@ def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
     from collectivo.extensions.utils import register_extension
     from collectivo.ux.utils import register_microfrontend, register_menuitem
+    from .populate import populate_keycloak_with_test_data
 
     register_extension(
         name=sender.name,
@@ -43,6 +44,8 @@ def post_migrate_callback(sender, **kwargs):
         menu='main_menu',
         microfrontend=sender.name+'_iframe'
     )
+
+    populate_keycloak_with_test_data()
 
 
 class TestExtensionConfig(AppConfig):

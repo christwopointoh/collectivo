@@ -6,8 +6,8 @@ from django.db.models.signals import post_migrate
 def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
     from collectivo.extensions.utils import register_extension
-    from .populate import populate_keycloak_with_test_data
     from collectivo.ux.utils import register_microfrontend, register_menuitem
+    from .populate import populate_keycloak_with_test_data
 
     register_extension(
         name=sender.name,

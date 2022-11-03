@@ -3,7 +3,7 @@ from uuid import UUID
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
-from collectivo.auth.tests import KeycloakAPIClient
+from collectivo.auth.utils import KeycloakAPIClient
 from ..models import Member
 
 

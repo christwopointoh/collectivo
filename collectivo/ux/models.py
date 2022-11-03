@@ -52,3 +52,7 @@ class MenuItem(models.Model):
     required_role = models.CharField(max_length=255, null=True)
     icon_name = models.CharField(max_length=255, null=True)
     icon_path = models.URLField(null=True)
+
+    def __str__(self):
+        """Return string representation of the model."""
+        return f'MenuItem ({self.item_id})'

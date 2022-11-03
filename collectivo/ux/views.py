@@ -1,6 +1,8 @@
 """Views of the user experience module."""
+from django.db.models import Q
 from rest_framework import viewsets
 from . import models, serializers
+# from collectivo.auth.permissions import IsAuthenticated
 
 
 class MenuViewSet(viewsets.ModelViewSet):
@@ -13,6 +15,7 @@ class MenuViewSet(viewsets.ModelViewSet):
     """
 
     queryset = models.Menu.objects.all()
+    # TODO permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         """Set name to read-only except for create."""
@@ -21,9 +24,10 @@ class MenuViewSet(viewsets.ModelViewSet):
         return serializers.MenuSerializer
 
 
-# TODO Admin permission
 class MenuItemViewSet(viewsets.ModelViewSet):
     """Manage menu-items.
+
+    Only items where the user has the required roles are shown.
 
     Attributes:
     - item_id (CharField):
@@ -71,10 +75,22 @@ class MenuItemViewSet(viewsets.ModelViewSet):
       Path to an icon image.
     """
 
-    queryset = models.MenuItem.objects.all()
+    # TODO permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
         """Set item_id to read-only except for create."""
         if self.request.method == 'POST':
             return serializers.MenuItemCreateSerializer
         return serializers.MenuItemSerializer
+
+    def get_queryset(self):
+        """Show only items where user has required roles."""
+        try:
+            user_roles = self.request.userinfo['roles']
+        except Exception:
+            user_roles = []
+        queryset = models.MenuItem.objects.filter(
+            Q(required_role__in=user_roles) |
+            Q(required_role=None)
+        )
+        return queryset

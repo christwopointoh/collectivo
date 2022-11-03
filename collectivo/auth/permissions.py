@@ -7,7 +7,10 @@ class IsAuthenticated(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """Check if user is authenticated."""
-        return request.userinfo is not None
+        try:
+            return request.userinfo is not None
+        except Exception:
+            return None
 
 
 class IsCollectivoAdmin(permissions.BasePermission):

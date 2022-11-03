@@ -16,14 +16,14 @@ class InternalApiTests(TestCase):
 
     def test_register_extension(self):
         """Test registering an extension through internal API."""
-        # A first call should create new entry (201)
+        # A first call should create new entry
         res = register_extension('my_extension', version='1.0.0')
         self.assertEqual(res.status_code, 201)
         self.assertEqual(res.data['version'], '1.0.0')
 
-        # A second call should update existing entry (200)
+        # A second call should update existing entry
         res = register_extension('my_extension', version='1.0.1')
-        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.status_code, 201)
         self.assertEqual(res.data['version'], '1.0.1')
 
 

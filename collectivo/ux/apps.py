@@ -6,8 +6,13 @@ from django.db.models.signals import post_migrate
 def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
     from .utils import register_menu
+    from collectivo.extensions.utils import register_extension
 
-    register_menu('main_menu')
+    name = 'ux'
+    description = 'API for user experience.'
+    register_extension(name=name, built_in=True, description=description)
+    register_menu(menu_id='main_menu', extension=name)
+    register_menu(menu_id='admin_menu', extension=name)
 
 
 class CollectivoUxConfig(AppConfig):

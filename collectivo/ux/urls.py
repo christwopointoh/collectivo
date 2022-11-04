@@ -6,9 +6,12 @@ from . import views
 app_name = 'collectivo.ux'
 
 router = DefaultRouter()
-router.register('microfrontends', views.MicroFrontendViewSet)
 router.register('menus', views.MenuViewSet)
-router.register('menu-items', views.MenuItemViewSet)
+router.register(
+    r'menus/(?P<menu_id>\w+)/items',
+    views.MenuItemViewSet,
+    basename='menuitem'
+)
 
 urlpatterns = [
     path('api/ux/v1/', include(router.urls)),

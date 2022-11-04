@@ -7,7 +7,7 @@ from collectivo.version import __version__
 def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
     from collectivo.extensions.utils import register_extension
-    from collectivo.ux.utils import register_menuitem, register_microfrontend
+    from collectivo.ux.utils import register_menuitem
 
     name = 'members'
     # TODO Language change
@@ -22,34 +22,23 @@ def post_migrate_callback(sender, **kwargs):
         description='An extension to manage member data and registration.'
     )
 
-    register_microfrontend(
-        name='members_user_ui',
+    register_menuitem(
+        item_id='members_user_menu_item',
+        menu_id='main_menu',
+        label='Membership',
         extension=name,
-        path='http://localhost:8001/hardcoded/path/remoteEntry.js',
-        type='modules'
-    )
-
-    register_microfrontend(
-        name='members_admin_ui',
-        extension=name,
-        path='http://localhost:8001/hardcoded/path/remoteEntry.js',
-        type='modules'
+        action='component',
+        component_name='profile'
     )
 
     register_menuitem(
-        name='members_user_menu_item',
-        label='My membership',
+        item_id='members_admin_menu_item',
+        menu_id='main_menu',
+        label='Members',
         extension=name,
-        menu='main_menu',
-        microfrontend='members_user_ui'
-    )
-
-    register_menuitem(
-        name='members_admin_menu_item',
-        label='Member data',
-        extension=name,
-        menu='main_menu',
-        microfrontend='members_admin_ui'
+        menu='admin_menu',
+        action='component',
+        component_name='members'
     )
 
 

@@ -22,7 +22,8 @@ def request(viewset: ViewSet, command='create', payload=None,
         'create': 'post',
         'update': 'put',
         'retrieve': 'get',
-        'list': 'get'
+        'list': 'get',
+        'destroy': 'delete',
     }
 
     method = drf_to_http[command]

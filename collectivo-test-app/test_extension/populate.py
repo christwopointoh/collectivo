@@ -1,5 +1,6 @@
 """Populate keycloak with data for testing purposes."""
 from collectivo.auth.manager import KeycloakManager
+from keycloak.exceptions import KeycloakPostError
 
 
 def populate_keycloak_with_test_data():
@@ -63,13 +64,32 @@ def populate_keycloak_with_test_data():
             "enabled": True,
             "firstName": "Example",
             "lastName": "Example",
+            "emailVerified": True
+        },
+        {
+            "email": "test_user_not_verified@example.com",
+            "username": "test_user_not_verified",
+            "enabled": True,
+            "firstName": "Example",
+            "lastName": "Example",
             "emailVerified": False
+        },
+        {
+            "email": "test_user_not_member@example.com",
+            "username": "test_user_not_member",
+            "enabled": True,
+            "firstName": "Example",
+            "lastName": "Example",
+            "emailVerified": True
         },
     ]
     for user in users:
-        user_id = keycloak_admin.create_user(user, exist_ok=True)
-        keycloak_admin.set_user_password(  # noqa
-            user_id, password='test', temporary=False)  # noqa
+        try:
+            user_id = keycloak_admin.create_user(user, exist_ok=True)
+            keycloak_admin.set_user_password(  # noqa
+                user_id, password='test', temporary=False)  # noqa
+        except KeycloakPostError:
+            pass
 
     # Add groups to users
     groups_and_users = {

@@ -4,6 +4,7 @@ from django.http.response import JsonResponse
 from django.utils.deprecation import MiddlewareMixin
 from keycloak import KeycloakOpenID
 from rest_framework.exceptions import AuthenticationFailed
+import jwt  
 
 
 class KeycloakMiddleware(MiddlewareMixin):
@@ -43,7 +44,12 @@ class KeycloakMiddleware(MiddlewareMixin):
         try:
             auth = request.META.get("HTTP_AUTHORIZATION").split()
             access_token = auth[1] if len(auth) == 2 else auth[0]
+            # Get userinfo from keycloak to check the validity of the token
             request.userinfo = self.keycloak.userinfo(access_token)
+            # Decode token to get user roles
+            decoded_access_token = jwt.decode(access_token, options={"verify_signature": False})
+            # Add roles to userinfo
+            request.userinfo['roles'] = decoded_access_token['realm_access']['roles']
 
         except Exception:
             return JsonResponse(

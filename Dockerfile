@@ -1,5 +1,5 @@
 # Build test-extension
-FROM node:16 AS build-env
+FROM node:18 AS build-env
 
 # Create app directory
 WORKDIR /app

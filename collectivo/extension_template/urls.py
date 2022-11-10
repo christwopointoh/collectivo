@@ -6,10 +6,10 @@ from .views import DashboardTileViewSet
 
 app_name = 'collectivo.dashboard'
 
-admin_router = DefaultRouter()
-admin_router.register('tiles', DashboardTileViewSet)
+router = DefaultRouter()
+router.register('tiles', DashboardTileViewSet)
 
 
 urlpatterns = [
-    path('api/dashboard/v1/', include(admin_router.urls)),
+    path('api/dashboard/v1/', include(router.urls)),
 ]

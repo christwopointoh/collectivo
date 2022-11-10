@@ -2,6 +2,7 @@
 from django.test import TestCase
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
+from collectivo.dashboard.models import DashboardTile
 
 
 class MembersRegistrationTests(TestCase):
@@ -20,3 +21,8 @@ class MembersRegistrationTests(TestCase):
         """Test that the menu items are registered."""
         res = MenuItem.objects.filter(extension=self.name)
         self.assertEqual(len(res), 2)
+
+    def test_tile_exist(self):
+        """Test that the menu items are registered."""
+        res = DashboardTile.objects.filter(extension=self.name)
+        self.assertEqual(len(res), 1)

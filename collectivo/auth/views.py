@@ -8,7 +8,7 @@ from .serializers import TokenSerializer
 from .permissions import IsAuthenticated, IsCollectivoAdmin
 
 
-config = settings.KEYCLOAK_CONFIG
+config = settings.COLLECTIVO['auth_keycloak_config']
 keycloak_manager = KeycloakOpenID(
     server_url=config["SERVER_URL"],
     client_id=config["REALM_NAME"],

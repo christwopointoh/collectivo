@@ -17,7 +17,7 @@ class MenuItem(models.Model):
 
     item_id = models.CharField(max_length=255, unique=True, primary_key=True)
     menu_id = models.ForeignKey(
-        'ux.Menu', on_delete=models.CASCADE)
+        'menus.Menu', on_delete=models.CASCADE)
     label = models.CharField(max_length=255)
     extension = models.ForeignKey(
         'extensions.Extension', on_delete=models.CASCADE)
@@ -41,7 +41,7 @@ class MenuItem(models.Model):
     link_source = models.URLField(null=True)
     order = models.FloatField(default=1)
     parent_item = models.ForeignKey(
-        'ux.MenuItem', on_delete=models.CASCADE, null=True)
+        'menus.MenuItem', on_delete=models.CASCADE, null=True)
     style = models.CharField(
         max_length=50,
         default='normal',

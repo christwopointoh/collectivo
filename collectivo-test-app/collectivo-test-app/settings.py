@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'collectivo',
-    'collectivo.ux',
+    'collectivo.menus',
     'collectivo.dashboard',
     'collectivo.auth',
     'collectivo.extensions',

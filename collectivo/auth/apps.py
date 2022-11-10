@@ -6,7 +6,7 @@ from django.db.models.signals import post_migrate
 def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
     from collectivo.extensions.utils import register_extension
-    from collectivo.ux.utils import register_menuitem
+    from collectivo.menus.utils import register_menuitem
     from .populate import create_groups_and_roles
 
     name = 'auth'

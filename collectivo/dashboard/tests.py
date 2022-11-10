@@ -4,7 +4,7 @@ from django.urls import reverse
 from collectivo.extensions.models import Extension
 from collectivo.auth.clients import CollectivoAPIClient
 from collectivo.auth.userinfo import UserInfo
-from collectivo.ux.models import MenuItem
+from collectivo.menus.models import MenuItem
 from .models import DashboardTile
 from .utils import register_tile
 

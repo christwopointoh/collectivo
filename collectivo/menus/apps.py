@@ -8,7 +8,7 @@ def post_migrate_callback(sender, **kwargs):
     from .utils import register_menu
     from collectivo.extensions.utils import register_extension
 
-    name = 'ux'
+    name = 'menus'
     description = 'API for user experience.'
     register_extension(name=name, built_in=True, description=description)
     register_menu(menu_id='main_menu', extension=name)
@@ -19,7 +19,7 @@ class CollectivoUxConfig(AppConfig):
     """Configuration class of the user experience module."""
 
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'collectivo.ux'
+    name = 'collectivo.menus'
 
     def ready(self):
         """

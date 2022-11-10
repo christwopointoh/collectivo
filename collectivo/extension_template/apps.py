@@ -7,7 +7,7 @@ from collectivo.version import __version__
 def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
     from collectivo.extensions.utils import register_extension
-    from collectivo.ux.utils import register_menuitem
+    from collectivo.menus.utils import register_menuitem
 
     name = 'extension_template'
 

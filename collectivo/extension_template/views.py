@@ -1,13 +1,8 @@
-"""Views of the dashboard extension."""
-from rest_framework import viewsets, mixins
+"""Views of the extension."""
+from rest_framework import viewsets
 
 
-class DasboardTileViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        mixins.UpdateModelMixin,
-        viewsets.GenericViewSet
-        ):
+class MyModelViewSet(viewsets.ModelViewSet):
     """Manage dashboard tiles."""
 
     pass

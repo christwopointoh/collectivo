@@ -1,4 +1,4 @@
-"""Configuration file for the dashboard extension."""
+"""Configuration file for the  extension."""
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
 from collectivo.version import __version__
@@ -9,7 +9,7 @@ def post_migrate_callback(sender, **kwargs):
     from collectivo.extensions.utils import register_extension
     from collectivo.ux.utils import register_menuitem
 
-    name = 'dashboard'
+    name = 'extension_template'
 
     register_extension(
         name=name,
@@ -18,12 +18,12 @@ def post_migrate_callback(sender, **kwargs):
     )
 
     register_menuitem(
-        item_id='dashboard_menu_item',
+        item_id='extension_template_menu_item',
         menu_id='main_menu',
-        label='Dashboard',
+        label='My Component',
         extension=name,
         action='component',
-        component_name='dashboard',
+        component_name='mycomponent',
     )
 
 
@@ -31,7 +31,7 @@ class MembersConfig(AppConfig):
     """Configuration class for the dashboard extension."""
 
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'collectivo.dashboard'
+    name = 'collectivo.extension_template'
 
     def ready(self):
         """

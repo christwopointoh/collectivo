@@ -1,15 +1,15 @@
-"""URL patterns of the dashboard extension."""
+"""URL patterns of the extension."""
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import DashboardTileViewSet
+from .views import MyModelViewSet
 
 
-app_name = 'collectivo.dashboard'
+app_name = 'collectivo.extension_template'
 
 router = DefaultRouter()
-router.register('tiles', DashboardTileViewSet)
+router.register('mymodel', MyModelViewSet)
 
 
 urlpatterns = [
-    path('api/dashboard/v1/', include(router.urls)),
+    path('api/extension_template/v1/', include(router.urls)),
 ]

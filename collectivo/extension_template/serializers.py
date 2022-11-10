@@ -1,13 +1,13 @@
-"""Serializers of the dashboard extension."""
+"""Serializers of the extension."""
 from rest_framework import serializers
-from .models import DashboardTile
+from .models import MyModel
 
 
-class DashboardTileSerializer(serializers.ModelSerializer):
-    """Serializer for dashboard tiles."""
+class MyModelSerializer(serializers.ModelSerializer):
+    """Serializer for my model."""
 
     class Meta:
         """Serializer settings."""
 
-        model = DashboardTile
+        model = MyModel
         fields = '__all__'

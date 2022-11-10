@@ -1,8 +1,8 @@
-"""Models of the dashboard extension."""
+"""Models of the  extension."""
 from django.db import models
 
 
-class DashboardTile(models.Model):
-    """A component that can be included in the dashboard."""
+class MyModel(models.Model):
+    """A model."""
 
     pass

@@ -7,6 +7,7 @@ def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
     from collectivo.extensions.utils import register_extension
     from collectivo.ux.utils import register_menuitem
+    from .populate import create_groups_and_roles
 
     name = 'auth'
     description = 'API for user authentication.'
@@ -19,6 +20,7 @@ def post_migrate_callback(sender, **kwargs):
         action='component',
         component_name='logout'
     )
+    create_groups_and_roles()
 
 
 class AuthConfig(AppConfig):

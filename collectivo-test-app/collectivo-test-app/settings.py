@@ -31,6 +31,7 @@ INSTALLED_APPS = [
 
     'collectivo',
     'collectivo.ux',
+    'collectivo.dashboard',
     'collectivo.auth',
     'collectivo.extensions',
     'collectivo.members',

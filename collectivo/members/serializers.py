@@ -3,7 +3,7 @@ from rest_framework import serializers
 from .models import Member
 
 
-admin_attrs = ('admin_attr', )  # Write access only for admins
+admin_attrs = ('user_id', 'admin_attr', )  # Write access only for admins
 create_attrs = ('create_attr', )  # Write access only for post or admins
 
 

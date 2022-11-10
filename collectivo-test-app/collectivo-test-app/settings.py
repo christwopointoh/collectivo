@@ -236,7 +236,7 @@ COLLECTIVO = {
     'auth_groups_and_roles': {
         'members': ['members_user'],
         'members_active': ['shifts_user'],
-        'superuser': ['collectivo_admin', 'members_admin', 'shifts_admin']
+        'superusers': ['collectivo_admin', 'members_admin', 'shifts_admin']
     },
 
     # Configuration for auth.middleware.KeycloakMiddleware

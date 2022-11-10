@@ -20,7 +20,3 @@ class MembersRegistrationTests(TestCase):
         """Test that the menu items are registered."""
         res = MenuItem.objects.filter(extension=self.name)
         self.assertEqual(len(res), 2)
-
-    def test_menu_items_access(self):
-        """Test that only the correct roles can view menu item."""
-        # TODO Access control for menus

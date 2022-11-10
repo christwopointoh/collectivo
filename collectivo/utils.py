@@ -54,3 +54,4 @@ def register_viewset(viewset, pk, **kwargs) -> Response:
         response.render()
         logger.debug(
             f"Could not register viewset '{viewset}': {response.content}")
+    return response

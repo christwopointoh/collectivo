@@ -2,6 +2,11 @@
 from django.test import RequestFactory
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
+from collectivo.auth.userinfo import UserInfo
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 # https://docs.djangoproject.com/en/4.1/ref/models/querysets/#field-lookups
@@ -31,4 +36,21 @@ def request(viewset: ViewSet, command='create', payload=None,
     request = getattr(rf, method)(
         None, payload, content_type="application/json")
 
-    return viewset.as_view({method: command})(request, **kwargs)
+    request.userinfo = UserInfo(roles=['collectivo_admin'])
+
+    response = viewset.as_view({method: command})(request, **kwargs)
+
+    return response
+
+
+def register_viewset(viewset, pk, **kwargs) -> Response:
+    """Register a viewset."""
+    get = request(viewset, 'retrieve', kwargs, pk=pk)
+    if get.status_code == 200:
+        response = request(viewset, 'update', kwargs, pk=pk)
+    else:
+        response = request(viewset, 'create', kwargs)
+    if response.status_code not in [200, 201]:
+        response.render()
+        logger.debug(
+            f"Could not register viewset '{viewset}': {response.content}")

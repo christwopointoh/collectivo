@@ -1,6 +1,7 @@
 """Django settings for collectivo-test-app."""
 import os
 from pathlib import Path
+import logging
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -16,7 +17,7 @@ SECRET_KEY = 'django-insecure-%x_1s#a=mf9rfm+@waioqu@)(2o5s3ff&*f0gas-$*8%#9kj7%
 DEBUG = True
 DEVELOPMENT = True
 
-ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "testserver"]
+ALLOWED_HOSTS = ['*', "0.0.0.0", "127.0.0.1", "localhost", "collectivo.local"]
 
 # Application definition
 
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'collectivo.middleware.correlation.Correlation',
     'corsheaders.middleware.CorsMiddleware',  # TODO DEBUG
 
     'django.middleware.security.SecurityMiddleware',
@@ -56,6 +58,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 
     'collectivo.auth.middleware.KeycloakMiddleware',
+    'collectivo.middleware.requestLog.RequestLogMiddleware',
 ]
 
 ROOT_URLCONF = 'collectivo-test-app.urls'
@@ -145,15 +148,15 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # CORS Settings - TODO Remove?
 
 CORS_ALLOW_HEADERS = [
-'accept',
-'accept-encoding',
-'authorization',
-'content-type',
-'dnt',
-'origin',
-'user-agent',
-'x-csrftoken',
-'x-requested-with',
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 
@@ -191,15 +194,17 @@ SPECTACULAR_SETTINGS = {
 
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'formatters': {
         'timeandname': {
             'format': '[{name}] {message}',  # {asctime},
             'style': '{',
         },
+        'verbose': {
+            'format': '[%(levelname)s %(asctime)s %(pathname)s@%(lineno)s]: %(message)s'
+        },
         'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
+            'format': '[%(levelname)s %(asctime)s]: %(message)s'
         },
     },
     'handlers': {
@@ -210,7 +215,7 @@ LOGGING = {
         # },
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'timeandname',
+            'formatter': 'verbose',
         },
     },
     'loggers': {
@@ -224,9 +229,13 @@ LOGGING = {
             'level': 'DEBUG',  # os.getenv('DJANGO_LOG_LEVEL', 'DEBUG')
             'propagate': True,
         },
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # change debug level as appropiate
+            'propagate': True,
+        },
     },
 }
-
 
 # General settings for collectivo
 
@@ -248,8 +257,3 @@ COLLECTIVO = {
     }
 
 }
-
-
-
-
-

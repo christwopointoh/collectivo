@@ -49,4 +49,3 @@ class MembersRegistrationTests(TestCase):
         res = self.client.get(TILES_URL)
         items = [i['tile_id'] for i in res.data]
         self.assertFalse('members_registration_tile' in items)
-

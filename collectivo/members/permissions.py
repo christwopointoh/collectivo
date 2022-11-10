@@ -7,11 +7,7 @@ class IsMembersUser(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """Check if the required permission is among user roles."""
-        try:
-            print("Checking permission, userinfo is: ", request.userinfo)
-            return 'members_user' in request.userinfo['roles']
-        except Exception:
-            return False
+        return request.userinfo.has_role('members_user')
 
 
 class IsMembersAdmin(permissions.BasePermission):
@@ -19,8 +15,4 @@ class IsMembersAdmin(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """Check if the required permission is among user roles."""
-        try:
-            print("Checking permission, userinfo is: ", request.userinfo)
-            return 'members_admin' in request.userinfo['roles']
-        except Exception:
-            return False
+        return request.userinfo.has_role('members_admin')

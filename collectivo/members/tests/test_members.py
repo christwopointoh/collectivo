@@ -3,59 +3,57 @@ from uuid import UUID
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
-from collectivo.auth.utils import KeycloakAPIClient
-from ..models import Member
+from collectivo.auth.clients import CollectivoAPIClient
+from collectivo.auth.userinfo import UserInfo
+from ..models import Member, update_member_groups
+from django.db.models import signals
 
 
 MEMBERS_URL = reverse('collectivo:collectivo.members:member-list')
 ME_URL = reverse('collectivo:collectivo.members:me')
 
 
-class PublicRecipeApiTests(TestCase):
-    """Test unauthenticated members API access."""
+class PublicMemberApiTests(TestCase):
+    """Test the public members API."""
 
     def setUp(self):
         """Prepare client."""
         self.client = APIClient()
 
     def test_auth_required_for_members(self):
-        """Test that authentication is required."""
+        """Test that authentication is required for /members."""
         res = self.client.get(MEMBERS_URL)
         self.assertEqual(res.status_code, 403)
 
     def test_auth_required_for_me(self):
-        """Test that authentication is required."""
+        """Test that authentication is required for /me."""
         res = self.client.get(ME_URL)
         self.assertEqual(res.status_code, 403)
 
 
-class PrivateMemberApiTests(TestCase):
-    """Test the privatly available members API for members."""
+class PrivateMemberApiTestsForUsers(TestCase):
+    """Test the private members API for users that are not members."""
 
     def setUp(self):
         """Prepare client."""
-        self.client = KeycloakAPIClient()
-        self.user = {
-            'sub': 'ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
-            'roles': ['members_user'],
-            'email': 'test_member_1@example.com'
-        }
+        self.client = CollectivoAPIClient()
+        signals.post_save.disconnect(update_member_groups, sender=Member)
+        self.user = UserInfo(
+            user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
+            email='some_member@example.com',
+            is_authenticated=True,
+        )
         self.payload = {
             'user_attr': '1',
             'create_attr': '2',
             'admin_attr': '3'
         }
-        self.expected_userinfo = {
+        self.expected_user = {
             **self.payload,
             'admin_attr': 'default value',
-            'user_id': UUID(self.user['sub'])
+            'user_id': UUID(self.user.user_id)
         }
         self.client.force_authenticate(self.user)
-
-    def test_member_cannot_access_admin_area(self):
-        """Test that a normal member cannot access admin API."""
-        res = self.client.get(MEMBERS_URL)
-        self.assertEqual(res.status_code, 403)
 
     def test_create_member_as_user(self):
         """Test that an authenticated user can create itself as a member."""
@@ -63,8 +61,39 @@ class PrivateMemberApiTests(TestCase):
         self.assertEqual(res.status_code, 201)
         member = Member.objects.get(id=res.data['id'])
 
-        for key in self.expected_userinfo.keys():
-            self.assertEqual(self.expected_userinfo[key], getattr(member, key))
+        for key in self.expected_user.keys():
+            self.assertEqual(self.expected_user[key], getattr(member, key))
+
+
+class PrivateMemberApiTestsForMembers(TestCase):
+    """Test the private members API for registered members."""
+
+    def setUp(self):
+        """Prepare client."""
+        self.client = CollectivoAPIClient()
+        signals.post_save.disconnect(update_member_groups, sender=Member)
+        self.user = UserInfo(
+            user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
+            roles=['members_user'],
+            email='some_member@example.com',
+            is_authenticated=True,
+        )
+        self.payload = {
+            'user_attr': '1',
+            'create_attr': '2',
+            'admin_attr': '3'
+        }
+        self.expected_user = {
+            **self.payload,
+            'admin_attr': 'default value',
+            'user_id': UUID(self.user.user_id)
+        }
+        self.client.force_authenticate(self.user)
+
+    def test_member_cannot_access_admin_area(self):
+        """Test that a normal member cannot access admin API."""
+        res = self.client.get(MEMBERS_URL)
+        self.assertEqual(res.status_code, 403)
 
     def test_cannot_create_same_member_twice(self):
         """Test that a member cannot create itself as a member again."""
@@ -78,8 +107,8 @@ class PrivateMemberApiTests(TestCase):
         self.client.post(ME_URL, self.payload)
         res = self.client.get(ME_URL)
         self.assertEqual(res.status_code, 200)
-        for key in self.expected_userinfo.keys():
-            self.assertEqual(str(self.expected_userinfo[key]), res.data[key])
+        for key in self.expected_user.keys():
+            self.assertEqual(str(self.expected_user[key]), res.data[key])
 
     def test_get_member_fails_if_not_exists(self):
         """Test that a user cannot access API if they are not a member."""
@@ -116,13 +145,15 @@ class AdminMemberApiTests(TestCase):
 
     def setUp(self):
         """Prepare client, extension, & micro-frontend."""
-        self.client = KeycloakAPIClient()
-        userinfo = {
-            'sub': 'ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
-            'roles': ['members_admin'],
-            'email': 'test_member_1@example.com'
-        }
-        self.client.force_authenticate(userinfo)
+        self.client = CollectivoAPIClient()
+        Member.objects.all().delete()
+        user = UserInfo(
+            # user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
+            roles=['members_admin'],
+            email='test_member_1@example.com',
+            is_authenticated=True,
+        )
+        self.client.force_authenticate(user)
         self.payload = {
             'user_attr': '1',
             'create_attr': '2',
@@ -137,9 +168,11 @@ class AdminMemberApiTests(TestCase):
 
     def test_create_members(self):
         """Test that admins can create members with access to all fields."""
-        n_users = 5
-        self.create_members(n_users)
-        self.assertEqual(len(Member.objects.all()), n_users)
+        n_users_new = 5
+        n_users_before = len(Member.objects.all())
+        n_users_after = n_users_before + n_users_new
+        self.create_members(n_users_new)
+        self.assertEqual(len(Member.objects.all()), n_users_after)
 
     def test_update_member_admin_fields(self):
         """Test that only admins can write to admin fields."""

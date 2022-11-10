@@ -11,5 +11,5 @@ router.register('tiles', DashboardTileViewSet, basename='tile')
 
 
 urlpatterns = [
-    path('api/ux/v1/', include(router.urls)),
+    path('api/dashboard/v1/', include(router.urls)),
 ]

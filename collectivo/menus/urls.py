@@ -14,5 +14,5 @@ router.register(
 )
 
 urlpatterns = [
-    path('api/ux/v1/', include(router.urls)),
+    path('api/menus/v1/', include(router.urls)),
 ]

@@ -2,11 +2,18 @@
 from django.db.models import Q
 from rest_framework import viewsets
 from . import models, serializers
-# from collectivo.auth.permissions import IsAuthenticated
+from collectivo.auth.permissions import IsCollectivoAdmin, IsAuthenticated
+import logging
+
+
+logger = logging.getLogger(__name__)
 
 
 class MenuViewSet(viewsets.ModelViewSet):
     """Manage menus.
+
+    List view requires authentication.
+    All other views require the role 'collectivo_admin'.
 
     Attributes:
     - menu_id (CharField): A unique name to identify the menu.
@@ -15,7 +22,12 @@ class MenuViewSet(viewsets.ModelViewSet):
     """
 
     queryset = models.Menu.objects.all()
-    # TODO permission_classes = [IsAuthenticated]
+
+    def get_permissions(self):
+        """Set permissions for this viewset."""
+        if self.action == 'list':
+            return [IsAuthenticated()]
+        return [IsCollectivoAdmin()]
 
     def get_serializer_class(self):
         """Set name to read-only except for create."""
@@ -27,7 +39,10 @@ class MenuViewSet(viewsets.ModelViewSet):
 class MenuItemViewSet(viewsets.ModelViewSet):
     """Manage menu-items.
 
+    List view requires authentication.
     Only items where the user has the required roles are shown.
+
+    All other views require the role 'collectivo_admin'.
 
     Attributes:
     - item_id (CharField):
@@ -75,7 +90,11 @@ class MenuItemViewSet(viewsets.ModelViewSet):
       Path to an icon image.
     """
 
-    # TODO permission_classes = [IsAuthenticated]
+    def get_permissions(self):
+        """Set permissions for this viewset."""
+        if self.action == 'list':
+            return [IsAuthenticated()]
+        return [IsCollectivoAdmin()]
 
     def get_serializer_class(self):
         """Set item_id to read-only except for create."""
@@ -85,10 +104,7 @@ class MenuItemViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Show only items where user has required roles."""
-        try:
-            user_roles = self.request.userinfo['roles']
-        except Exception:
-            user_roles = []
+        user_roles = self.request.userinfo.roles
         queryset = models.MenuItem.objects.filter(
             Q(required_role__in=user_roles) |
             Q(required_role=None)

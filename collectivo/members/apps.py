@@ -28,7 +28,8 @@ def post_migrate_callback(sender, **kwargs):
         label='Membership',
         extension=name,
         action='component',
-        component_name='profile'
+        component_name='profile',
+        required_role='members_user'
     )
 
     register_menuitem(
@@ -38,7 +39,8 @@ def post_migrate_callback(sender, **kwargs):
         extension=name,
         menu='admin_menu',
         action='component',
-        component_name='members'
+        component_name='members',
+        required_role='members_admin'
     )
 
 

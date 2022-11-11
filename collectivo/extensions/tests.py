@@ -2,8 +2,7 @@
 from django.urls import reverse
 from django.test import TestCase
 
-from rest_framework.test import APIClient
-
+from collectivo.auth.clients import CollectivoAPIClient
 from .models import Extension
 from .utils import register_extension
 
@@ -30,9 +29,22 @@ class InternalApiTests(TestCase):
 class PublicExtensionsApiTests(TestCase):
     """Test the publicly available ingredients API."""
 
+    def test_extension_API_fails(self):
+        """Test extension API is not available for public user."""
+        self.client = CollectivoAPIClient()
+        self.name = 'my_extension'
+        self.setup_payload = {'name': self.name}
+        res = self.client.post(EXTENSIONS_URL, self.setup_payload)
+        self.assertEquals(res.status_code, 403)
+
+
+class PrivateExtensionsApiTests(TestCase):
+    """Test the publicly available ingredients API."""
+
     def setUp(self):
         """Prepare API client and a test extension."""
-        self.client = APIClient()
+        self.client = CollectivoAPIClient()
+        self.client.force_roles(['collectivo_admin'])
         self.name = 'my_extension'
         self.setup_payload = {'name': self.name}
         self.client.post(EXTENSIONS_URL, self.setup_payload)

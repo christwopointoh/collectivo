@@ -3,8 +3,14 @@ from rest_framework import serializers
 from .models import Member
 
 
-admin_attrs = ('admin_attr', )  # Write access only for admins
-create_attrs = ('create_attr', )  # Write access only for post or admins
+# Write access for admins
+admin_attrs = ('user_id', 'admin_attr', )
+
+# Write access for create view or admins
+create_attrs = ('create_attr', )
+
+# Exclude from admin list view
+detail_attrs = []
 
 
 class MemberCreateSerializer(serializers.ModelSerializer):
@@ -31,6 +37,16 @@ class MemberSerializer(serializers.ModelSerializer):
 
 class MemberAdminSerializer(serializers.ModelSerializer):
     """Serializer for admins to manage members."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = Member
+        exclude = detail_attrs
+
+
+class MemberAdminDetailSerializer(serializers.ModelSerializer):
+    """Serializer for admins to manage members in detail."""
 
     class Meta:
         """Serializer settings."""

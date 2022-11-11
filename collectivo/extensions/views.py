@@ -2,12 +2,14 @@
 from rest_framework import viewsets
 from .models import Extension
 from .serializers import ExtensionSerializer, ExtensionCreateSerializer
+from collectivo.auth.permissions import IsCollectivoAdmin
 
 
 class ExtensionViewSet(viewsets.ModelViewSet):
     """Manage extensions."""
 
     queryset = Extension.objects.all()
+    permission_classes = [IsCollectivoAdmin]
 
     def get_serializer_class(self):
         """Set name to read-only except for create."""

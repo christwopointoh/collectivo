@@ -1,1 +1,1 @@
-"""__init file for app module."""
+"""The collectivo-test-app."""

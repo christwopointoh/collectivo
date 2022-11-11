@@ -86,11 +86,11 @@ class KeycloakMiddleware(MiddlewareMixin):
 
         # Add userinfos to request
         try:
-            user.user_id = data.get('sub', None),
+            user.user_id = data.get('sub', None)
             user.email = data.get('email', None),
-            user.email_verified = data.get('email_verified', None),
-            user.given_name = data.get('given_name', None),
-            user.family_name = data.get('family_name', None),
+            user.email_verified = data.get('email_verified', None)
+            user.given_name = data.get('given_name', None)
+            user.family_name = data.get('family_name', None)
             roles = data.get(
                 'realm_access', {}).get('roles', [])
             for role in roles:

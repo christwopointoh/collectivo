@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from collectivo.auth.permissions import IsAuthenticated
-from collectivo.utils import filter_lookups, get_auth_manager
+from collectivo.utils import filter_lookups, test_settings, get_auth_manager
 from .permissions import IsMembersAdmin, IsMembersUser
 from . import models, serializers
 from .models import Member
@@ -47,7 +47,13 @@ class MemberViewSet(
         ])
         if user_fields_have_changed:
             # new_user_data = {**old_user_data, **new_user_data}
+            # TODO Test if this works for PATCH
             auth_manager.update_user(user_id=user_id, **new_user_data)
+
+    def sync_user_groups(self, user_id)
+        """Add user to group members after creation."""
+        if test_settings.get('members_add_to_group', True):
+            get_auth_manager().add_user_to_group(user_id, 'members')
 
     def perform_create(self, serializer):
         """Create member with user_id."""
@@ -55,6 +61,7 @@ class MemberViewSet(
         if Member.objects.filter(user_id=user_id).exists():
             raise PermissionDenied('User is already registered as a member.')
         self.sync_user_data(serializer)
+        self.sync_user_groups(user_id)
         serializer.save(user_id=user_id)
 
     def perform_update(self, serializer):
@@ -106,3 +113,5 @@ class MembersAdminViewSet(viewsets.ModelViewSet):
             return serializers.MemberAdminSerializer
         else:
             return serializers.MemberAdminDetailSerializer
+
+    # TODO Add create/update logic here as well

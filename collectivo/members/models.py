@@ -85,12 +85,12 @@ class Member(models.Model):
 #         )
 
 
-@receiver(post_save, sender=Member)
-def update_member_groups(sender, instance, created, **kwargs):
-    """Add user to group 'members' if created or updated."""
-    if instance.user_id:
-        get_auth_manager().add_user_to_group(instance.user_id, 'members')
+# @receiver(post_save, sender=Member)
+# def update_member_groups(sender, instance, created, **kwargs):
+#     """Add user to group 'members' if created or updated."""
+#     if instance.user_id:
+#         get_auth_manager().add_user_to_group(instance.user_id, 'members')
 
-    # TODO Add user to additional groups
-    # if instance.type == 'active':
-    # set_user_groups(instance.user_id, groups)
+#     # TODO Add user to additional groups
+#     # if instance.type == 'active':
+#     # set_user_groups(instance.user_id, groups)

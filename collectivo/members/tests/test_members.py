@@ -5,8 +5,8 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from collectivo.auth.clients import CollectivoAPIClient
 from collectivo.auth.userinfo import UserInfo
-from ..models import Member, update_member_groups
-from django.db.models import signals
+from collectivo.utils import test_settings
+from ..models import Member
 from django.conf import settings
 from keycloak import KeycloakOpenID
 
@@ -39,7 +39,8 @@ class PrivateMemberApiTestsForUsers(TestCase):
     def setUp(self):
         """Prepare client."""
         self.client = CollectivoAPIClient()
-        signals.post_save.disconnect(update_member_groups, sender=Member)
+        test_settings['members_add_to_group'] = False
+        # signals.post_save.disconnect(update_member_groups, sender=Member)
         self.user = UserInfo(
             user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
             email='some_member@example.com',
@@ -62,6 +63,9 @@ class PrivateMemberApiTestsForUsers(TestCase):
             'user_id': UUID(self.user.user_id)
         }
         self.client.force_authenticate(self.user)
+
+    def tearDown(self):
+        test_settings['members_add_to_group'] = True
 
     def test_create_member_as_user(self):
         """Test that an authenticated user can create itself as a member."""
@@ -110,7 +114,8 @@ class PrivateMemberApiTestsForMembers(TestCase):
     def setUp(self):
         """Prepare client."""
         self.client = CollectivoAPIClient()
-        signals.post_save.disconnect(update_member_groups, sender=Member)
+        test_settings['members_add_to_group'] = False
+        # signals.post_save.disconnect(update_member_groups, sender=Member)
         self.user = UserInfo(
             user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
             roles=['members_user'],
@@ -134,6 +139,9 @@ class PrivateMemberApiTestsForMembers(TestCase):
             'user_id': UUID(self.user.user_id)
         }
         self.client.force_authenticate(self.user)
+
+    def tearDown(self):
+        test_settings['members_add_to_group'] = True
 
     def test_member_cannot_access_admin_area(self):
         """Test that a normal member cannot access admin API."""

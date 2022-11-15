@@ -14,8 +14,8 @@ class UserInfo:
     email: str = None
     email_verified: bool = False
     is_authenticated: bool = False
-    given_name: str = None
-    family_name: str = None
+    first_name: str = None
+    last_name: str = None
     roles: list[str] = field(default_factory=list)
 
     def has_role(self, role: str) -> bool:

@@ -46,7 +46,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    'collectivo.middleware.correlation.Correlation',
+    'collectivo.middleware.requestId.AddRequestId',
     'corsheaders.middleware.CorsMiddleware',  # TODO DEBUG
 
     'django.middleware.security.SecurityMiddleware',
@@ -169,7 +169,8 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
-    ]
+    ],
+    'EXCEPTION_HANDLER': 'collectivo.middleware.customExceptionHandler.customExceptionHandler'
 }
 
 

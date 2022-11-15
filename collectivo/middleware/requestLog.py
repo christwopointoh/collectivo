@@ -36,8 +36,8 @@ class RequestLogMiddleware:
         if request.userinfo is not None:
             log_data["user"] = request.userinfo.user_id
 
-        if request.META["X-Correlation-ID"] is not None:
-            log_data["correlation_id"] = request.META["X-Correlation-ID"]
+        if request.META["X-Request-ID"] is not None:
+            log_data["request_id"] = request.META["X-Request-ID"]
 
         # add runtime to our log_data
         log_data["run_time"] = time.time() - start_time

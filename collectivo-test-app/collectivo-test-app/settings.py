@@ -245,7 +245,12 @@ COLLECTIVO = {
         'REALM_NAME': 'collectivo',
         'CLIENT_ID': 'collectivo',
         'CLIENT_SECRET_KEY': '**********'
-    }
+    },
+
+    # Path to default models
+    'default_auth_manager': 'collectivo.auth.manager.KeycloakAuthManager',
+    'default_user_model': 'collectivo.members.models.Member',
+    'default_extension_model': 'collectivo.extensions.models.Extension',
 
 }
 

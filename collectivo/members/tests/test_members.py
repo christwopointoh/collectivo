@@ -7,6 +7,8 @@ from collectivo.auth.clients import CollectivoAPIClient
 from collectivo.auth.userinfo import UserInfo
 from ..models import Member, update_member_groups
 from django.db.models import signals
+from django.conf import settings
+from keycloak import KeycloakOpenID
 
 
 MEMBERS_URL = reverse('collectivo:collectivo.members:member-list')
@@ -41,12 +43,18 @@ class PrivateMemberApiTestsForUsers(TestCase):
         self.user = UserInfo(
             user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
             email='some_member@example.com',
+            first_name='firstname',
+            last_name='lastname',
             is_authenticated=True,
         )
         self.payload = {
             'user_attr': '1',
             'create_attr': '2',
-            'admin_attr': '3'
+            'admin_attr': '3',
+            'first_name': 'firstname',
+            'last_name': 'lastname',
+            'email_verified': True,
+            'email': 'some_member@example.com',
         }
         self.expected_user = {
             **self.payload,
@@ -57,12 +65,44 @@ class PrivateMemberApiTestsForUsers(TestCase):
 
     def test_create_member_as_user(self):
         """Test that an authenticated user can create itself as a member."""
+
         res = self.client.post(ME_URL, self.payload)
         self.assertEqual(res.status_code, 201)
         member = Member.objects.get(id=res.data['id'])
 
         for key in self.expected_user.keys():
             self.assertEqual(self.expected_user[key], getattr(member, key))
+
+
+class MembersKeycloakIntegrationTests(TestCase):
+    """Test the synchronization of userdata through keycloak."""
+
+    def setUp(self):
+        """Prepare client and keycloak token."""
+        config = settings.COLLECTIVO['auth_keycloak_config']
+        self.keycloak = KeycloakOpenID(
+            server_url=config["SERVER_URL"],
+            client_id=config["REALM_NAME"],
+            realm_name=config["CLIENT_ID"],
+            client_secret_key=config["CLIENT_SECRET_KEY"],
+        )
+        self.token = self.keycloak.token(
+            'test_member_01@example.com', 'test')
+        self.access_token = 'Token ' + self.token['access_token']
+        # logging.disable(logging.DEBUG)
+
+    # TODO test for create
+
+    def test_changing_keycloak_data(self):
+        """Test that changes in member data are synched with keycloak."""
+        client = APIClient()
+        client.credentials(HTTP_AUTHORIZATION=self.access_token)
+        res = client.patch(ME_URL, {'first_name': 'name1'})
+        res = client.get(ME_URL)
+        self.assertEqual(res.data['first_name'], 'name1')
+        res = client.patch(ME_URL, {'first_name': 'name2'})
+        res = client.get(ME_URL)
+        self.assertEqual(res.data['first_name'], 'name2')
 
 
 class PrivateMemberApiTestsForMembers(TestCase):
@@ -76,12 +116,18 @@ class PrivateMemberApiTestsForMembers(TestCase):
             user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
             roles=['members_user'],
             email='some_member@example.com',
+            first_name='firstname',
+            last_name='lastname',
             is_authenticated=True,
         )
         self.payload = {
             'user_attr': '1',
             'create_attr': '2',
-            'admin_attr': '3'
+            'admin_attr': '3',
+            'first_name': 'firstname',
+            'last_name': 'lastname',
+            'email_verified': True,
+            'email': 'some_member@example.com',
         }
         self.expected_user = {
             **self.payload,
@@ -108,7 +154,7 @@ class PrivateMemberApiTestsForMembers(TestCase):
         res = self.client.get(ME_URL)
         self.assertEqual(res.status_code, 200)
         for key in self.expected_user.keys():
-            self.assertEqual(str(self.expected_user[key]), res.data[key])
+            self.assertEqual(str(self.expected_user[key]), str(res.data[key]))
 
     def test_get_member_fails_if_not_exists(self):
         """Test that a user cannot access API if they are not a member."""
@@ -118,7 +164,7 @@ class PrivateMemberApiTestsForMembers(TestCase):
     def test_update_member(self):
         """Test that a member can edit non-admin fields of it's own data."""
         res1 = self.client.post(ME_URL, self.payload)
-        res2 = self.client.put(ME_URL, {'user_attr': 'new_value'})
+        res2 = self.client.patch(ME_URL, {'user_attr': 'new_value'})
         self.assertEqual(res2.status_code, 200)
         member = Member.objects.get(id=res1.data['id'])
         self.assertEqual(getattr(member, 'user_attr'), 'new_value')
@@ -140,7 +186,7 @@ class PrivateMemberApiTestsForMembers(TestCase):
         self.assertNotEqual(getattr(member, 'admin_attr'), 'new_value')
 
 
-class AdminMemberApiTests(TestCase):
+class PrivateMemberApiTestsForAdmins(TestCase):
     """Test the privatly available members API for admins."""
 
     def setUp(self):
@@ -151,13 +197,19 @@ class AdminMemberApiTests(TestCase):
             # user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
             roles=['members_admin'],
             email='test_member_1@example.com',
+            first_name='firstname',
+            last_name='lastname',
             is_authenticated=True,
         )
         self.client.force_authenticate(user)
         self.payload = {
             'user_attr': '1',
             'create_attr': '2',
-            'admin_attr': '3'
+            'admin_attr': '3',
+            'first_name': 'firstname',
+            'last_name': 'lastname',
+            'email_verified': True,
+            'email': 'test_member_1@example.com',
         }
 
     def create_members(self, n_users):

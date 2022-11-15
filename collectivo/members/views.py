@@ -1,16 +1,17 @@
 """Views of the members extension."""
-
-from django.db.utils import IntegrityError
+import logging
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
 from rest_framework.exceptions import NotAuthenticated, PermissionDenied
 from collectivo.auth.permissions import IsAuthenticated
-from collectivo.utils import filter_lookups
+from collectivo.utils import filter_lookups, get_auth_manager
 from .permissions import IsMembersAdmin, IsMembersUser
 from . import models, serializers
+from .models import Member
 
 
 member_fields = [field.name for field in models.Member._meta.get_fields()]
+logger = logging.getLogger(__name__)
 
 
 class MemberViewSet(
@@ -28,21 +29,38 @@ class MemberViewSet(
 
     queryset = models.Member.objects.all()
 
-    def get_pk(self, request):
-        """Return member id."""
-        if not request.userinfo.is_authenticated:
-            raise NotAuthenticated
-        return get_object_or_404(
-            self.queryset,
-            user_id=request.userinfo.user_id
-        ).id
+    def sync_user_data(self, serializer):
+        """Update user data if it has changed."""
+        auth_manager = get_auth_manager()
+        user_fields = auth_manager.get_user_fields()
+        old_user_data = self.request.userinfo
+        user_id = old_user_data.user_id
+        if user_id is None:
+            return
+        new_user_data = {
+            k: v for k, v in serializer.validated_data.items()
+            if k in user_fields
+        }
+        user_fields_have_changed = any([
+            new_user_data.get(field) != getattr(old_user_data, field)
+            for field in new_user_data.keys()
+        ])
+        if user_fields_have_changed:
+            # new_user_data = {**old_user_data, **new_user_data}
+            auth_manager.update_user(user_id=user_id, **new_user_data)
 
     def perform_create(self, serializer):
         """Create member with user_id."""
-        try:
-            serializer.save(user_id=self.request.userinfo.user_id)
-        except IntegrityError:
-            raise PermissionDenied(detail='This user is already a member.')
+        user_id = self.request.userinfo.user_id
+        if Member.objects.filter(user_id=user_id).exists():
+            raise PermissionDenied('User is already registered as a member.')
+        self.sync_user_data(serializer)
+        serializer.save(user_id=user_id)
+
+    def perform_update(self, serializer):
+        """Update member."""
+        self.sync_user_data(serializer)
+        serializer.save()
 
     def get_object(self):
         """Return member that corresponds with current user."""

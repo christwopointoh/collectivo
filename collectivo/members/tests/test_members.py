@@ -65,7 +65,6 @@ class PrivateMemberApiTestsForUsers(TestCase):
 
     def test_create_member_as_user(self):
         """Test that an authenticated user can create itself as a member."""
-
         res = self.client.post(ME_URL, self.payload)
         self.assertEqual(res.status_code, 201)
         member = Member.objects.get(id=res.data['id'])

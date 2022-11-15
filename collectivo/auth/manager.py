@@ -5,6 +5,7 @@ from django.conf import settings
 
 class AuthManager:
     """Template for authentication and authorization tools."""
+
     pass
 
 
@@ -26,7 +27,8 @@ class KeycloakAuthManager(AuthManager, KeycloakAdmin):
         """Return attributes of the user model."""
         return ('first_name', 'last_name', 'email')
 
-    def update_user(self, user_id, first_name=None, last_name=None, email=None):
+    def update_user(self, user_id, first_name=None,
+                    last_name=None, email=None):
         """Update a keycloak user."""
         payload = {
             'firstName': first_name,
@@ -40,4 +42,3 @@ class KeycloakAuthManager(AuthManager, KeycloakAdmin):
         """Add a user to a keycloak group."""
         group_id = self.get_group_by_path(f'/{group_name}')['id']
         self.group_user_add(user_id, group_id)
-

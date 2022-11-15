@@ -11,15 +11,7 @@ N_TEST_MEMBERS = 15
 
 def populate_keycloak_with_test_data():
     """Add users, groups, and roles to keycloak."""
-    #try:
     logger.debug('Creating test-population')
-    _populate_keycloak_with_test_data()
-    #except Exception as e:
-    #    logger.debug(f'Failed to create test-population: {repr(e)}')
-
-
-def _populate_keycloak_with_test_data():
-    """Add users, groups, and roles to auth service."""
     auth_manager = get_auth_manager()
 
     # Add users

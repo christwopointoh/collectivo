@@ -62,7 +62,7 @@ class MemberAdminSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = Member
-        fields = '__all__'
+        fields = admin_list_attrs
 
 
 class MemberAdminDetailSerializer(serializers.ModelSerializer):
@@ -72,4 +72,4 @@ class MemberAdminDetailSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = Member
-        fields = admin_list_attrs
+        fields = '__all__'

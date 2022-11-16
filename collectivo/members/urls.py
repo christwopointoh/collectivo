@@ -17,4 +17,3 @@ urlpatterns = [
     path('api/members/v1/', include(admin_router.urls)),
     path('api/members/v1/', include(me_router.urls)),
 ]
-

@@ -1,16 +1,36 @@
 """Serializers of the members extension."""
 from rest_framework import serializers
 from .models import Member
+# from drf_spectacular.utils import extend_schema_field
 
+# Write access for users
+user_write_attrs = (
+    'title_pre', 'title_post', 'first_name', 'last_name',
+    'gender', 'date_birth',
+    'email', 'email_2', 'phone', 'phone_2',
+    'address_street', 'address_number', 'address_is_home', 'address_co',
+    'address_stair', 'address_door', 'address_postcode', 'address_city',
+    'address_country',
+)
 
-# Write access for admins
-admin_attrs = ('user_id', 'admin_attr', )
+user_read_attrs = (
+    'id',
+)
+
+legal_person_attrs = (
+    'legal_name', 'legal_type', 'legal_seat', 'legal_type_id'
+)
 
 # Write access for create view or admins
-create_attrs = ('create_attr', )
+user_write_attrs_create = (
+    'membership_type',
+    'shares_number', 'shares_payment_type', 'shares_installment_plan'
+)
 
-# Exclude from admin list view
-detail_attrs = []
+# Include in admin list view
+admin_list_attrs = (
+    'id', 'first_name', 'last_name', 'membership_type', 'membership_status',
+)
 
 
 class MemberCreateSerializer(serializers.ModelSerializer):
@@ -20,8 +40,8 @@ class MemberCreateSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = Member
-        fields = '__all__'
-        read_only_fields = admin_attrs
+        fields = user_write_attrs + user_write_attrs_create + user_read_attrs
+        read_only_fields = user_read_attrs
 
 
 class MemberSerializer(serializers.ModelSerializer):
@@ -31,8 +51,8 @@ class MemberSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = Member
-        fields = '__all__'
-        read_only_fields = admin_attrs + create_attrs
+        fields = user_write_attrs + user_read_attrs
+        read_only_fields = user_read_attrs
 
 
 class MemberAdminSerializer(serializers.ModelSerializer):
@@ -42,7 +62,7 @@ class MemberAdminSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = Member
-        exclude = detail_attrs
+        fields = '__all__'
 
 
 class MemberAdminDetailSerializer(serializers.ModelSerializer):
@@ -52,4 +72,4 @@ class MemberAdminDetailSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = Member
-        fields = '__all__'
+        fields = admin_list_attrs

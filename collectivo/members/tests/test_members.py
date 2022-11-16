@@ -12,13 +12,10 @@ MEMBERS_URL = reverse('collectivo:collectivo.members:member-list')
 ME_URL = reverse('collectivo:collectivo.members:me')
 
 TEST_MEMBER = {
-    'user_attr': '1',
-    'create_attr': '2',
-    'admin_attr': '3',
     'first_name': 'firstname',
     'last_name': 'lastname',
-    'email_verified': True,
     'email': 'some_member@example.com',
+    'email_verified': True,
 }
 
 TEST_USER = {
@@ -89,7 +86,8 @@ class PrivateMemberApiTestsForNonMembers(MembersTestCase):
         res = self.client.post(ME_URL, TEST_MEMBER)
         self.assertEqual(res.status_code, 201)
         member = Member.objects.get(id=res.data['id'])
-        expected_user = {**TEST_MEMBER, 'admin_attr': 'default value'}
+        expected_user = {**TEST_MEMBER}
+        del expected_user['email_verified']  # not shown to user
         for key in expected_user.keys():
             self.assertEqual(expected_user[key], getattr(member, key))
 
@@ -118,7 +116,8 @@ class PrivateMemberApiTestsForMembers(MembersTestCase):
         """Test that a member can view it's own data."""
         res = self.client.get(ME_URL)
         self.assertEqual(res.status_code, 200)
-        expected_user = {**TEST_MEMBER, 'admin_attr': 'default value'}
+        expected_user = {**TEST_MEMBER}
+        del expected_user['email_verified']  # not shown to user
         for key in expected_user.keys():
             self.assertEqual(str(expected_user[key]), str(res.data[key]))
 
@@ -130,19 +129,14 @@ class PrivateMemberApiTestsForMembers(MembersTestCase):
         self.assertEqual(res.data['last_name'], 'lastname')
         # TODO Check with keycloak userinfo
 
-    def test_update_member_create_fields_fails(self):
-        """Test that a member cannot edit admin fields of it's own data."""
-        res2 = self.client.put(ME_URL, {'create_attr': 'new_value'})
-        self.assertEqual(res2.status_code, 400)
-        member = Member.objects.get(id=self.members_id)
-        self.assertNotEqual(getattr(member, 'create_attr'), 'new_value')
-
     def test_update_member_admin_fields_fails(self):
         """Test that a member cannot edit admin fields of it's own data."""
-        res2 = self.client.put(ME_URL, {'admin_attr': 'new_value'})
+        res2 = self.client.put(
+            ME_URL, {'membership_status': '2_provisional'})
         self.assertEqual(res2.status_code, 400)
         member = Member.objects.get(id=self.members_id)
-        self.assertNotEqual(getattr(member, 'admin_attr'), 'new_value')
+        self.assertNotEqual(
+            getattr(member, 'membership_status'), '2_provisional')
 
 
 class PrivateMemberApiTestsForAdmins(TestCase):
@@ -161,9 +155,6 @@ class PrivateMemberApiTestsForAdmins(TestCase):
         )
         self.client.force_authenticate(user)
         self.payload = {
-            'user_attr': '1',
-            'create_attr': '2',
-            'admin_attr': '3',
             'first_name': 'firstname',
             'last_name': 'lastname',
             'email_verified': True,
@@ -173,7 +164,7 @@ class PrivateMemberApiTestsForAdmins(TestCase):
     def create_members(self, n_users):
         """Create a set of members for testing."""
         for i, user in enumerate(range(n_users)):
-            payload = {**self.payload, 'user_attr': str(i)}
+            payload = {**self.payload, 'first_name': str(i)}
             self.client.post(MEMBERS_URL, payload)
 
     def test_create_members(self):
@@ -185,32 +176,33 @@ class PrivateMemberApiTestsForAdmins(TestCase):
         self.assertEqual(len(Member.objects.all()), n_users_after)
 
     def test_update_member_admin_fields(self):
-        """Test that only admins can write to admin fields."""
+        """Test that admins can write to admin fields."""
         res1 = self.client.post(MEMBERS_URL, self.payload)
         res2 = self.client.patch(
             reverse(
                 'collectivo:collectivo.members:member-detail',
                 args=[res1.data['id']]),
-            {'admin_attr': 'new_value'}
+            {'membership_status': '2_provisional'}
         )
         self.assertEqual(res2.status_code, 200)
         member = Member.objects.get(id=res1.data['id'])
-        self.assertEqual(getattr(member, 'admin_attr'), 'new_value')
+        self.assertEqual(
+            getattr(member, 'membership_status'), '2_provisional')
 
     def test_member_sorting(self):
         """Test that all member fields can be sorted."""
         n_users = 3
         self.create_members(n_users)
 
-        res = self.client.get(MEMBERS_URL+'?orderingx=user_attr')
+        res = self.client.get(MEMBERS_URL+'?orderingx=first_name')
         self.assertEqual(
-            [entry['user_attr'] for entry in res.data],
+            [entry['first_name'] for entry in res.data],
             ['0', '1', '2']
         )
 
-        res = self.client.get(MEMBERS_URL+'?ordering=-user_attr')
+        res = self.client.get(MEMBERS_URL+'?ordering=-first_name')
         self.assertEqual(
-            [entry['user_attr'] for entry in res.data],
+            [entry['first_name'] for entry in res.data],
             ['2', '1', '0']
         )
 
@@ -219,21 +211,21 @@ class PrivateMemberApiTestsForAdmins(TestCase):
         n_users = 3
         self.create_members(n_users)
 
-        res = self.client.get(MEMBERS_URL+'?user_attr=1')
+        res = self.client.get(MEMBERS_URL+'?first_name=1')
         self.assertEqual(
-            [entry['user_attr'] for entry in res.data],
+            [entry['first_name'] for entry in res.data],
             ['1']
         )
 
-        res = self.client.get(MEMBERS_URL+'?user_attr__gte=1')
+        res = self.client.get(MEMBERS_URL+'?first_name__gte=1')
         self.assertEqual(
-            [entry['user_attr'] for entry in res.data],
+            [entry['first_name'] for entry in res.data],
             ['1', '2']
         )
 
-        res = self.client.get(MEMBERS_URL+'?user_attr__contains=1')
+        res = self.client.get(MEMBERS_URL+'?first_name__contains=1')
         self.assertEqual(
-            [entry['user_attr'] for entry in res.data],
+            [entry['first_name'] for entry in res.data],
             ['1']
         )
 

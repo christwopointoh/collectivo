@@ -80,8 +80,10 @@ def populate_keycloak_with_test_data():
         user_id = auth_manager.get_user_id(member['username'])
         payload = {
             'user_id': user_id,
+
             'email': member['email'],
             'email_verified': member['emailVerified'],
+
             'first_name': member['firstName'],
             'last_name': member['lastName'],
         }

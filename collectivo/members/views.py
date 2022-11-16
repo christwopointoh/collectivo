@@ -1,11 +1,10 @@
 """Views of the members extension."""
 import logging
-from django.shortcuts import get_object_or_404
 from rest_framework import viewsets, mixins
-from rest_framework.exceptions import NotAuthenticated, PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 from collectivo.auth.permissions import IsAuthenticated
-from collectivo.utils import filter_lookups, test_settings, get_auth_manager
-from .permissions import IsMembersAdmin, IsMembersUser
+from collectivo.utils import filter_lookups, get_auth_manager
+from .permissions import IsMembersAdmin
 from . import models, serializers
 from .models import Member
 
@@ -28,6 +27,7 @@ class MemberViewSet(
     """
 
     queryset = models.Member.objects.all()
+    permission_classes = [IsAuthenticated]
 
     def sync_user_data(self, serializer):
         """Update user data if it has changed."""
@@ -46,14 +46,11 @@ class MemberViewSet(
             for field in new_user_data.keys()
         ])
         if user_fields_have_changed:
-            # new_user_data = {**old_user_data, **new_user_data}
-            # TODO Test if this works for PATCH
             auth_manager.update_user(user_id=user_id, **new_user_data)
 
-    def sync_user_groups(self, user_id)
+    def sync_user_groups(self, user_id):
         """Add user to group members after creation."""
-        if test_settings.get('members_add_to_group', True):
-            get_auth_manager().add_user_to_group(user_id, 'members')
+        get_auth_manager().add_user_to_group(user_id, 'members')
 
     def perform_create(self, serializer):
         """Create member with user_id."""
@@ -71,12 +68,10 @@ class MemberViewSet(
 
     def get_object(self):
         """Return member that corresponds with current user."""
-        if not self.request.userinfo.is_authenticated:
-            raise NotAuthenticated
-        return get_object_or_404(
-            self.queryset,
-            user_id=self.request.userinfo.user_id
-        )  # TODO Better error
+        try:
+            return self.queryset.get(user_id=self.request.userinfo.user_id)
+        except Member.DoesNotExist:
+            raise PermissionDenied('User is not registered as a member.')
 
     def get_serializer_class(self):
         """Set name to read-only except for create."""
@@ -84,12 +79,6 @@ class MemberViewSet(
             return serializers.MemberCreateSerializer
         else:
             return serializers.MemberSerializer
-
-    def get_permissions(self):
-        """Set permissions for this viewset."""
-        if self.action == 'create':
-            return [IsAuthenticated()]
-        return [IsMembersUser()]
 
 
 class MembersAdminViewSet(viewsets.ModelViewSet):

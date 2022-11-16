@@ -21,11 +21,6 @@ filter_lookups = [
 ]
 
 
-# Global settings that can be adjusted during testing
-# Can be used to activate or deactivate various features
-test_settings = {}
-
-
 # Retrieve default models as defined in the settings
 # Can be used to access models without creating dependencies
 

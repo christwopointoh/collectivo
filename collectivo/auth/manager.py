@@ -48,3 +48,9 @@ class KeycloakAuthManager(AuthManager, KeycloakAdmin):
         """Add a user to a keycloak group."""
         group_id = self.get_group_by_path(f'/{group_name}')['id']
         self.group_user_add(user_id, group_id)
+
+    def remove_user_from_group(self, user_id, group_name):
+        """Remove a user from an authorization group."""
+        group_id = self.get_group_by_path(f'/{group_name}')['id']
+        self.group_user_remove(user_id, group_id)
+

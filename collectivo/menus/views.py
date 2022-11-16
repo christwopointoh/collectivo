@@ -82,7 +82,7 @@ class MenuItemViewSet(viewsets.ModelViewSet):
       <br/>Options:
         - 'normal': The standard style (default).
     - required_role (CharField, optional):
-    If passed, only users with this role will see the menu item.
+      If passed, only users with this role will see the menu item.
     - icon_name_prime (CharField, optional):
       Name of a prime icon to be used by primevue frontend applications.
       See: https://github.com/primefaces/primeicons

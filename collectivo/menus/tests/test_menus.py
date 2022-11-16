@@ -2,14 +2,14 @@
 from django.test import TestCase
 from django.urls import reverse
 from ..utils import register_menuitem
-from collectivo.ux.models import Menu, MenuItem
+from collectivo.menus.models import Menu, MenuItem
 from collectivo.auth.clients import CollectivoAPIClient
 from collectivo.auth.userinfo import UserInfo
 
 
 EXTENSIONS_URL = reverse('collectivo:collectivo.extensions:extension-list')
-MENUS_URL = reverse('collectivo:collectivo.ux:menu-list')
-ITEMS_URL = reverse('collectivo:collectivo.ux:menuitem-list',
+MENUS_URL = reverse('collectivo:collectivo.menus:menu-list')
+ITEMS_URL = reverse('collectivo:collectivo.menus:menuitem-list',
                     kwargs={'menu_id': 'main_menu'})
 
 

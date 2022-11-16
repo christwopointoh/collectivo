@@ -26,7 +26,7 @@ class MenuSerializer(serializers.ModelSerializer):
 
         model = Menu
         fields = '__all__'
-        read_only_fields = ('name', )
+        read_only_fields = ('menu_id', )
 
 
 class MenuItemCreateSerializer(serializers.ModelSerializer):
@@ -52,4 +52,4 @@ class MenuItemSerializer(serializers.ModelSerializer):
 
         model = MenuItem
         fields = '__all__'
-        read_only_fields = ('name', )
+        read_only_fields = ('item_id', )

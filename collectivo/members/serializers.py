@@ -11,14 +11,13 @@ user_write_attrs = (
     'address_street', 'address_number', 'address_is_home', 'address_co',
     'address_stair', 'address_door', 'address_postcode', 'address_city',
     'address_country',
+
+    # Only for legal person
+    'legal_name', 'legal_type', 'legal_seat', 'legal_type_id'
 )
 
 user_read_attrs = (
     'id',
-)
-
-legal_person_attrs = (
-    'legal_name', 'legal_type', 'legal_seat', 'legal_type_id'
 )
 
 # Write access for create view or admins

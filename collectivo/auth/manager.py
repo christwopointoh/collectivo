@@ -53,4 +53,3 @@ class KeycloakAuthManager(AuthManager, KeycloakAdmin):
         """Remove a user from an authorization group."""
         group_id = self.get_group_by_path(f'/{group_name}')['id']
         self.group_user_remove(user_id, group_id)
-

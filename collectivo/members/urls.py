@@ -18,5 +18,3 @@ urlpatterns = [
     path('api/members/v1/', include(me_router.urls)),
 ]
 
-handler400 = 'rest_framework.exceptions.bad_request'
-handler500 = 'rest_framework.exceptions.server_error'

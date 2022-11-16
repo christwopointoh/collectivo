@@ -1,5 +1,5 @@
 """A manager for keycloak users and permissions."""
-from keycloak import KeycloakAdmin
+from keycloak import KeycloakAdmin, KeycloakOpenID
 from django.conf import settings
 
 
@@ -21,6 +21,12 @@ class KeycloakAuthManager(AuthManager, KeycloakAdmin):
             client_id=config["CLIENT_ID"],
             client_secret_key=config["CLIENT_SECRET_KEY"],
             verify=True
+        )
+        self.openid = KeycloakOpenID(
+            server_url=config["SERVER_URL"],
+            client_id=config["REALM_NAME"],
+            realm_name=config["CLIENT_ID"],
+            client_secret_key=config["CLIENT_SECRET_KEY"],
         )
 
     def get_user_fields(self):

@@ -3,7 +3,7 @@ import logging
 from rest_framework import viewsets, mixins
 from rest_framework.exceptions import PermissionDenied
 from collectivo.auth.permissions import IsAuthenticated
-from collectivo.utils import filter_lookups, get_auth_manager
+from collectivo.utils import get_auth_manager  # filter_lookups
 from .permissions import IsMembersAdmin
 from . import models, serializers
 from .models import Member
@@ -91,7 +91,11 @@ class MembersAdminViewSet(viewsets.ModelViewSet):
     queryset = models.Member.objects.all()
     serializer_class = serializers.MemberAdminSerializer
 
-    filterset_fields = {field: filter_lookups for field in member_fields}
+    # filterset_fields = {field: filter_lookups for field in member_fields}
+    filterset_fields = {
+        'first_name': ('contains', 'in'),
+        'last_name': ('contains', 'in'),
+    }
     ordering_fields = member_fields
 
     permission_classes = [IsMembersAdmin]

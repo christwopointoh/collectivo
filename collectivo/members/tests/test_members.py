@@ -206,28 +206,28 @@ class PrivateMemberApiTestsForAdmins(TestCase):
             ['2', '1', '0']
         )
 
-    def test_member_filtering(self):
-        """Test that all member fields can be filtered."""
-        n_users = 3
-        self.create_members(n_users)
+    # def test_member_filtering(self):
+    #     """Test that all member fields can be filtered."""
+    #     n_users = 3
+    #     self.create_members(n_users)
 
-        res = self.client.get(MEMBERS_URL+'?first_name=1')
-        self.assertEqual(
-            [entry['first_name'] for entry in res.data],
-            ['1']
-        )
+    #     res = self.client.get(MEMBERS_URL+'?first_name=1')
+    #     self.assertEqual(
+    #         [entry['first_name'] for entry in res.data],
+    #         ['1']
+    #     )
 
-        res = self.client.get(MEMBERS_URL+'?first_name__gte=1')
-        self.assertEqual(
-            [entry['first_name'] for entry in res.data],
-            ['1', '2']
-        )
+    #     res = self.client.get(MEMBERS_URL+'?first_name__gte=1')
+    #     self.assertEqual(
+    #         [entry['first_name'] for entry in res.data],
+    #         ['1', '2']
+    #     )
 
-        res = self.client.get(MEMBERS_URL+'?first_name__contains=1')
-        self.assertEqual(
-            [entry['first_name'] for entry in res.data],
-            ['1']
-        )
+    #     res = self.client.get(MEMBERS_URL+'?first_name__contains=1')
+    #     self.assertEqual(
+    #         [entry['first_name'] for entry in res.data],
+    #         ['1']
+    #     )
 
     def test_member_pagination(self):
         """Test that pagination works for members."""

@@ -28,7 +28,9 @@ user_write_attrs_create = (
 
 # Include in admin list view
 admin_list_attrs = (
-    'id', 'first_name', 'last_name', 'membership_type', 'membership_status',
+    'id', 'first_name', 'last_name',
+    'membership_type', 'membership_status',
+    'shares_payment_status',
 )
 
 
@@ -54,8 +56,8 @@ class MemberSerializer(serializers.ModelSerializer):
         read_only_fields = user_read_attrs
 
 
-class MemberAdminSerializer(serializers.ModelSerializer):
-    """Serializer for admins to manage members."""
+class MemberAdminSummarySerializer(serializers.ModelSerializer):
+    """Serializer for admins to get member summaries."""
 
     class Meta:
         """Serializer settings."""
@@ -64,7 +66,7 @@ class MemberAdminSerializer(serializers.ModelSerializer):
         fields = admin_list_attrs
 
 
-class MemberAdminDetailSerializer(serializers.ModelSerializer):
+class MemberAdminSerializer(serializers.ModelSerializer):
     """Serializer for admins to manage members in detail."""
 
     class Meta:

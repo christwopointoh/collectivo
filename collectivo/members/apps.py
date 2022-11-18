@@ -46,6 +46,7 @@ def post_migrate_callback(sender, **kwargs):
 
     register_tile(
         tile_id='members_registration_tile',
+        label='Register as a member',
         extension=name,
         component_name='members_registration_tile',
         blocked_role='members_user'

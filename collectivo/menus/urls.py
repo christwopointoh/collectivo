@@ -3,7 +3,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from . import views
 
-app_name = 'collectivo.ux'
+app_name = 'collectivo.menus'
 
 router = DefaultRouter()
 router.register('menus', views.MenuViewSet)
@@ -14,5 +14,5 @@ router.register(
 )
 
 urlpatterns = [
-    path('api/ux/v1/', include(router.urls)),
+    path('api/menus/v1/', include(router.urls)),
 ]

@@ -1,34 +1,37 @@
-"""Configuration file for the authentication module."""
+"""Configuration file for the  extension."""
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
+from collectivo.version import __version__
 
 
 def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
     from collectivo.extensions.utils import register_extension
     from collectivo.menus.utils import register_menuitem
-    from .populate import create_groups_and_roles
 
-    name = 'auth'
-    description = 'API for user authentication.'
-    register_extension(name=name, built_in=True, description=description)
+    name = 'extension_template'
+
+    register_extension(
+        name=name,
+        version=__version__,
+        description='An extension to provide a starting page.'
+    )
+
     register_menuitem(
-        item_id='auth_logout_button',
+        item_id='extension_template_menu_item',
         menu_id='main_menu',
-        label='Log out',
+        label='My Component',
         extension=name,
         action='component',
-        component_name='logout'
+        component_name='mycomponent',
     )
-    create_groups_and_roles()
 
 
-class AuthConfig(AppConfig):
-    """Configuration class of the authentication module."""
+class MembersConfig(AppConfig):
+    """Configuration class for the dashboard extension."""
 
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'collectivo.auth'
-    label = 'collectivo_auth'
+    name = 'collectivo.extension_template'
 
     def ready(self):
         """

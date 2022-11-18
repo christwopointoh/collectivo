@@ -1,5 +1,5 @@
 """Utility functions of the user experience module."""
-from collectivo.ux import views
+from collectivo.menus import views
 from collectivo.utils import register_viewset
 
 

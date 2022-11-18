@@ -1,7 +1,7 @@
 """Tests of the authentication extension."""
 from django.test import TestCase
 from collectivo.extensions.models import Extension
-from collectivo.ux.models import MenuItem
+from collectivo.menus.models import MenuItem
 
 
 class AuthRegistrationTests(TestCase):

@@ -22,6 +22,12 @@ keycloak_admin = KeycloakManager().keycloak_admin
 
 
 def add_user_to_group(user_id, group_name):
-    """Add a user to a keycloak group."""
+    """Add a user to an authorization group."""
     group_id = keycloak_admin.get_group_by_path(f'/{group_name}')['id']
     keycloak_admin.group_user_add(user_id, group_id)
+
+
+def remove_user_from_group(user_id, group_name):
+    """Remove a user from an authorization group."""
+    group_id = keycloak_admin.get_group_by_path(f'/{group_name}')['id']
+    keycloak_admin.group_user_remove(user_id, group_id)

@@ -19,14 +19,28 @@ class VersionView(APIView):
         return Response(data)
 
 
+# TODO Default does not work yet
 field_attrs = [
     'label', 'help_text',
     'required', 'default',
     'max_length', 'min_length',
     'max_value', 'min_value',
     'read_only', 'write_only',
-    'choices', 'conditions',
+    'choices',
 ]
+
+input_types = {
+    'CharField': 'text',
+    'UUIDField': 'text',
+    'URLField': 'url',
+    'TextField': 'email',
+    'ChoiceField': 'select',
+    'EmailField': 'email',
+    'IntegerField': 'number',
+    'FloatField': 'number',
+    'DateField': 'date',
+    'BooleanField': 'checkbox',
+}
 
 
 class SchemaMixin:
@@ -39,12 +53,18 @@ class SchemaMixin:
         serializer = self.get_serializer_class()()
         data = {}
         for field_name, field_obj in serializer.fields.items():
+            field_type = field_obj.__class__.__name__
             data[field_name] = {
-                "field_type": field_obj.__class__.__name__,
+                "field_type": field_type,
+                "input_type": input_types[field_type]
             }
             for attr in field_attrs:
                 if hasattr(field_obj, attr):
                     value = getattr(field_obj, attr)
                     if value is not empty and value is not None:
                         data[field_name][attr] = value
+            if hasattr(serializer, 'schema_attrs') and \
+                    field_name in serializer.schema_attrs:
+                for key, value in serializer.schema_attrs[field_name].items():
+                    data[field_name][key] = value
         return Response(data)

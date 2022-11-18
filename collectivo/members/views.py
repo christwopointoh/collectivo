@@ -104,7 +104,7 @@ class MembersAdminSummaryView(mixins.ListModelMixin, GenericMemberViewSet):
     Requires the role 'members_admin'.
     """
 
-    serializer_class = serializers.MemberAdminSerializer
+    serializer_class = serializers.MemberAdminSummarySerializer
     permission_classes = [IsMembersAdmin]
     filterset_fields = {
         'first_name': ('contains', ),
@@ -123,5 +123,5 @@ class MembersAdminViewSet(viewsets.ModelViewSet, GenericMemberViewSet):
     Requires the role 'members_admin'.
     """
 
-    serializer_class = serializers.MemberAdminSummarySerializer
+    serializer_class = serializers.MemberAdminSerializer
     permission_classes = [IsMembersAdmin]

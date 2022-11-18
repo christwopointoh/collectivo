@@ -3,6 +3,10 @@ from rest_framework import serializers
 from .models import Member
 # from drf_spectacular.utils import extend_schema_field
 
+
+# Only for legal person
+user_legal_attrs = ('legal_name', 'legal_type', 'legal_seat', 'legal_type_id')
+
 # Write access for users
 user_write_attrs = (
     'title_pre', 'title_post', 'first_name', 'last_name',
@@ -11,10 +15,7 @@ user_write_attrs = (
     'address_street', 'address_number', 'address_is_home', 'address_co',
     'address_stair', 'address_door', 'address_postcode', 'address_city',
     'address_country',
-
-    # Only for legal person
-    'legal_name', 'legal_type', 'legal_seat', 'legal_type_id'
-)
+) + user_legal_attrs
 
 user_read_attrs = (
     'id',
@@ -66,8 +67,23 @@ class MemberAdminSummarySerializer(serializers.ModelSerializer):
         fields = admin_list_attrs
 
 
+legal_schema_attrs = {
+        attr: {
+            'conditions': [[
+                {
+                    'field': 'membership_type',
+                    'condition': 'exact',
+                    'value': 'legal'
+                }
+            ]]
+        } for attr in user_legal_attrs
+    }
+
+
 class MemberAdminSerializer(serializers.ModelSerializer):
     """Serializer for admins to manage members in detail."""
+
+    schema_attrs = legal_schema_attrs
 
     class Meta:
         """Serializer settings."""

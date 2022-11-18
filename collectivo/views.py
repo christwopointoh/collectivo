@@ -1,5 +1,6 @@
 """Views of the collectivo core."""
 from rest_framework.views import APIView
+from rest_framework.fields import empty
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from collectivo.version import __version__
@@ -18,6 +19,16 @@ class VersionView(APIView):
         return Response(data)
 
 
+field_attrs = [
+    'label', 'help_text',
+    'required', 'default',
+    'max_length', 'min_length',
+    'max_value', 'min_value',
+    'read_only', 'write_only',
+    'choices', 'conditions',
+]
+
+
 class SchemaMixin:
     """Adds an action 'schema' to a viewset."""
 
@@ -26,16 +37,14 @@ class SchemaMixin:
     def _schema(self, request):
         """Return model schema."""
         serializer = self.get_serializer_class()()
-        field_data = {}
+        data = {}
         for field_name, field_obj in serializer.fields.items():
-            field_data[field_name] = {
-                "field_type": str(field_obj).split("(")[0],
-                "read_only": field_obj.read_only,
-                "required": field_obj.required,
-                "label": field_obj.label
-                # TODO condition, validation, input_type,
-                # TODO default value, write_only
+            data[field_name] = {
+                "field_type": field_obj.__class__.__name__,
             }
-            if hasattr(field_obj, "choices"):
-                field_data[field_name]["choices"] = field_obj.choices
-        return Response(field_data)
+            for attr in field_attrs:
+                if hasattr(field_obj, attr):
+                    value = getattr(field_obj, attr)
+                    if value is not empty and value is not None:
+                        data[field_name][attr] = value
+        return Response(data)

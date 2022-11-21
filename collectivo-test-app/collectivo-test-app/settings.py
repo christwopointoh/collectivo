@@ -164,6 +164,9 @@ CORS_ORIGIN_ALLOW_ALL = True
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.AcceptHeaderVersioning',
+    #'DEFAULT_VERSION': 'v2',
+    'ALLOWED_VERSIONS': [None, 'v1', 'v2'],
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -186,6 +189,16 @@ SPECTACULAR_SETTINGS = {
         }
     },
     "SECURITY": [{"ApiKeyAuth": [], }],
+    # "SERVE_INCLUDE_SCHEMA": False,
+    'SWAGGER_UI_SETTINGS':  '''{
+        deepLinking: true,
+        urls: [{url: "/api/collectivo/v1/schema/?version=v1", name: "v1"}, {url: "/api/collectivo/v1/schema/?version=v2", name: "v2"}],
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+        layout: "StandaloneLayout",
+        persistAuthorization: true,
+        displayOperationId: true,
+        filter: true
+    }'''
 }
 
 

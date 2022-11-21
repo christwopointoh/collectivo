@@ -164,6 +164,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
@@ -246,7 +247,12 @@ COLLECTIVO = {
         'REALM_NAME': 'collectivo',
         'CLIENT_ID': 'collectivo',
         'CLIENT_SECRET_KEY': '**********'
-    }
+    },
+
+    # Path to default models
+    'default_auth_manager': 'collectivo.auth.manager.KeycloakAuthManager',
+    'default_user_model': 'collectivo.members.models.Member',
+    'default_extension_model': 'collectivo.extensions.models.Extension',
 
 }
 

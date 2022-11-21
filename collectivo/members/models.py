@@ -1,43 +1,111 @@
 """Models of the members extension."""
 from django.db import models
-from django.dispatch import receiver
-from django.db.models.signals import post_save, post_delete
-from collectivo.auth.manager import add_user_to_group
 
 
 class Member(models.Model):
     """A member of the collective."""
 
+    # Account
     user_id = models.UUIDField(null=True, unique=True)
-    user_attr = models.CharField(max_length=255)
-    create_attr = models.CharField(max_length=255)
-    admin_attr = models.CharField(
-        max_length=255, default='default value')
+    email_verified = models.BooleanField(null=True)
 
-    # Future fields
-    # children = models.ManyToManyField('children')
-    # coshoppers = models.ManyToManyField('coshoppers')
-    # capital = models.IntegerField()
-    # capital_status = models.CharField()
-    # date_entered
-    # date_left
-    # groups
+    # Membership
+    membership_type = models.CharField(
+        help_text='Type of membership.',
+        max_length=20,
+        default='active',
+        choices=[
+            ('active', 'active'),
+            ('investing', 'investing'),
+            ('legal', 'legal'),
+        ]
+    )
+    membership_status = models.CharField(
+        max_length=20,
+        help_text='Current status of membership.',
+        default='1_applicant',
+        choices=[
+            ('1_applicant', '1_applicant'),
+            ('2_provisional', '2_provisional'),
+            ('3_approved', '3_approved'),
+            ('4_normal', '4_normal'),
+            ('5_leaving', '5_leaving'),
+            ('6_left', '6_left'),
+            ('7_deceased', '7_deceased')
+        ]
+    )
 
+    # Coop shares
+    shares_number = models.IntegerField(default=0)
+    shares_payment_status = models.CharField(
+        max_length=20,
+        help_text='Status of payment.',
+        default='1_pending',
+        choices=[
+            ('1_pending', '1_pending'),
+            ('2_processing', '2_processing'),
+            ('3_success', '3_success'),
+            ('4_denied', '4_denied'),
+        ]
+    )
+    shares_payment_type = models.CharField(
+        max_length=20,
+        help_text='Type of payment.',
+        default='sepa',
+        choices=[
+            ('sepa', 'sepa'),
+            # ('transfer', 'transfer')
+        ]
+    )
+    shares_installment_plan = models.BooleanField(default=False)
 
-@receiver(post_save, sender=Member)
-def update_member_groups(sender, instance, created, **kwargs):
-    """Add user to group 'members' if created or updated."""
-    if instance.user_id:
-        add_user_to_group(instance.user_id, 'members')
+    # If payment type is not sepa
+    # bank_iban
+    # bank_blz
+    # bank_owner
 
-    # TODO Add user to additional groups
-    # if instance.type == 'active':
-    # set_user_groups(instance.user_id, groups)
+    # Personal data (real person)
+    title_pre = models.CharField(max_length=255, null=True)
+    title_post = models.CharField(max_length=255, null=True)
+    first_name = models.CharField(max_length=255)
+    last_name = models.CharField(max_length=255)
+    # pronouns?
+    gender = models.CharField(
+        max_length=20,
+        null=True,
+        choices=[
+            ('male', 'male'),
+            ('female', 'female'),
+            ('diverse', 'diverse'),
+        ]
+    )
+    date_birth = models.DateField(null=True)
+    address_street = models.CharField(max_length=255, null=True)
+    address_number = models.CharField(max_length=255, null=True)
+    address_is_home = models.BooleanField(null=True)
+    address_co = models.CharField(max_length=255, null=True)
+    address_stair = models.CharField(max_length=255, null=True)
+    address_door = models.CharField(max_length=255, null=True)
+    address_postcode = models.CharField(max_length=255, null=True)
+    address_city = models.CharField(max_length=255, null=True)
+    address_country = models.CharField(max_length=255, null=True)
+    phone = models.CharField(max_length=255, null=True)
+    phone_2 = models.CharField(max_length=255, null=True)
+    email = models.EmailField()  # Snyced with auth!
+    email_2 = models.EmailField(null=True)
+    homepage = models.CharField(max_length=255, null=True)
 
+    # Personal data (only for active members)
+    # Kinder/Miteinkäuferinnen/FamilienID
 
-@receiver(post_delete, sender=Member)  # pre_save?
-def remove_member_groups(sender, instance, **kwargs):
-    """Remove user from group 'members' if deleted."""
-    pass
-    # TODO
-    # remove_user_from_group(instance.user_id, 'members')
+    # Personal data (only for legal person)
+    legal_name = models.CharField(max_length=255, null=True)
+    legal_type = models.CharField(max_length=255, null=True)
+    legal_seat = models.CharField(max_length=255, null=True)
+    legal_type_id = models.CharField(max_length=255, null=True)
+
+    # To be done in serializer (not saved in django, but sent somewhere)
+    # Newsletter
+
+    # To be done in frontend (does not have to be saved, just validated)
+    # Checkboxen

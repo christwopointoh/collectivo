@@ -1,7 +1,6 @@
 """Populate collectivo & keycloak with test users."""
 import logging
-from collectivo.auth.manager import KeycloakManager
-from collectivo.members.models import Member
+from collectivo.utils import get_auth_manager, get_user_model
 from keycloak.exceptions import KeycloakPostError
 
 
@@ -12,16 +11,8 @@ N_TEST_MEMBERS = 15
 
 def populate_keycloak_with_test_data():
     """Add users, groups, and roles to keycloak."""
-    try:
-        logger.debug('Creating test-population')
-        _populate_keycloak_with_test_data()
-    except Exception as e:
-        logger.debug(f'Failed to create test-population: {repr(e)}')
-
-
-def _populate_keycloak_with_test_data():
-    """Add users, groups, and roles to keycloak."""
-    keycloak_admin = KeycloakManager().keycloak_admin
+    logger.debug('Creating test-population')
+    auth_manager = get_auth_manager()
 
     # Add users
     superusers = [
@@ -68,8 +59,8 @@ def _populate_keycloak_with_test_data():
 
     for user in users:
         try:
-            user_id = keycloak_admin.create_user(user, exist_ok=True)
-            keycloak_admin.set_user_password(  # noqa
+            user_id = auth_manager.create_user(user, exist_ok=True)
+            auth_manager.set_user_password(  # noqa
                 user_id, password='test', temporary=False)  # noqa
         except KeycloakPostError:
             pass
@@ -79,13 +70,21 @@ def _populate_keycloak_with_test_data():
         'superusers': [d['email'] for d in superusers],
     }
     for group_name, user_names in groups_and_users.items():
-        group_id = keycloak_admin.get_group_by_path(f'/{group_name}')['id']
         for user_name in user_names:
-            user_id = keycloak_admin.get_user_id(user_name)
-            keycloak_admin.group_user_add(user_id, group_id)
+            user_id = auth_manager.get_user_id(user_name)
+            auth_manager.add_user_to_group(user_id, group_name)
 
     # Make members into members
     # This automatically adds them to the group 'members'
     for member in members:
-        user_id = keycloak_admin.get_user_id(member['username'])
-        Member.objects.get_or_create(user_id=user_id)
+        user_id = auth_manager.get_user_id(member['username'])
+        payload = {
+            'user_id': user_id,
+
+            'email': member['email'],
+            'email_verified': member['emailVerified'],
+
+            'first_name': member['firstName'],
+            'last_name': member['lastName'],
+        }
+        get_user_model().objects.get_or_create(**payload)

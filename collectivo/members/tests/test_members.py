@@ -1,16 +1,31 @@
 """Tests of the members API."""
-from uuid import UUID
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 from collectivo.auth.clients import CollectivoAPIClient
 from collectivo.auth.userinfo import UserInfo
-from ..models import Member, update_member_groups
-from django.db.models import signals
+from collectivo.utils import get_auth_manager
+from ..models import Member
 
 
 MEMBERS_URL = reverse('collectivo:collectivo.members:member-list')
 ME_URL = reverse('collectivo:collectivo.members:me')
+
+TEST_MEMBER = {
+    'first_name': 'firstname',
+    'last_name': 'lastname',
+    'email': 'some_member@example.com',
+    'email_verified': True,
+}
+
+TEST_USER = {
+    'email': 'some_member@example.com',
+    'username': 'some_member@example.com',
+    'firstName': 'firstname',
+    'lastName': 'lastname',
+    "enabled": True,
+    "emailVerified": True,
+}
 
 
 class PublicMemberApiTests(TestCase):
@@ -31,64 +46,61 @@ class PublicMemberApiTests(TestCase):
         self.assertEqual(res.status_code, 403)
 
 
-class PrivateMemberApiTestsForUsers(TestCase):
+class MembersTestCase(TestCase):
+    """Template for test cases that need an authorized user."""
+
+    def setUp(self):
+        """Create client with authorized test user."""
+        self.auth_manager = get_auth_manager()
+        user_id = self.auth_manager.create_user(TEST_USER, exist_ok=True)
+        self.auth_manager.set_user_password(  # noqa
+                user_id, password='test', temporary=False)  # noqa
+        self.client = APIClient()
+        self.authorize()
+
+    def tearDown(self):
+        """Delete test user."""
+        auth_manager = get_auth_manager()
+        user_id = auth_manager.get_user_id('some_member@example.com')
+        auth_manager.delete_user(user_id)
+
+    def authorize(self):
+        """Authorize test user."""
+        token = self.auth_manager.openid.token(
+            'some_member@example.com', 'test')
+        self.client.credentials(HTTP_AUTHORIZATION=token['access_token'])
+
+
+class PrivateMemberApiTestsForNonMembers(MembersTestCase):
     """Test the private members API for users that are not members."""
 
-    def setUp(self):
-        """Prepare client."""
-        self.client = CollectivoAPIClient()
-        signals.post_save.disconnect(update_member_groups, sender=Member)
-        self.user = UserInfo(
-            user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
-            email='some_member@example.com',
-            is_authenticated=True,
-        )
-        self.payload = {
-            'user_attr': '1',
-            'create_attr': '2',
-            'admin_attr': '3'
-        }
-        self.expected_user = {
-            **self.payload,
-            'admin_attr': 'default value',
-            'user_id': UUID(self.user.user_id)
-        }
-        self.client.force_authenticate(self.user)
+    def test_cannot_access_profile(self):
+        """Test that a user cannot access API if they are not a member."""
+        res = self.client.get(ME_URL)
+        self.assertEqual(res.status_code, 403)
+        self.assertEqual(res.data['detail'],
+                         'User is not registered as a member.')
 
-    def test_create_member_as_user(self):
+    def test_create_member(self):
         """Test that an authenticated user can create itself as a member."""
-        res = self.client.post(ME_URL, self.payload)
+        res = self.client.post(ME_URL, TEST_MEMBER)
         self.assertEqual(res.status_code, 201)
         member = Member.objects.get(id=res.data['id'])
+        expected_user = {**TEST_MEMBER}
+        del expected_user['email_verified']  # not shown to user
+        for key in expected_user.keys():
+            self.assertEqual(expected_user[key], getattr(member, key))
 
-        for key in self.expected_user.keys():
-            self.assertEqual(self.expected_user[key], getattr(member, key))
 
-
-class PrivateMemberApiTestsForMembers(TestCase):
-    """Test the private members API for registered members."""
+class PrivateMemberApiTestsForMembers(MembersTestCase):
+    """Test the private members API for users that are members."""
 
     def setUp(self):
-        """Prepare client."""
-        self.client = CollectivoAPIClient()
-        signals.post_save.disconnect(update_member_groups, sender=Member)
-        self.user = UserInfo(
-            user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
-            roles=['members_user'],
-            email='some_member@example.com',
-            is_authenticated=True,
-        )
-        self.payload = {
-            'user_attr': '1',
-            'create_attr': '2',
-            'admin_attr': '3'
-        }
-        self.expected_user = {
-            **self.payload,
-            'admin_attr': 'default value',
-            'user_id': UUID(self.user.user_id)
-        }
-        self.client.force_authenticate(self.user)
+        """Register authorized user as member."""
+        super().setUp()
+        res = self.client.post(ME_URL, TEST_MEMBER)
+        self.authorize()  # Needed to refresh token with new role
+        self.members_id = res.data['id']
 
     def test_member_cannot_access_admin_area(self):
         """Test that a normal member cannot access admin API."""
@@ -97,50 +109,37 @@ class PrivateMemberApiTestsForMembers(TestCase):
 
     def test_cannot_create_same_member_twice(self):
         """Test that a member cannot create itself as a member again."""
-        res = self.client.post(ME_URL, self.payload)
-        self.assertEqual(res.status_code, 201)
-        res2 = self.client.post(ME_URL, self.payload)
+        res2 = self.client.post(ME_URL, TEST_MEMBER)
         self.assertEqual(res2.status_code, 403)
 
     def test_get_own_member(self):
         """Test that a member can view it's own data."""
-        self.client.post(ME_URL, self.payload)
         res = self.client.get(ME_URL)
         self.assertEqual(res.status_code, 200)
-        for key in self.expected_user.keys():
-            self.assertEqual(str(self.expected_user[key]), res.data[key])
-
-    def test_get_member_fails_if_not_exists(self):
-        """Test that a user cannot access API if they are not a member."""
-        res2 = self.client.get(ME_URL)
-        self.assertEqual(res2.status_code, 404)
+        expected_user = {**TEST_MEMBER}
+        del expected_user['email_verified']  # not shown to user
+        for key in expected_user.keys():
+            self.assertEqual(str(expected_user[key]), str(res.data[key]))
 
     def test_update_member(self):
         """Test that a member can edit non-admin fields of it's own data."""
-        res1 = self.client.post(ME_URL, self.payload)
-        res2 = self.client.put(ME_URL, {'user_attr': 'new_value'})
-        self.assertEqual(res2.status_code, 200)
-        member = Member.objects.get(id=res1.data['id'])
-        self.assertEqual(getattr(member, 'user_attr'), 'new_value')
-
-    def test_update_member_create_fields_fails(self):
-        """Test that a member cannot edit admin fields of it's own data."""
-        res1 = self.client.post(ME_URL, self.payload)
-        res2 = self.client.put(ME_URL, {'create_attr': 'new_value'})
-        self.assertEqual(res2.status_code, 400)
-        member = Member.objects.get(id=res1.data['id'])
-        self.assertNotEqual(getattr(member, 'create_attr'), 'new_value')
+        self.client.patch(ME_URL, {'first_name': 'New Name'})
+        res = self.client.get(ME_URL)
+        self.assertEqual(res.data['first_name'], 'New Name')
+        self.assertEqual(res.data['last_name'], 'lastname')
+        # TODO Check with keycloak userinfo
 
     def test_update_member_admin_fields_fails(self):
         """Test that a member cannot edit admin fields of it's own data."""
-        res1 = self.client.post(ME_URL, self.payload)
-        res2 = self.client.put(ME_URL, {'admin_attr': 'new_value'})
+        res2 = self.client.put(
+            ME_URL, {'membership_status': '2_provisional'})
         self.assertEqual(res2.status_code, 400)
-        member = Member.objects.get(id=res1.data['id'])
-        self.assertNotEqual(getattr(member, 'admin_attr'), 'new_value')
+        member = Member.objects.get(id=self.members_id)
+        self.assertNotEqual(
+            getattr(member, 'membership_status'), '2_provisional')
 
 
-class AdminMemberApiTests(TestCase):
+class PrivateMemberApiTestsForAdmins(TestCase):
     """Test the privatly available members API for admins."""
 
     def setUp(self):
@@ -148,22 +147,24 @@ class AdminMemberApiTests(TestCase):
         self.client = CollectivoAPIClient()
         Member.objects.all().delete()
         user = UserInfo(
-            # user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
             roles=['members_admin'],
             email='test_member_1@example.com',
+            first_name='firstname',
+            last_name='lastname',
             is_authenticated=True,
         )
         self.client.force_authenticate(user)
         self.payload = {
-            'user_attr': '1',
-            'create_attr': '2',
-            'admin_attr': '3'
+            'first_name': 'firstname',
+            'last_name': 'lastname',
+            'email_verified': True,
+            'email': 'test_member_1@example.com',
         }
 
     def create_members(self, n_users):
         """Create a set of members for testing."""
         for i, user in enumerate(range(n_users)):
-            payload = {**self.payload, 'user_attr': str(i)}
+            payload = {**self.payload, 'first_name': str(i)}
             self.client.post(MEMBERS_URL, payload)
 
     def test_create_members(self):
@@ -175,32 +176,33 @@ class AdminMemberApiTests(TestCase):
         self.assertEqual(len(Member.objects.all()), n_users_after)
 
     def test_update_member_admin_fields(self):
-        """Test that only admins can write to admin fields."""
+        """Test that admins can write to admin fields."""
         res1 = self.client.post(MEMBERS_URL, self.payload)
         res2 = self.client.patch(
             reverse(
                 'collectivo:collectivo.members:member-detail',
                 args=[res1.data['id']]),
-            {'admin_attr': 'new_value'}
+            {'membership_status': '2_provisional'}
         )
         self.assertEqual(res2.status_code, 200)
         member = Member.objects.get(id=res1.data['id'])
-        self.assertEqual(getattr(member, 'admin_attr'), 'new_value')
+        self.assertEqual(
+            getattr(member, 'membership_status'), '2_provisional')
 
     def test_member_sorting(self):
         """Test that all member fields can be sorted."""
         n_users = 3
         self.create_members(n_users)
 
-        res = self.client.get(MEMBERS_URL+'?orderingx=user_attr')
+        res = self.client.get(MEMBERS_URL+'?orderingx=first_name')
         self.assertEqual(
-            [entry['user_attr'] for entry in res.data],
+            [entry['first_name'] for entry in res.data],
             ['0', '1', '2']
         )
 
-        res = self.client.get(MEMBERS_URL+'?ordering=-user_attr')
+        res = self.client.get(MEMBERS_URL+'?ordering=-first_name')
         self.assertEqual(
-            [entry['user_attr'] for entry in res.data],
+            [entry['first_name'] for entry in res.data],
             ['2', '1', '0']
         )
 
@@ -209,21 +211,21 @@ class AdminMemberApiTests(TestCase):
         n_users = 3
         self.create_members(n_users)
 
-        res = self.client.get(MEMBERS_URL+'?user_attr=1')
+        res = self.client.get(MEMBERS_URL+'?first_name=1')
         self.assertEqual(
-            [entry['user_attr'] for entry in res.data],
+            [entry['first_name'] for entry in res.data],
             ['1']
         )
 
-        res = self.client.get(MEMBERS_URL+'?user_attr__gte=1')
+        res = self.client.get(MEMBERS_URL+'?first_name__gte=1')
         self.assertEqual(
-            [entry['user_attr'] for entry in res.data],
+            [entry['first_name'] for entry in res.data],
             ['1', '2']
         )
 
-        res = self.client.get(MEMBERS_URL+'?user_attr__contains=1')
+        res = self.client.get(MEMBERS_URL+'?first_name__contains=1')
         self.assertEqual(
-            [entry['user_attr'] for entry in res.data],
+            [entry['first_name'] for entry in res.data],
             ['1']
         )
 

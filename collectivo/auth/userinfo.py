@@ -13,16 +13,16 @@ class UserInfo:
                  email: str = None,
                  email_verified: bool = False,
                  is_authenticated: bool = False,
-                 given_name: str = None,
-                 family_name: str = None,
+                 first_name: str = None,
+                 last_name: str = None,
                  roles: list[str] = None):
         """Initialize object."""
         self.user_id = user_id
         self.email = email
         self.email_verified = email_verified
         self.is_authenticated = is_authenticated
-        self.given_name = given_name
-        self.family_name = family_name
+        self.first_name = first_name
+        self.last_name = last_name
         self.roles = roles if roles is not None else []
 
     def has_role(self, role: str) -> bool:

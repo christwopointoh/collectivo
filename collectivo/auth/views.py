@@ -8,7 +8,8 @@ from .serializers import TokenSerializer
 from .permissions import IsAuthenticated, IsSuperuser
 
 
-config = settings.COLLECTIVO['auth_keycloak_config']
+# TODO Use auth manager
+config = settings.KEYCLOAK
 keycloak_manager = KeycloakOpenID(
     server_url=config["SERVER_URL"],
     client_id=config["REALM_NAME"],

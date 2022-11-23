@@ -24,12 +24,12 @@ class KeycloakMiddleware(MiddlewareMixin):
         except Exception:
             raise CollectivoError(
                 f"{__name__}: Failed to set up keycloak connection."
-                "Please check 'auth_keycloak_config' in settings.COLLECTIVO."
+                "Please check settings.KEYCLOAK."
             )
 
     def setup_KeycloakOpenID(self):
         """Set up KeyCloakOpenID with given settings."""
-        self.config = settings.COLLECTIVO['auth_keycloak_config']
+        self.config = settings.KEYCLOAK  # TODO Use auth manager
         self.keycloak = KeycloakOpenID(
             server_url=self.config["SERVER_URL"],
             realm_name=self.config["REALM_NAME"],

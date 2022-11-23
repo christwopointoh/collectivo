@@ -14,7 +14,7 @@ class KeycloakAuthManager(AuthManager, KeycloakAdmin):
 
     def __init__(self):
         """Initialize keycloak admin."""
-        config = settings.COLLECTIVO['auth_keycloak_config']
+        config = settings.KEYCLOAK
         super().__init__(
             server_url=config["SERVER_URL"],
             realm_name=config["REALM_NAME"],

@@ -1,4 +1,4 @@
-"""Models of the test_extension app."""
+"""Models of the devtools app."""
 from django.db import models
 
 

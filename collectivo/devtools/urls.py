@@ -1,12 +1,12 @@
-"""URL patterns of the test_extension."""
+"""URL patterns of the devtools."""
 from django.urls import path
 from . import views
 
 
-app_name = 'collectivo.test_extension'
+app_name = 'collectivo.devtools'
 api_path = f'api/{app_name}/'
 
 urlpatterns = [
-    path(api_path+'test/', views.TestAPIView.as_view(), name='test_api'),
+    path(api_path+'devtools/', views.TestAPIView.as_view(), name='test_api'),
     path(app_name+'/', views.test_html_view, name='test_html'),
 ]

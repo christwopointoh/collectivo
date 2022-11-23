@@ -176,10 +176,10 @@ REST_FRAMEWORK = {
 
 # DRF Spectacular (OpenAPI)
 
-SCHEMA_VERSIONS = ['0.1.0']
-SWAGGER_URLS = ''
-for version in SCHEMA_VERSIONS:
-    SWAGGER_URLS += f'{{url: "/api/collectivo/schema/?version={version}", name: "API Version {version}"}},'
+_schema_versions = ['0.1.0']
+_swagger_urls = ''
+for version in _schema_versions:
+    _swagger_urls += f'{{url: "/api/collectivo/schema/?version={version}", name: "API Version {version}"}},'
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'collectivo',
@@ -206,7 +206,7 @@ SPECTACULAR_SETTINGS = {
     # Define SWAGGER UI with top bar for version switching
     'SWAGGER_UI_SETTINGS':  f'''{{
         deepLinking: true,
-        urls: [{SWAGGER_URLS}],
+        urls: [{_swagger_urls}],
         presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
         layout: "StandaloneLayout",
         persistAuthorization: true,

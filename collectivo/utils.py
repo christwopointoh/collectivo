@@ -51,7 +51,7 @@ def get_extension_model():
 # Can be used for extensions to communicate via REST API
 
 def request(viewset: ViewSet, command='create', payload=None,
-            **kwargs) -> Response:
+            userinfo=None, **kwargs) -> Response:
     """Make an internal http request to a DRF Viewset."""
     rf = RequestFactory()
     drf_to_http = {
@@ -67,20 +67,25 @@ def request(viewset: ViewSet, command='create', payload=None,
     request = getattr(rf, method)(
         None, payload, content_type="application/json")
 
-    request.userinfo = UserInfo(roles=['collectivo_admin'])
+    if userinfo is not None:
+        request.userinfo = userinfo
+    else:
+        request.userinfo = UserInfo(roles=['collectivo_admin', 'members_admin'])
 
     response = viewset.as_view({method: command})(request, **kwargs)
 
     return response
 
 
-def register_viewset(viewset, pk, **kwargs) -> Response:
+def register_viewset(viewset, pk=None, payload=None, userinfo=None) -> Response:
     """Register a viewset."""
-    get = request(viewset, 'retrieve', kwargs, pk=pk)
-    if get.status_code == 200:
-        response = request(viewset, 'update', kwargs, pk=pk)
+    get = None
+    if pk is not None and hasattr(viewset, 'retrieve'):
+        get = request(viewset, 'retrieve', payload, userinfo, pk=pk)
+    if get is not None and get.status_code == 200:
+        response = request(viewset, 'update', payload, userinfo, pk=pk)
     else:
-        response = request(viewset, 'create', kwargs)
+        response = request(viewset, 'create', payload, userinfo)
     if response.status_code not in [200, 201]:
         response.render()
         logger.debug(

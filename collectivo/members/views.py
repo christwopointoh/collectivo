@@ -49,6 +49,14 @@ class GenericMemberViewSet(
 
     queryset = models.Member.objects.all()
 
+    def _perform_create(self, user_id, serializer):
+        """Create member with user_id."""
+        if Member.objects.filter(user_id=user_id).exists():
+            raise PermissionDenied('User is already registered as a member.')
+        self.sync_user_data(serializer)
+        self.sync_user_groups(user_id)
+        serializer.save(user_id=user_id)
+
 
 class MemberRegisterView(mixins.CreateModelMixin, GenericMemberViewSet):
     """
@@ -63,11 +71,7 @@ class MemberRegisterView(mixins.CreateModelMixin, GenericMemberViewSet):
     def perform_create(self, serializer):
         """Create member with user_id."""
         user_id = self.request.userinfo.user_id
-        if Member.objects.filter(user_id=user_id).exists():
-            raise PermissionDenied('User is already registered as a member.')
-        self.sync_user_data(serializer)
-        self.sync_user_groups(user_id)
-        serializer.save(user_id=user_id)
+        self._perform_create(self, user_id, serializer)
 
 
 class MemberViewSet(
@@ -125,3 +129,11 @@ class MembersAdminViewSet(viewsets.ModelViewSet, GenericMemberViewSet):
 
     serializer_class = serializers.MemberAdminSerializer
     permission_classes = [IsMembersAdmin]
+
+    def perform_create(self, serializer):
+        """Create member with user_id."""
+        user_id = serializer.initial_data['user_id']
+        if user_id is None:
+            serializer.save()
+            return
+        self._perform_create(user_id, serializer)

@@ -47,7 +47,7 @@ class TestExtensionConfig(AppConfig):
     """Configuration class for the test_extension app."""
 
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'test_extension'
+    name = 'collectivo.test_extension'
 
     def ready(self):
         """

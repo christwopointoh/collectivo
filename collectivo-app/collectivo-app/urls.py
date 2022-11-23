@@ -1,13 +1,15 @@
 """URL Configuration of collectivo-app."""
-from django.contrib import admin
 from django.urls import path, include
 
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('', include('collectivo.urls')),
-    path('', include('test_extension.urls'))
-]
+urlpatterns = [path('', include('collectivo.urls'))]
+
+# Try to import custom urls
+try:
+    from extensions import urls
+    urlpatterns += urls.urlpatterns
+except ModuleNotFoundError:
+    pass
 
 handler400 = 'rest_framework.exceptions.bad_request'
 handler500 = 'rest_framework.exceptions.server_error'

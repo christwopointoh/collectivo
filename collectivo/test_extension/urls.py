@@ -1,9 +1,9 @@
 """URL patterns of the test_extension."""
 from django.urls import path
-from test_extension import views
+from . import views
 
 
-app_name = 'test_extension'
+app_name = 'collectivo.test_extension'
 api_path = f'api/{app_name}/'
 
 urlpatterns = [

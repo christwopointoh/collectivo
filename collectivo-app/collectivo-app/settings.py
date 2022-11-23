@@ -60,7 +60,7 @@ MIDDLEWARE = [
 ]
 
 if DEVELOPMENT:
-    INSTALLED_APPS += ['test_extension', 'corsheaders']
+    INSTALLED_APPS += ['collectivo.test_extension', 'corsheaders']
     MIDDLEWARE += ['corsheaders.middleware.CorsMiddleware']
     CORS_ALLOW_HEADERS = [
         'accept',

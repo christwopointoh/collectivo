@@ -19,10 +19,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ['SECRET_KEY']
 DEBUG = os.environ.get('DEBUG', False)
 DEVELOPMENT = os.environ.get('DEVELOPMENT', False)
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '').replace(' ', '').split(',')
 
-if DEVELOPMENT and not ALLOWED_HOSTS:
+if os.environ.get('ALLOWED_HOSTS') is not None:
+    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').replace(' ', '').split(',')
+elif DEVELOPMENT:
     ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "testserver"]
+else:
+    ALLOWED_HOSTS = []
 
 # Install built-in collectivo extensions
 _built_in_extensions = [
@@ -174,9 +177,10 @@ _schema_versions = ['0.1.0']
 _swagger_urls = ''
 for version in _schema_versions:
     _swagger_urls += (
-        f'{{url: "/api/collectivo/schema/?version={version}, "'
-        f'name: "API Version {version}"}},'
+        f'{{url: "/api/collectivo/schema/?version={version}", '
+        f'name: "API Version {version}"}}, '
     )
+print(_swagger_urls)
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'collectivo',

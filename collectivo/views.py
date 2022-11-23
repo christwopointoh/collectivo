@@ -7,7 +7,7 @@ from collectivo.version import __version__
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 
-class VersionView(APIView):
+class AboutView(APIView):
     """API views of the project version."""
 
     @extend_schema(responses={200: OpenApiResponse()})

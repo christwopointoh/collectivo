@@ -3,8 +3,10 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 from collectivo.menus.models import MenuItem
+from collectivo.members.models import Member
 from collectivo.extensions.models import Extension
-
+from collectivo.utils import get_auth_manager
+from .populate import members, users, superusers
 
 EXTENSIONS_URL = reverse('collectivo:collectivo.extensions:extension-list')
 MENUS_URL = reverse('collectivo:collectivo.menus:menu-list')
@@ -12,12 +14,13 @@ ITEMS_URL = reverse('collectivo:collectivo.menus:menuitem-list',
                     kwargs={'menu_id': 'main_menu'})
 
 
-class PublicMenusApiTests(TestCase):
+class TestExtensionRegistrationTests(TestCase):
     """Test the publicly available menus API."""
 
     def setUp(self):
         """Prepare client."""
         self.client = APIClient()
+        self.auth_manager = get_auth_manager()
 
     def test_extension_exists(self):
         """Test extension exists."""
@@ -28,3 +31,18 @@ class PublicMenusApiTests(TestCase):
         """Test menu items exist."""
         items = MenuItem.objects.filter(extension='test_extension')
         self.assertEqual(len(items), 3)
+
+    def test_test_users_exist(self):
+        """Test that test users exist."""
+        for user in users:
+            user_id = self.auth_manager.get_user_id(user['email'])
+            roles = self.auth_manager.get_realm_roles_of_user(user_id)
+            roles = [role['name'] for role in roles]
+
+            if user in members:
+                self.assertTrue(
+                    Member.objects.filter(email=user['email']).exists())
+                self.assertTrue('members_user' in roles)
+
+            if user in superusers:
+                self.assertTrue('superuser' in roles)

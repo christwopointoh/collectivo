@@ -1,6 +1,7 @@
 """Django settings for collectivo-test-app."""
 import os
 from pathlib import Path
+from collectivo.version import __version__
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -177,6 +178,30 @@ REST_FRAMEWORK = {
 # DRF Spectacular (OpenAPI)
 
 SPECTACULAR_SETTINGS = {
+    'TITLE': 'collectivo',
+    'DESCRIPTION': 'A modular framework to build participative community platforms.',
+    # 'TOS': None,
+    # Optional: MAY contain "name", "url", "email"
+    #'CONTACT': {},
+    # Optional: MUST contain "name", MAY contain URL
+    'LICENSE': {
+        'name': 'GNU Affero General Public License v3.0',
+        'url': 'https://github.com/MILA-Wien/collectivo/blob/main/LICENSE'
+    },
+    # Statically set schema version. May also be an empty string. When used together with
+    # view versioning, will become '0.0.0 (v2)' for 'v2' versioned requests.
+    # Set VERSION to None if only the request version should be rendered.
+    'VERSION': __version__,
+    # Optional list of servers.
+    # Each entry MUST contain "url", MAY contain "description", "variables"
+    # e.g. [{'url': 'https://example.com/v1', 'description': 'Text'}, ...]
+    'SERVERS': [],
+    # Tags defined in the global scope
+    'TAGS': [],
+    # Optional: MUST contain 'url', may contain "description"
+    'EXTERNAL_DOCS': {
+        'url': 'https://github.com/MILA-Wien/collectivo'
+    },
     # Allow for authentication via token in the SwaggerUI interface
     "APPEND_COMPONENTS": {
         "securitySchemes": {
@@ -244,13 +269,6 @@ LOGGING = {
 # General settings for collectivo
 
 COLLECTIVO = {
-
-    # Define user groups and their respective roles
-    'auth_groups_and_roles': {
-        'members': ['members_user'],
-        'members_active': ['shifts_user'],
-        'superusers': ['collectivo_admin', 'members_admin', 'shifts_admin']
-    },
 
     # Configuration for auth.middleware.KeycloakMiddleware
     'auth_keycloak_config': {

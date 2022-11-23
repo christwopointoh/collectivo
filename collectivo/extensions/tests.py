@@ -44,7 +44,7 @@ class PrivateExtensionsApiTests(TestCase):
     def setUp(self):
         """Prepare API client and a test extension."""
         self.client = CollectivoAPIClient()
-        self.client.force_roles(['collectivo_admin'])
+        self.client.force_roles(['superuser'])
         self.name = 'my_extension'
         self.setup_payload = {'name': self.name}
         self.client.post(EXTENSIONS_URL, self.setup_payload)

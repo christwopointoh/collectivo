@@ -74,9 +74,9 @@ class Member(models.Model):
         max_length=20,
         null=True,
         choices=[
-            ('male', 'male'),
-            ('female', 'female'),
             ('diverse', 'diverse'),
+            ('female', 'female'),
+            ('male', 'male'),
         ]
     )
     date_birth = models.DateField(null=True)

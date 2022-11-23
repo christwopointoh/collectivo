@@ -2,7 +2,7 @@
 from django.db.models import Q
 from rest_framework import viewsets
 from . import models, serializers
-from collectivo.auth.permissions import IsCollectivoAdmin, IsAuthenticated
+from collectivo.auth.permissions import IsSuperuser, IsAuthenticated
 import logging
 
 
@@ -13,7 +13,7 @@ class MenuViewSet(viewsets.ModelViewSet):
     """Manage menus.
 
     List view requires authentication.
-    All other views require the role 'collectivo_admin'.
+    All other views require the role 'superuser'.
 
     Attributes:
     - menu_id (CharField): A unique name to identify the menu.
@@ -27,7 +27,7 @@ class MenuViewSet(viewsets.ModelViewSet):
         """Set permissions for this viewset."""
         if self.action == 'list':
             return [IsAuthenticated()]
-        return [IsCollectivoAdmin()]
+        return [IsSuperuser()]
 
     def get_serializer_class(self):
         """Set name to read-only except for create."""
@@ -42,7 +42,7 @@ class MenuItemViewSet(viewsets.ModelViewSet):
     List view requires authentication.
     Only items where the user has the required roles are shown.
 
-    All other views require the role 'collectivo_admin'.
+    All other views require the role 'superuser'.
 
     Attributes:
     - item_id (CharField):
@@ -94,7 +94,7 @@ class MenuItemViewSet(viewsets.ModelViewSet):
         """Set permissions for this viewset."""
         if self.action == 'list':
             return [IsAuthenticated()]
-        return [IsCollectivoAdmin()]
+        return [IsSuperuser()]
 
     def get_serializer_class(self):
         """Set item_id to read-only except for create."""

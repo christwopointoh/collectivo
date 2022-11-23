@@ -69,7 +69,7 @@ class AdminMenusApiTests(TestCase):
         self.client = CollectivoAPIClient()
         user = UserInfo(
             user_id='ac4339c5-56f6-4df5-a6c8-bcdd3683a56a',
-            roles=['collectivo_admin', 'test_role', 'test_role2'],
+            roles=['superuser', 'test_role', 'test_role2'],
             email='test_member_1@example.com',
             is_authenticated=True
         )

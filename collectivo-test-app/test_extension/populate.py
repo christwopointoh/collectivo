@@ -1,9 +1,8 @@
 """Populate collectivo & keycloak with test users."""
 import logging
 from collectivo.utils import get_auth_manager, register_viewset
-from collectivo.auth.userinfo import UserInfo
 from collectivo.members.views import MembersAdminViewSet
-from keycloak.exceptions import KeycloakPostError, KeycloakGetError
+from keycloak.exceptions import KeycloakGetError
 
 
 logger = logging.getLogger(__name__)
@@ -70,14 +69,13 @@ def populate_keycloak_with_test_data():
         auth_manager.set_user_password(  # noqa
             user_id, password='test', temporary=False)  # noqa
 
-    # Add groups to users
-    groups_and_users = {
-        'superusers': [d['email'] for d in superusers],
-    }
-    for group_name, user_names in groups_and_users.items():
-        for user_name in user_names:
-            user_id = auth_manager.get_user_id(user_name)
-            auth_manager.add_user_to_group(user_id, group_name)
+    # Assign superuser role to superusers
+    for user in superusers:
+        role = 'superuser'
+        user_id = auth_manager.get_user_id(user['email'])
+        role_id = auth_manager.get_realm_role(role)['id']
+        auth_manager.assign_realm_roles(
+            user_id, {'id': role_id, 'name': role})
 
     # Make members into members
     # This automatically adds them to the group 'members'
@@ -92,7 +90,6 @@ def populate_keycloak_with_test_data():
             'first_name': member['firstName'],
             'last_name': member['lastName'],
         }
-        userinfo = UserInfo(user_id=user_id, is_authenticated=True)
         register_viewset(
             MembersAdminViewSet,
             payload=payload

@@ -6,7 +6,7 @@ from collectivo.menus.models import MenuItem
 from collectivo.members.models import Member
 from collectivo.extensions.models import Extension
 from collectivo.utils import get_auth_manager
-from .populate import members, users
+from .populate import members, users, superusers
 
 EXTENSIONS_URL = reverse('collectivo:collectivo.extensions:extension-list')
 MENUS_URL = reverse('collectivo:collectivo.menus:menu-list')
@@ -36,10 +36,13 @@ class TestExtensionRegistrationTests(TestCase):
         """Test that test users exist."""
         for user in users:
             user_id = self.auth_manager.get_user_id(user['email'])
-            groups = self.auth_manager.get_user_groups(user_id)
-            groups = [group['name'] for group in groups]
+            roles = self.auth_manager.get_realm_roles_of_user(user_id)
+            roles = [role['name'] for role in roles]
 
             if user in members:
                 self.assertTrue(
                     Member.objects.filter(email=user['email']).exists())
-                self.assertTrue('members' in groups)
+                self.assertTrue('members_user' in roles)
+
+            if user in superusers:
+                self.assertTrue('superuser' in roles)

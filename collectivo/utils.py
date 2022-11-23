@@ -70,14 +70,15 @@ def request(viewset: ViewSet, command='create', payload=None,
     if userinfo is not None:
         request.userinfo = userinfo
     else:
-        request.userinfo = UserInfo(roles=['collectivo_admin', 'members_admin'])
+        request.userinfo = UserInfo(roles=['superuser'])
 
     response = viewset.as_view({method: command})(request, **kwargs)
 
     return response
 
 
-def register_viewset(viewset, pk=None, payload=None, userinfo=None) -> Response:
+def register_viewset(
+        viewset, pk=None, payload=None, userinfo=None) -> Response:
     """Register a viewset."""
     get = None
     if pk is not None and hasattr(viewset, 'retrieve'):

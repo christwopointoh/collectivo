@@ -72,13 +72,6 @@ COLLECTIVO = {
         'CLIENT_ID': 'collectivo',
         'CLIENT_SECRET_KEY': '**********'
     },
-    # Define user groups and their respective roles
-    # These will be automatically added to keycloak.
-    # Check other extensions to see possible roles.
-    'auth_groups_and_roles': {
-        'members': ['members_user', ...],
-        'superuser': ['collectivo_admin', 'members_admin', ...]
-    },
 }
 ```
 
@@ -92,11 +85,8 @@ The members extension can be used to manage member data.
 - Roles:
     - `members_user`
     - `members_admin`
-- Groups:
-    - `members`: If this group exists, members will automatically be added to this group.
 - API:
-    - `/members/v1/me`
-        - `POST`: Users that are not yet members can sign up as members.
-        - All other views: Members can manage their own data (required role: `members_user`).
-    - `/members/v1/members`:
-        - All views: Manage the data of all users (required role: `members_admin`).
+    - `/members/register`: Users that are not yet members can sign up as members. They then automatically receive the role `members_user`.
+    - `/members/profile`: Members can manage their own data (required role: `members_user`).
+    - `/members/members`: Manage the data of all users (required role: `members_admin` or `superuser`).
+    - `/members/summary`: Get summary data of all users (required role: `members_admin` or `superuser`).

@@ -259,13 +259,6 @@ LOGGING = {
 
 COLLECTIVO = {
 
-    # Define user groups and their respective roles
-    'auth_groups_and_roles': {
-        'members': ['members_user'],
-        'members_active': ['shifts_user'],
-        'superusers': ['collectivo_admin', 'members_admin', 'shifts_admin']
-    },
-
     # Configuration for auth.middleware.KeycloakMiddleware
     'auth_keycloak_config': {
         'SERVER_URL': 'http://keycloak:8080',

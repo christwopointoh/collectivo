@@ -1,7 +1,7 @@
 """Views of the dashboard extension."""
 from django.db.models import Q
 from rest_framework import viewsets
-from collectivo.auth.permissions import IsCollectivoAdmin, IsAuthenticated
+from collectivo.auth.permissions import IsSuperuser, IsAuthenticated
 from . import models, serializers
 
 
@@ -10,7 +10,7 @@ class DashboardTileViewSet(viewsets.ModelViewSet):
     Manage dashboard tiles.
 
     List view requires authentication.
-    All other views require the role 'collectivo_admin'.
+    All other views require the role 'superuser'.
 
     Dashboard tiles refer to webcomponents
     that will be displayed in the dashboard.
@@ -47,7 +47,7 @@ class DashboardTileViewSet(viewsets.ModelViewSet):
         """Set permissions for this viewset."""
         if self.action == 'list':
             return [IsAuthenticated()]
-        return [IsCollectivoAdmin()]
+        return [IsSuperuser()]
 
     def get_serializer_class(self):
         """Set name to read-only except for create."""

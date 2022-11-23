@@ -7,9 +7,9 @@ ENV TZ=Europe/Vienna
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install app dependencies
-COPY /collectivo-test-app/test_extension/components/package.json package.json
+COPY /collectivo-app/test_extension/components/package.json package.json
 RUN yarn
-COPY /collectivo-test-app/test_extension/components/ .
+COPY /collectivo-app/test_extension/components/ .
 
 # If you are building your code for production
 RUN yarn build
@@ -29,16 +29,16 @@ RUN apk add --update --no-cache postgresql-client  && \
 COPY ./requirements.txt /tmp/requirements.txt
 
 # Copy source code of the test app into the container
-COPY ./collectivo-test-app /collectivo-test-app
+COPY ./collectivo-app /collectivo-app
 
 # Copy source code of the collectivo app into the test app
-COPY ./collectivo /collectivo-test-app/collectivo
+COPY ./collectivo /collectivo-app/collectivo
 
 # Copy source code of the test-extension into the test app
-COPY --from=build-env /app/dist /collectivo-test-app/test_extension/static/test_extension
+COPY --from=build-env /app/dist /collectivo-app/test_extension/static/test_extension
 
 # Move working directory into the test app
-WORKDIR /collectivo-test-app
+WORKDIR /collectivo-app
 
 # Set port through which the test app can be accessed
 EXPOSE 8000
@@ -60,12 +60,12 @@ RUN apk del .tmp-build-deps && \
 ENV PATH="/py/bin:$PATH"
 
 # Create a static folder for the app
-RUN mkdir -p /collectivo-test-app/static | true && \
-    chown -R django-user:django-user /collectivo-test-app && \
-    chmod -R 755 /collectivo-test-app/static
+RUN mkdir -p /collectivo-app/static | true && \
+    chown -R django-user:django-user /collectivo-app && \
+    chmod -R 755 /collectivo-app/static
 
 # Create a static folder for microfrontends
-RUN mkdir -p /collectivo-test-app/test_extension/static/test_extension
+RUN mkdir -p /collectivo-app/test_extension/static/test_extension
 
 # Switch to the new user
 USER django-user

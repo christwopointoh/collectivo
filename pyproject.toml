@@ -17,10 +17,10 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 exclude = [
-    "collectivo-test-app",
-    "collectivo-test-app.collectivo-test-app",
-    "collectivo-test-app.test_extension",
-    "collectivo-test-app.test_extension.migrations"
+    "collectivo-app",
+    "collectivo-app.collectivo-app",
+    "collectivo-app.test_extension",
+    "collectivo-app.test_extension.migrations"
 ]
 
 [tool.setuptools.dynamic]

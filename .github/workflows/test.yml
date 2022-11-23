@@ -47,7 +47,7 @@ jobs:
           docker network create -d bridge collectivo
           cd ${GITHUB_WORKSPACE}/docker/keycloak && docker build -t keycloak .
           /usr/bin/docker run -d -p 8080:8080 --network collectivo --name keycloak --hostname keycloak  -e GITHUB_ACTIONS=true -e CI=true keycloak
-      
+
 
       - name: Setup Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -86,14 +86,14 @@ jobs:
           DB_PORT: ${{ env.POSTGRES_PORT }}
           TEST_DATABASE_PREFIX: ${{ env.DB_NAME }}
         run: |
-          cp -a collectivo collectivo-test-app
-          cd collectivo-test-app
+          cp -a collectivo collectivo-app
+          cd collectivo-app
           python manage.py migrate
           coverage run manage.py test
       - name: Run Lint Checks
         run: |
-          cp -a collectivo collectivo-test-app
-          cd collectivo-test-app
+          cp -a collectivo collectivo-app
+          cd collectivo-app
           flake8
       - name: Collect docker logs on failure
         if: failure()

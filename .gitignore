@@ -3,8 +3,8 @@ node_modules/
 
 # Collectivo
 .env
-collectivo-test-app/collectivo
-collectivo-test-app/test_extension/static/test_extension
+collectivo-app/collectivo
+collectivo-app/test_extension/static/test_extension
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

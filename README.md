@@ -25,9 +25,9 @@ To run and test the app with docker:
 5. The frontend will be available at `collectivo.local:8001` (or `collectivo.local:5137` if you set up a development server via [collectivo-ux](https://github.com/MILA-Wien/collectivo-ux/)).
 6. To perform tests and linting, run: `docker compose run --rm collectivo sh -c "python manage.py test && flake8"`
 
-### The collectivo-test-app
+### The collectivo-app
 
-The default docker instructions will install collectivo within the collectivo-test-app. This test app initializes with the following test users:
+The default docker instructions will install collectivo within the collectivo-app. This test app initializes with the following test users:
 
 - `test_superuser@example.com`
 - `test_member_01@example.com`, `test_member_02@example.com`, ..., `test_member_15@example.com`

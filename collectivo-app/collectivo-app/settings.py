@@ -1,4 +1,4 @@
-"""Django settings for collectivo-test-app."""
+"""Django settings for collectivo-app."""
 import os
 from pathlib import Path
 from collectivo.version import __version__
@@ -75,7 +75,7 @@ if DEVELOPMENT:
     ]
     CORS_ORIGIN_ALLOW_ALL = True
 
-ROOT_URLCONF = 'collectivo-test-app.urls'
+ROOT_URLCONF = 'collectivo-app.urls'
 
 TEMPLATES = [
     {
@@ -93,7 +93,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'collectivo-test-app.wsgi.application'
+WSGI_APPLICATION = 'collectivo-app.wsgi.application'
 
 
 # Database
@@ -271,8 +271,8 @@ COLLECTIVO = {
 # Configuration for collectivo.auth.middleware.KeycloakMiddleware
 KEYCLOAK = {
     'SERVER_URL': os.environ.get('KEYCLOAK_SERVER_URL'),
-    'REALM_NAME': os.environ.get('KEYCLOAK_REALM_NAME'),
-    'CLIENT_ID': os.environ.get('KEYCLOAK_CLIENT_ID'),
+    'REALM_NAME': os.environ.get('KEYCLOAK_REALM_NAME', 'collectivo'),
+    'CLIENT_ID': os.environ.get('KEYCLOAK_CLIENT_ID', 'collectivo'),
     'CLIENT_SECRET_KEY': os.environ.get('KEYCLOAK_CLIENT_SECRET_KEY')
 }
 

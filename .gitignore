@@ -2,6 +2,7 @@
 node_modules/
 
 # Collectivo
+.env
 collectivo-test-app/collectivo
 collectivo-test-app/test_extension/static/test_extension
 

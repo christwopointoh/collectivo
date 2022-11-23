@@ -57,7 +57,7 @@ class MemberRegisterView(mixins.CreateModelMixin, GenericMemberViewSet):
     Requires authentication.
     """
 
-    serializer_class = serializers.MemberCreateSerializer
+    serializer_class = serializers.MemberRegisterSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
@@ -81,7 +81,7 @@ class MemberViewSet(
     Requires authentication and registration.
     """
 
-    serializer_class = serializers.MemberSerializer
+    serializer_class = serializers.MemberProfileSerializer
     permission_classes = [IsAuthenticated]
 
     def perform_update(self, serializer):
@@ -104,7 +104,7 @@ class MembersAdminSummaryView(mixins.ListModelMixin, GenericMemberViewSet):
     Requires the role 'members_admin'.
     """
 
-    serializer_class = serializers.MemberAdminSummarySerializer
+    serializer_class = serializers.MemberSummarySerializer
     permission_classes = [IsMembersAdmin]
     filterset_fields = {
         'first_name': ('contains', ),

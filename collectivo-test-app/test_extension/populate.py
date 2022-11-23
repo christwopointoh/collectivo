@@ -2,7 +2,7 @@
 import logging
 from collectivo.utils import get_auth_manager, register_viewset
 from collectivo.members.views import MembersAdminViewSet
-from keycloak.exceptions import KeycloakGetError
+from keycloak.exceptions import KeycloakGetError, KeycloakDeleteError
 
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ def populate_keycloak_with_test_data():
         try:
             user_id = auth_manager.get_user_id(user['email'])
             auth_manager.delete_user(user_id)
-        except KeycloakGetError:
+        except (KeycloakGetError, KeycloakDeleteError):
             pass
         user_id = auth_manager.create_user(user)
         auth_manager.set_user_password(  # noqa

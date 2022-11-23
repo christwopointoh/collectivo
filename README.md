@@ -90,3 +90,23 @@ The members extension can be used to manage member data.
     - `/members/profile`: Members can manage their own data (required role: `members_user`).
     - `/members/members`: Manage the data of all users (required role: `members_admin` or `superuser`).
     - `/members/summary`: Get summary data of all users (required role: `members_admin` or `superuser`).
+
+## Schemas
+
+Each endpoint has now an endpoint /schema with information about the fields.
+
+The schema has the following possible attributes:
+
+```python
+'field_type', 'input_type',
+'label', 'help_text',
+'required', 'default',
+'max_length', 'min_length',
+'max_value', 'min_value',
+'read_only', 'write_only',
+'choices', 'condition'
+```
+
+The condition is structured as follows: `{'field': x, 'condition':'exact', 'value':z}` which means that field `x` should have the exact value of `z`.
+
+The `input_type` is currently generated automatically from the `field_type` and states default html input types.

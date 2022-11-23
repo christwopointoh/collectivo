@@ -34,12 +34,14 @@ input_types = {
     'UUIDField': 'text',
     'URLField': 'url',
     'TextField': 'email',
-    'ChoiceField': 'select',
+    'ChoiceField': 'radio',
     'EmailField': 'email',
     'IntegerField': 'number',
     'FloatField': 'number',
     'DateField': 'date',
     'BooleanField': 'checkbox',
+    'PhoneField': 'phone',
+    'CountryField': 'country'
 }
 
 

@@ -1,17 +1,14 @@
-# Build test-extension
+# Build webcomponents for test-extension
 FROM node:18 AS build-env
 
 # Create app directory
 WORKDIR /app
-
 ENV TZ=Europe/Vienna
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install app dependencies
-
 COPY /collectivo-test-app/test_extension/components/package.json package.json
 RUN yarn
-
 COPY /collectivo-test-app/test_extension/components/ .
 
 # If you are building your code for production
@@ -22,7 +19,6 @@ FROM python:3.9-alpine3.13
 
 # Send stdout and sterr messages directly to the terminal
 ENV PYTHONUNBUFFERED 1
-
 
 # Install temporary packages to build the postgresql database
 RUN apk add --update --no-cache postgresql-client  && \
@@ -60,7 +56,7 @@ RUN apk del .tmp-build-deps && \
     --no-create-home \
     django-user
 
-# TODO What does this do?
+# Set python path to virtual environment
 ENV PATH="/py/bin:$PATH"
 
 # Create a static folder for the app
@@ -75,7 +71,8 @@ RUN mkdir -p /collectivo-test-app/test_extension/static/test_extension
 USER django-user
 
 # Set default command
-CMD while ! nc -z db 5432; do sleep 1; done && \
+# TODO Change to production server
+CMD while ! nc -z collectivo-db 5432; do sleep 1; done && \
              python manage.py migrate && \
              python manage.py collectstatic --noinput && \
              python manage.py runserver 0.0.0.0:8000

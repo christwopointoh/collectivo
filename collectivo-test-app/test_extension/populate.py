@@ -35,7 +35,7 @@ def populate_keycloak_with_test_data():
             "lastName": "Example",
             "emailVerified": True
         }
-        for i in range(1, N_TEST_MEMBERS)
+        for i in range(1, N_TEST_MEMBERS+1)
     ] + superusers
 
     users = [

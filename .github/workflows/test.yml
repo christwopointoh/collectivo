@@ -71,8 +71,6 @@ jobs:
               } 1>&2
               sleep 10
           done
-
-
       - name: Run Tests
         # Step specific environment variables
         env:
@@ -87,7 +85,7 @@ jobs:
           SECRET_KEY: badkey
           KEYCLOAK_SERVER_URL: http://keycloak:8080
           KEYCLOAK_CLIENT_SECRET_KEY: '**********'
-          COLLECTIVO_EXTENSIONS: menus, auth, extensions, dashboard, members
+          COLLECTIVO_EXTENSIONS: core
           DEBUG: True
           DEVELOPMENT: True
         run: |

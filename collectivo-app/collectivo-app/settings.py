@@ -28,10 +28,17 @@ else:
     ALLOWED_HOSTS = []
 
 # Install built-in collectivo extensions
+# If core is given, all core extensions are installed first
 _built_in_extensions = [
     f'collectivo.{ext}' for ext in
-    os.environ.get('COLLECTIVO_EXTENSIONS', '').replace(' ', '').split(',')
+    os.environ.get('COLLECTIVO_EXTENSIONS', 'core').replace(' ', '').split(',')
 ]
+if 'core' in _built_in_extensions:
+    _core_apps = ('menus, auth, extensions, dashboard, members')
+    for _app in _core_apps + ['core']:
+        if _app in _built_in_extensions:
+            _built_in_extensions.remove(_app)
+    _built_in_extensions = _core_apps + _built_in_extensions
 
 INSTALLED_APPS = [
     *_custom_settings.get('INSTALLED_APPS_TOP', []),
@@ -180,7 +187,6 @@ for version in _schema_versions:
         f'{{url: "/api/collectivo/schema/?version={version}", '
         f'name: "API Version {version}"}}, '
     )
-print(_swagger_urls)
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'collectivo',

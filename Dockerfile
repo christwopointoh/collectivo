@@ -7,9 +7,9 @@ ENV TZ=Europe/Vienna
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
 
 # Install app dependencies
-COPY /collectivo-app/test_extension/components/package.json package.json
+COPY /collectivo/devtools/components/package.json package.json
 RUN yarn
-COPY /collectivo-app/test_extension/components/ .
+COPY /collectivo/devtools/components/ .
 
 # If you are building your code for production
 RUN yarn build
@@ -35,7 +35,7 @@ COPY ./collectivo-app /collectivo-app
 COPY ./collectivo /collectivo-app/collectivo
 
 # Copy source code of the test-extension into the test app
-COPY --from=build-env /app/dist /collectivo-app/test_extension/static/test_extension
+COPY --from=build-env /app/dist /collectivo/devtools/static/devtools
 
 # Move working directory into the test app
 WORKDIR /collectivo-app

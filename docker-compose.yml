@@ -34,8 +34,8 @@ services:
       # UNSAFE! GENERATE SECRETE KEY IN KEYCLOAK FOR PRODUCTION
       KEYCLOAK_CLIENT_SECRET_KEY: '**********'
       COLLECTIVO_EXTENSIONS: menus, auth, extensions, dashboard, members
-      DEBUG: True
-      DEVELOPMENT: True
+      DEBUG: 1
+      DEVELOPMENT: 1
       # Optional environment variables:
       # ALLOWED_HOSTS
       # See https://docs.djangoproject.com/en/3.2/topics/i18n/

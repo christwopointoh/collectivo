@@ -76,7 +76,6 @@ jobs:
       - name: Run Tests
         # Step specific environment variables
         env:
-          DEBUG: "0"
           DJANGO_SECRET_KEY: ${{ env.DJANGO_SECRET_KEY }}
           # Set the database url to the postgres service container
           DB_USERNAME: ${{ env.DB_USER }}

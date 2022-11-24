@@ -34,11 +34,11 @@ _built_in_extensions = [
     os.environ.get('COLLECTIVO_EXTENSIONS', 'core').replace(' ', '').split(',')
 ]
 if 'collectivo.core' in _built_in_extensions:
-    _core_apps = (
+    _core_apps = [
         'collectivo.menus', 'collectivo.auth', 'collectivo.extensions',
         'collectivo.dashboard', 'collectivo.members'
-    )
-    for _app in _core_apps + ['core']:
+    ]
+    for _app in _core_apps + ['collectivo.core']:
         if _app in _built_in_extensions:
             _built_in_extensions.remove(_app)
     _built_in_extensions = _core_apps + _built_in_extensions

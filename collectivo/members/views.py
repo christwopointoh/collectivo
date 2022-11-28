@@ -3,31 +3,28 @@ import logging
 from rest_framework import viewsets, mixins
 from rest_framework.exceptions import PermissionDenied
 from collectivo.auth.permissions import IsAuthenticated
-from collectivo.utils import filter_lookups, get_auth_manager
+from collectivo.utils import get_auth_manager
+from collectivo.views import SchemaMixin
 from .permissions import IsMembersAdmin
 from . import models, serializers
 from .models import Member
 
 
-member_fields = [field.name for field in models.Member._meta.get_fields()]
 logger = logging.getLogger(__name__)
 
+member_fields = [field.name for field in models.Member._meta.get_fields()]
 
-class MemberViewSet(
-        mixins.CreateModelMixin,
-        mixins.RetrieveModelMixin,
-        mixins.UpdateModelMixin,
-        viewsets.GenericViewSet
-        ):
-    """
-    API for members to manage themselves.
+filterset_fields = {
+    'first_name': ('contains', ),
+    'last_name': ('contains', ),
+    'membership_status': ('exact', ),
+    'membership_type': ('exact', ),
+    'shares_payment_status': ('exact', ),
+}
 
-    Create view requires authentication.
-    All other views require the role 'members_user'.
-    """
 
-    queryset = models.Member.objects.all()
-    permission_classes = [IsAuthenticated]
+class MemberAuthSyncMixin:
+    """Functions to sync user data with auth manager."""
 
     def sync_user_data(self, serializer):
         """Update user data if it has changed."""
@@ -52,6 +49,26 @@ class MemberViewSet(
         """Add user to group members after creation."""
         get_auth_manager().add_user_to_group(user_id, 'members')
 
+
+class GenericMemberViewSet(
+        SchemaMixin,
+        MemberAuthSyncMixin,
+        viewsets.GenericViewSet):
+    """Base class for all member views."""
+
+    queryset = models.Member.objects.all()
+
+
+class MemberRegisterView(mixins.CreateModelMixin, GenericMemberViewSet):
+    """
+    API for members to register themselves.
+
+    Requires authentication.
+    """
+
+    serializer_class = serializers.MemberRegisterSerializer
+    permission_classes = [IsAuthenticated]
+
     def perform_create(self, serializer):
         """Create member with user_id."""
         user_id = self.request.userinfo.user_id
@@ -60,6 +77,21 @@ class MemberViewSet(
         self.sync_user_data(serializer)
         self.sync_user_groups(user_id)
         serializer.save(user_id=user_id)
+
+
+class MemberViewSet(
+        mixins.RetrieveModelMixin,
+        mixins.UpdateModelMixin,
+        GenericMemberViewSet
+        ):
+    """
+    API for members to manage themselves.
+
+    Requires authentication and registration.
+    """
+
+    serializer_class = serializers.MemberProfileSerializer
+    permission_classes = [IsAuthenticated]
 
     def perform_update(self, serializer):
         """Update member."""
@@ -73,34 +105,28 @@ class MemberViewSet(
         except Member.DoesNotExist:
             raise PermissionDenied('User is not registered as a member.')
 
-    def get_serializer_class(self):
-        """Set name to read-only except for create."""
-        if self.action == 'create':
-            return serializers.MemberCreateSerializer
-        else:
-            return serializers.MemberSerializer
+
+class MembersAdminSummaryView(mixins.ListModelMixin, GenericMemberViewSet):
+    """
+    API for admins to get a summary of members.
+
+    Requires the role 'members_admin'.
+    """
+
+    serializer_class = serializers.MemberSummarySerializer
+    permission_classes = [IsMembersAdmin]
+    filterset_fields = filterset_fields
+    ordering_fields = member_fields
 
 
-class MembersAdminViewSet(viewsets.ModelViewSet):
+class MembersAdminViewSet(viewsets.ModelViewSet, GenericMemberViewSet):
     """
     API for admins to manage members.
 
     Requires the role 'members_admin'.
     """
 
-    queryset = models.Member.objects.all()
     serializer_class = serializers.MemberAdminSerializer
-
-    filterset_fields = {field: filter_lookups for field in member_fields}
-    ordering_fields = member_fields
-
     permission_classes = [IsMembersAdmin]
-
-    def get_serializer_class(self):
-        """Set name to read-only except for create."""
-        if self.action == 'list':
-            return serializers.MemberAdminSerializer
-        else:
-            return serializers.MemberAdminDetailSerializer
-
-    # TODO Add create/update logic here as well
+    filterset_fields = filterset_fields
+    ordering_fields = member_fields

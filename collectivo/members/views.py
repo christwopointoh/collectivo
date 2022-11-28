@@ -10,8 +10,17 @@ from . import models, serializers
 from .models import Member
 
 
-member_fields = [field.name for field in models.Member._meta.get_fields()]
 logger = logging.getLogger(__name__)
+
+member_fields = [field.name for field in models.Member._meta.get_fields()]
+
+filterset_fields = {
+    'first_name': ('contains', ),
+    'last_name': ('contains', ),
+    'membership_status': ('exact', ),
+    'membership_type': ('exact', ),
+    'shares_payment_status': ('exact', ),
+}
 
 
 class MemberAuthSyncMixin:
@@ -106,13 +115,7 @@ class MembersAdminSummaryView(mixins.ListModelMixin, GenericMemberViewSet):
 
     serializer_class = serializers.MemberSummarySerializer
     permission_classes = [IsMembersAdmin]
-    filterset_fields = {
-        'first_name': ('contains', ),
-        'last_name': ('contains', ),
-        'membership_status': ('exact', ),
-        'membership_type': ('exact', ),
-        'shares_payment_status': ('exact', ),
-    }
+    filterset_fields = filterset_fields
     ordering_fields = member_fields
 
 
@@ -125,3 +128,5 @@ class MembersAdminViewSet(viewsets.ModelViewSet, GenericMemberViewSet):
 
     serializer_class = serializers.MemberAdminSerializer
     permission_classes = [IsMembersAdmin]
+    filterset_fields = filterset_fields
+    ordering_fields = member_fields

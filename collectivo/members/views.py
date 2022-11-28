@@ -1,90 +1,152 @@
 """Views of the members extension."""
-
-from django.db.utils import IntegrityError
-from django.shortcuts import get_object_or_404
+import logging
 from rest_framework import viewsets, mixins
-from rest_framework.exceptions import NotAuthenticated, PermissionDenied
+from rest_framework.exceptions import PermissionDenied
 from collectivo.auth.permissions import IsAuthenticated
-from collectivo.utils import filter_lookups
-from .permissions import IsMembersAdmin, IsMembersUser
+from collectivo.utils import get_auth_manager
+from collectivo.views import SchemaMixin
+from .permissions import IsMembersAdmin
 from . import models, serializers
+from .models import Member
 
+
+logger = logging.getLogger(__name__)
 
 member_fields = [field.name for field in models.Member._meta.get_fields()]
 
+filterset_fields = {
+    'first_name': ('contains', ),
+    'last_name': ('contains', ),
+    'membership_status': ('exact', ),
+    'membership_type': ('exact', ),
+    'shares_payment_status': ('exact', ),
+}
+
+
+class MemberAuthSyncMixin:
+    """Functions to sync user data with auth manager."""
+
+    def sync_user_data(self, serializer):
+        """Update user data if it has changed."""
+        auth_manager = get_auth_manager()
+        user_fields = auth_manager.get_user_fields()
+        old_user_data = self.request.userinfo
+        user_id = old_user_data.user_id
+        if user_id is None:
+            return
+        new_user_data = {
+            k: v for k, v in serializer.validated_data.items()
+            if k in user_fields
+        }
+        user_fields_have_changed = any([
+            new_user_data.get(field) != getattr(old_user_data, field)
+            for field in new_user_data.keys()
+        ])
+        if user_fields_have_changed:
+            auth_manager.update_user(user_id=user_id, **new_user_data)
+
+    def sync_user_roles(self, user_id):
+        """Add user to group members after creation."""
+        role = 'members_user'
+        auth_manager = get_auth_manager()
+        role_id = auth_manager.get_realm_role(role)['id']
+        auth_manager.assign_realm_roles(
+            user_id, {'id': role_id, 'name': role})
+
+
+class GenericMemberViewSet(
+        SchemaMixin,
+        MemberAuthSyncMixin,
+        viewsets.GenericViewSet):
+    """Base class for all member views."""
+
+    queryset = models.Member.objects.all()
+
+    def _perform_create(self, user_id, serializer):
+        """Create member with user_id."""
+        if Member.objects.filter(user_id=user_id).exists():
+            raise PermissionDenied('User is already registered as a member.')
+        self.sync_user_data(serializer)
+        self.sync_user_roles(user_id)
+        serializer.save(user_id=user_id)
+
+    def perform_update(self, serializer):
+        """Update member."""
+        self.sync_user_data(serializer)
+        self.sync_user_roles(serializer.initial_data['user_id'])
+        serializer.save()
+
+
+class MemberRegisterView(mixins.CreateModelMixin, GenericMemberViewSet):
+    """
+    API for members to register themselves.
+
+    Requires authentication.
+    """
+
+    serializer_class = serializers.MemberRegisterSerializer
+    permission_classes = [IsAuthenticated]
+
+    def perform_create(self, serializer):
+        """Create member with user_id."""
+        user_id = self.request.userinfo.user_id
+        self._perform_create(user_id, serializer)
+
 
 class MemberViewSet(
-        mixins.CreateModelMixin,
         mixins.RetrieveModelMixin,
         mixins.UpdateModelMixin,
-        viewsets.GenericViewSet
+        GenericMemberViewSet
         ):
     """
     API for members to manage themselves.
 
-    Create view requires authentication.
-    All other views require the role 'members_user'.
+    Requires authentication and registration.
     """
 
-    queryset = models.Member.objects.all()
-
-    def get_pk(self, request):
-        """Return member id."""
-        if not request.userinfo.is_authenticated:
-            raise NotAuthenticated
-        return get_object_or_404(
-            self.queryset,
-            user_id=request.userinfo.user_id
-        ).id
-
-    def perform_create(self, serializer):
-        """Create member with user_id."""
-        try:
-            serializer.save(user_id=self.request.userinfo.user_id)
-        except IntegrityError:
-            raise PermissionDenied(detail='This user is already a member.')
+    serializer_class = serializers.MemberProfileSerializer
+    permission_classes = [IsAuthenticated]
 
     def get_object(self):
         """Return member that corresponds with current user."""
-        if not self.request.userinfo.is_authenticated:
-            raise NotAuthenticated
-        return get_object_or_404(
-            self.queryset,
-            user_id=self.request.userinfo.user_id
-        )  # TODO Better error
-
-    def get_serializer_class(self):
-        """Set name to read-only except for create."""
-        if self.action == 'create':
-            return serializers.MemberCreateSerializer
-        else:
-            return serializers.MemberSerializer
-
-    def get_permissions(self):
-        """Set permissions for this viewset."""
-        if self.action == 'create':
-            return [IsAuthenticated()]
-        return [IsMembersUser()]
+        try:
+            return self.queryset.get(user_id=self.request.userinfo.user_id)
+        except Member.DoesNotExist:
+            raise PermissionDenied('User is not registered as a member.')
 
 
-class MembersAdminViewSet(viewsets.ModelViewSet):
+class MembersAdminSummaryView(mixins.ListModelMixin, GenericMemberViewSet):
+    """
+    API for admins to get a summary of members.
+
+    Requires the role 'members_admin'.
+    """
+
+    serializer_class = serializers.MemberSummarySerializer
+    permission_classes = [IsMembersAdmin]
+    filterset_fields = filterset_fields
+    ordering_fields = member_fields
+
+
+class MembersAdminViewSet(viewsets.ModelViewSet, GenericMemberViewSet):
     """
     API for admins to manage members.
 
     Requires the role 'members_admin'.
     """
 
-    queryset = models.Member.objects.all()
     serializer_class = serializers.MemberAdminSerializer
-
-    filterset_fields = {field: filter_lookups for field in member_fields}
+    permission_classes = [IsMembersAdmin]
+    filterset_fields = filterset_fields
     ordering_fields = member_fields
 
-    permission_classes = [IsMembersAdmin]
-
-    def get_serializer_class(self):
-        """Set name to read-only except for create."""
-        if self.action == 'list':
-            return serializers.MemberAdminSerializer
+    def perform_create(self, serializer):
+        """Create member with user_id."""
+        if 'user_id' in serializer.initial_data:
+            user_id = serializer.initial_data['user_id']
         else:
-            return serializers.MemberAdminDetailSerializer
+            user_id = None
+        if user_id is None:
+            serializer.save()
+            return
+        self._perform_create(user_id, serializer)

@@ -1,3 +1,29 @@
 [build-system]
-requires = ['setuptools>=40.8.0', 'wheel']
-build-backend = 'setuptools.build_meta:__legacy__'
+requires = ['setuptools']
+build-backend = 'setuptools.build_meta'
+
+[project]
+name = "collectivo"
+license = {text = "GNU Affero General Public License v3"}
+requires-python = ">=3.9"
+classifiers = [
+    "Framework :: Django",
+    "Programming Language :: Python :: 3"
+]
+dynamic = ["version", "dependencies"]
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+exclude = [
+    "collectivo-app",
+    "collectivo-app.collectivo-app",
+    "collectivo-app.test_extension",
+    "collectivo-app.test_extension.migrations"
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "collectivo.__version__"}
+dependencies = {file = "requirements_package.txt"}
+readme = {file = "readme.md"}

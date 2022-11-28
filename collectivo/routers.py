@@ -1,5 +1,5 @@
 """Routers of the collectivo package."""
-from rest_framework.routers import Route, SimpleRouter
+from rest_framework.routers import Route, SimpleRouter, DynamicRoute
 
 
 class DirectDetailRouter(SimpleRouter):
@@ -17,5 +17,11 @@ class DirectDetailRouter(SimpleRouter):
             name='{basename}',
             detail=False,
             initkwargs={'suffix': 'Instance'}
+        ),
+        DynamicRoute(
+            url=r'^{prefix}/{url_path}{trailing_slash}$',
+            name='{basename}-{url_name}',
+            detail=False,
+            initkwargs={}
         ),
     ]

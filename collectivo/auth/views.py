@@ -5,10 +5,11 @@ from rest_framework.response import Response
 from keycloak import KeycloakOpenID
 from django.conf import settings
 from .serializers import TokenSerializer
-from .permissions import IsAuthenticated, IsCollectivoAdmin
+from .permissions import IsAuthenticated, IsSuperuser
 
 
-config = settings.COLLECTIVO['auth_keycloak_config']
+# TODO Use auth manager
+config = settings.KEYCLOAK
 keycloak_manager = KeycloakOpenID(
     server_url=config["SERVER_URL"],
     client_id=config["REALM_NAME"],
@@ -76,7 +77,7 @@ class PrivateTestView(APIView):
 class AdminTestView(APIView):
     """API view that needs authentication."""
 
-    permission_classes = [IsCollectivoAdmin]
+    permission_classes = [IsSuperuser]
 
     def get(self, request):
         """Return empty response."""

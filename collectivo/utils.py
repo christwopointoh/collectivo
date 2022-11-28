@@ -1,9 +1,11 @@
 """Utility functions of the collectivo package."""
 from django.test import RequestFactory
+from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
 from collectivo.auth.userinfo import UserInfo
 import logging
+import importlib
 
 
 logger = logging.getLogger(__name__)
@@ -19,8 +21,37 @@ filter_lookups = [
 ]
 
 
+# Retrieve default models as defined in the settings
+# Can be used to access models without creating dependencies
+
+def get_object_from_settings(setting_name):
+    """Return a default model as defined in the settings."""
+    cls = settings.COLLECTIVO[setting_name]
+    module_name, class_name = cls.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+    return getattr(module, class_name)
+
+
+def get_auth_manager():
+    """Return default auth manager object."""
+    return get_object_from_settings('default_auth_manager')()
+
+
+def get_user_model():
+    """Return default user object."""
+    return get_object_from_settings('default_user_model')
+
+
+def get_extension_model():
+    """Return default extension object."""
+    return get_object_from_settings('default_extension_model')
+
+
+# Internal API calls
+# Can be used for extensions to communicate via REST API
+
 def request(viewset: ViewSet, command='create', payload=None,
-            **kwargs) -> Response:
+            userinfo=None, **kwargs) -> Response:
     """Make an internal http request to a DRF Viewset."""
     rf = RequestFactory()
     drf_to_http = {
@@ -36,21 +67,28 @@ def request(viewset: ViewSet, command='create', payload=None,
     request = getattr(rf, method)(
         None, payload, content_type="application/json")
 
-    request.userinfo = UserInfo(roles=['collectivo_admin'])
+    if userinfo is not None:
+        request.userinfo = userinfo
+    else:
+        request.userinfo = UserInfo(roles=['superuser'])
 
     response = viewset.as_view({method: command})(request, **kwargs)
 
     return response
 
 
-def register_viewset(viewset, pk, **kwargs) -> Response:
+def register_viewset(
+        viewset, pk=None, payload=None, userinfo=None) -> Response:
     """Register a viewset."""
-    get = request(viewset, 'retrieve', kwargs, pk=pk)
-    if get.status_code == 200:
-        response = request(viewset, 'update', kwargs, pk=pk)
+    get = None
+    if pk is not None and hasattr(viewset, 'retrieve'):
+        get = request(viewset, 'retrieve', payload, userinfo, pk=pk)
+    if get is not None and get.status_code == 200:
+        response = request(viewset, 'update', payload, userinfo, pk=pk)
     else:
-        response = request(viewset, 'create', kwargs)
+        response = request(viewset, 'create', payload, userinfo)
     if response.status_code not in [200, 201]:
         response.render()
         logger.debug(
             f"Could not register viewset '{viewset}': {response.content}")
+    return response

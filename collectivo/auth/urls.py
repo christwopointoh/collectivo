@@ -5,34 +5,33 @@ from django.conf import settings
 
 
 app_name = 'collectivo.auth'
-
-
-urlpatterns = [
-    path(
-        'api/keycloak/v1/test_public/',
-        views.PublicTestView.as_view(),
-        name='test_view_public'
-    ),
-    path(
-        'api/keycloak/v1/test_private/',
-        views.PrivateTestView.as_view(),
-        name='test_view_private'
-    ),
-    path(
-        'api/keycloak/v1/test_admin/',
-        views.AdminTestView.as_view(),
-        name='test_view_admin'
-    ),
-    path(
-        'api/keycloak/v1/is_authenticated/',
-        views.IsAuthenticatedView.as_view(),
-        name='is_authenticated'),
-]
+urlpatterns = []
 
 if settings.DEVELOPMENT:
 
     urlpatterns += [
-        path('api/keycloak/v1/token/',
+
+        path(
+            'api/dev/test_public/',
+            views.PublicTestView.as_view(),
+            name='test_view_public'
+        ),
+        path(
+            'api/dev/test_private/',
+            views.PrivateTestView.as_view(),
+            name='test_view_private'
+        ),
+        path(
+            'api/dev/test_admin/',
+            views.AdminTestView.as_view(),
+            name='test_view_admin'
+        ),
+        path(
+            'api/dev/is_authenticated/',
+            views.IsAuthenticatedView.as_view(),
+            name='is_authenticated'),
+
+        path('api/dev/token/',
              views.KeycloakTokenView.as_view(),
              name='token'),
     ]

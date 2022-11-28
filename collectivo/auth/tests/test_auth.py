@@ -45,7 +45,7 @@ class AuthenticationTests(TestCase):
 
     def setUp(self):
         """Prepare client and keycloak token."""
-        config = settings.COLLECTIVO['auth_keycloak_config']
+        config = settings.KEYCLOAK  # TODO Use Auth Manager
         self.keycloak = KeycloakOpenID(
             server_url=config["SERVER_URL"],
             client_id=config["REALM_NAME"],

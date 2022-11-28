@@ -9,5 +9,5 @@ router = DefaultRouter()
 router.register('extensions', views.ExtensionViewSet)
 
 urlpatterns = [
-    path('api/extensions/v1/', include(router.urls))
+    path('api/extensions/', include(router.urls))
 ]

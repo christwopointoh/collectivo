@@ -2,8 +2,9 @@
 node_modules/
 
 # Collectivo
-collectivo-test-app/collectivo
-collectivo-test-app/test_extension/static/test_extension
+.env
+collectivo-app/collectivo
+collectivo/devtools/static/devtools
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

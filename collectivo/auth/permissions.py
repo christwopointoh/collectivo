@@ -10,12 +10,12 @@ class IsAuthenticated(permissions.BasePermission):
         return request.userinfo.is_authenticated
 
 
-class IsCollectivoAdmin(permissions.BasePermission):
-    """Permission to check if user has the role 'is_collectivo_admin'."""
+class IsSuperuser(permissions.BasePermission):
+    """Permission to check if user has the role 'superuser'."""
 
     def has_permission(self, request, view):
         """Check if the required permission is among user roles."""
-        return request.userinfo.has_role('collectivo_admin')
+        return request.userinfo.has_role_or_is_superuser()
 
 
 class IsSelf(permissions.BasePermission):

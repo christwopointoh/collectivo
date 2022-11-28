@@ -32,9 +32,7 @@ class RequestLogMiddleware:
         response = self.get_response(request)
 
         log_data["status_code"] = response.status_code
-
-        if request.userinfo is not None:
-            log_data["user"] = request.userinfo.user_id
+        #TODO add user id to log_data
 
         if request.META["X-Request-ID"] is not None:
             log_data["request_id"] = request.META["X-Request-ID"]

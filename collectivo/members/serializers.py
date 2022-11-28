@@ -29,7 +29,7 @@ registration_fields = (
     'survey_skills',
 ) + legal_fields + natural_fields + sepa_fields
 
-readonly_fields = ('id', ) + registration_fields
+readonly_fields = ('id', 'membership_start',) + registration_fields
 
 summary_fields = (
     'id',
@@ -41,7 +41,7 @@ summary_fields = (
     'tags',
 )
 tag_fields = (
-    'statutes_approved',
+    # 'statutes_approved', TODO Add nach Gründung
     'public_use_approved',
     'data_use_approved'
 )
@@ -73,8 +73,8 @@ class MemberRegisterSerializer(MemberSerializer):
     """Serializer for users to register themselves as members."""
 
     # Tag fields
-    statutes_approved = serializers.BooleanField(
-        default=False, write_only=True)
+    # statutes_approved = serializers.BooleanField(
+    #     default=False, write_only=True)
     public_use_approved = serializers.BooleanField(
         default=False, write_only=True)
     data_use_approved = serializers.BooleanField(

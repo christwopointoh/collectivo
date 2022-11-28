@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from collectivo.auth.clients import CollectivoAPIClient
 from collectivo.auth.userinfo import UserInfo
 from collectivo.utils import get_auth_manager
+from django.utils.timezone import localdate
 from ..models import Member
 
 
@@ -34,6 +35,11 @@ TEST_MEMBER = {
 TEST_MEMBER_POST = {
     **TEST_MEMBER,
     'email_verified': True,
+}
+
+TEST_MEMBER_GET = {
+    **TEST_MEMBER,
+    'membership_start': localdate()
 }
 
 TEST_USER = {
@@ -105,7 +111,7 @@ class PrivateMemberApiTestsForNonMembers(MembersTestCase):
         if res.status_code != 201:
             raise Exception('Could not register member:', res.content)
         member = Member.objects.get(id=res.data['id'])
-        for key, value in TEST_MEMBER.items():
+        for key, value in TEST_MEMBER_GET.items():
             self.assertEqual(value, getattr(member, key))
 
 
@@ -134,7 +140,7 @@ class PrivateMemberApiTestsForMembers(MembersTestCase):
         """Test that a member can view it's own data."""
         res = self.client.get(PROFILE_URL)
         self.assertEqual(res.status_code, 200)
-        for key, value in TEST_MEMBER.items():
+        for key, value in TEST_MEMBER_GET.items():
             self.assertEqual(str(value), str(res.data[key]))
 
     def test_update_member(self):

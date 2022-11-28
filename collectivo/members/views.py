@@ -8,6 +8,7 @@ from collectivo.views import SchemaMixin
 from .permissions import IsMembersAdmin
 from . import models, serializers
 from .models import Member
+from django.utils.timezone import localdate
 
 
 logger = logging.getLogger(__name__)
@@ -67,7 +68,10 @@ class GenericMemberViewSet(
             raise PermissionDenied('User is already registered as a member.')
         self.sync_user_data(serializer)
         self.sync_user_roles(user_id)
-        serializer.save(user_id=user_id)
+        serializer.save(
+            user_id=user_id,
+            membership_start=localdate(),
+        )
 
     def perform_update(self, serializer):
         """Update member."""

@@ -45,9 +45,13 @@ class MemberAuthSyncMixin:
         if user_fields_have_changed:
             auth_manager.update_user(user_id=user_id, **new_user_data)
 
-    def sync_user_groups(self, user_id):
+    def sync_user_roles(self, user_id):
         """Add user to group members after creation."""
-        get_auth_manager().add_user_to_group(user_id, 'members')
+        role = 'members_user'
+        auth_manager = get_auth_manager()
+        role_id = auth_manager.get_realm_role(role)['id']
+        auth_manager.assign_realm_roles(
+            user_id, {'id': role_id, 'name': role})
 
 
 class GenericMemberViewSet(
@@ -57,6 +61,20 @@ class GenericMemberViewSet(
     """Base class for all member views."""
 
     queryset = models.Member.objects.all()
+
+    def _perform_create(self, user_id, serializer):
+        """Create member with user_id."""
+        if Member.objects.filter(user_id=user_id).exists():
+            raise PermissionDenied('User is already registered as a member.')
+        self.sync_user_data(serializer)
+        self.sync_user_roles(user_id)
+        serializer.save(user_id=user_id)
+
+    def perform_update(self, serializer):
+        """Update member."""
+        self.sync_user_data(serializer)
+        self.sync_user_roles(serializer.initial_data['user_id'])
+        serializer.save()
 
 
 class MemberRegisterView(mixins.CreateModelMixin, GenericMemberViewSet):
@@ -72,11 +90,7 @@ class MemberRegisterView(mixins.CreateModelMixin, GenericMemberViewSet):
     def perform_create(self, serializer):
         """Create member with user_id."""
         user_id = self.request.userinfo.user_id
-        if Member.objects.filter(user_id=user_id).exists():
-            raise PermissionDenied('User is already registered as a member.')
-        self.sync_user_data(serializer)
-        self.sync_user_groups(user_id)
-        serializer.save(user_id=user_id)
+        self._perform_create(user_id, serializer)
 
 
 class MemberViewSet(
@@ -92,11 +106,6 @@ class MemberViewSet(
 
     serializer_class = serializers.MemberProfileSerializer
     permission_classes = [IsAuthenticated]
-
-    def perform_update(self, serializer):
-        """Update member."""
-        self.sync_user_data(serializer)
-        serializer.save()
 
     def get_object(self):
         """Return member that corresponds with current user."""
@@ -130,3 +139,14 @@ class MembersAdminViewSet(viewsets.ModelViewSet, GenericMemberViewSet):
     permission_classes = [IsMembersAdmin]
     filterset_fields = filterset_fields
     ordering_fields = member_fields
+
+    def perform_create(self, serializer):
+        """Create member with user_id."""
+        if 'user_id' in serializer.initial_data:
+            user_id = serializer.initial_data['user_id']
+        else:
+            user_id = None
+        if user_id is None:
+            serializer.save()
+            return
+        self._perform_create(user_id, serializer)

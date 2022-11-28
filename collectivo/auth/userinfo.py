@@ -25,13 +25,11 @@ class UserInfo:
         self.last_name = last_name
         self.roles = roles if roles is not None else []
 
-    def has_role(self, role: str) -> bool:
-        """Check if user has role."""
-        try:
+    def has_role_or_is_superuser(self, role: str = None) -> bool:
+        """Check if user has role or is superuser."""
+        if 'superuser' in self.roles:
+            return True
+        elif role is not None:
             return role in self.roles
-        except Exception as e:
-            logger.debug(
-                f"Error while trying to check if user"
-                f"{self.id} has role {role}: {repr(e)}"
-            )
+        else:
             return False

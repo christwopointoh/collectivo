@@ -79,4 +79,3 @@ class MemberAdminSerializer(MemberSerializer):
 
         model = Member
         fields = '__all__'
-        read_only_fields = readonly_fields

@@ -12,6 +12,7 @@ class MemberTag(models.Model):
 class MemberCard(models.Model):
     """A membership card that can be assigned to members."""
 
+    date_created = models.DateField()
     active = models.BooleanField(default=False)
 
 
@@ -75,7 +76,7 @@ class Member(models.Model):
     # FUTURE coshoppers = models.ManyToManyField('MemberAddon')
 
     # Personal data (only for natural people)
-    birth_date = models.DateField(null=True)
+    birthday = models.DateField(null=True)
 
     # Personal data (only for legal person)
     legal_name = models.CharField(max_length=255, null=True)
@@ -83,9 +84,9 @@ class Member(models.Model):
     legal_id = models.CharField(max_length=255, null=True)
 
     # Membership
-    membership_started_date = models.DateField(null=True)
-    membership_cancelled_date = models.DateField(null=True)
-    membership_ended_date = models.DateField(null=True)
+    membership_start = models.DateField(null=True)
+    membership_cancelled = models.DateField(null=True)
+    membership_end = models.DateField(null=True)
     membership_status = models.CharField(
         max_length=20,
         help_text='Current status of membership.',

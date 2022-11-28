@@ -165,6 +165,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.AcceptHeaderVersioning',
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -175,31 +176,22 @@ REST_FRAMEWORK = {
 
 # DRF Spectacular (OpenAPI)
 
+_schema_versions = ['0.1.0']
+_swagger_urls = ''
+for version in _schema_versions:
+    _swagger_urls += f'{{url: "/api/collectivo/schema/?version={version}", name: "API Version {version}"}},'
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'collectivo',
     'DESCRIPTION': 'A modular framework to build participative community platforms.',
-    # 'TOS': None,
-    # Optional: MAY contain "name", "url", "email"
-    #'CONTACT': {},
-    # Optional: MUST contain "name", MAY contain URL
     'LICENSE': {
         'name': 'GNU Affero General Public License v3.0',
         'url': 'https://github.com/MILA-Wien/collectivo/blob/main/LICENSE'
     },
-    # Statically set schema version. May also be an empty string. When used together with
-    # view versioning, will become '0.0.0 (v2)' for 'v2' versioned requests.
-    # Set VERSION to None if only the request version should be rendered.
-    'VERSION': __version__,
-    # Optional list of servers.
-    # Each entry MUST contain "url", MAY contain "description", "variables"
-    # e.g. [{'url': 'https://example.com/v1', 'description': 'Text'}, ...]
+    'VERSION': '',
     'SERVERS': [],
-    # Tags defined in the global scope
     'TAGS': [],
-    # Optional: MUST contain 'url', may contain "description"
-    'EXTERNAL_DOCS': {
-        'url': 'https://github.com/MILA-Wien/collectivo'
-    },
+    'EXTERNAL_DOCS': {'url': 'https://github.com/MILA-Wien/collectivo'},
     # Allow for authentication via token in the SwaggerUI interface
     "APPEND_COMPONENTS": {
         "securitySchemes": {
@@ -211,8 +203,16 @@ SPECTACULAR_SETTINGS = {
         }
     },
     "SECURITY": [{"ApiKeyAuth": [], }],
+    # Define SWAGGER UI with top bar for version switching
+    'SWAGGER_UI_SETTINGS':  f'''{{
+        deepLinking: true,
+        urls: [{_swagger_urls}],
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+        layout: "StandaloneLayout",
+        persistAuthorization: true,
+        filter: true
+    }}'''
 }
-
 
 # Logging
 

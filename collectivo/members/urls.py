@@ -20,6 +20,6 @@ me_router.register(
     'profile', views.MemberViewSet, basename='profile')
 
 urlpatterns = [
-    path('api/members/v1/', include(admin_router.urls)),
-    path('api/members/v1/', include(me_router.urls)),
+    path('api/members/', include(admin_router.urls)),
+    path('api/members/', include(me_router.urls)),
 ]

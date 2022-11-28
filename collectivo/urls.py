@@ -10,11 +10,11 @@ app_name = 'collectivo'
 
 urlpatterns = [
     # Core API views
-    path('api/collectivo/v1/version/',
-         views.VersionView.as_view(), name='version'),
+    path('api/collectivo/about/',
+         views.AboutView.as_view(), name='version'),
 
     # API Documentation
-    path('api/collectivo/v1/schema/',
+    path('api/collectivo/schema/',
          SpectacularAPIView.as_view(), name='api-schema'),
     path('api/docs/',
          SpectacularSwaggerView.as_view(url_name='collectivo:api-schema'),

@@ -6,7 +6,7 @@ from .models import Member, MemberTag
 # Fields for all members
 editable_fields = (
     'gender',
-    'email', 'phone',
+    'phone', 'email',
     'address_street', 'address_number',
     'address_stair', 'address_door', 'address_postcode',
     'address_city', 'address_country',
@@ -16,10 +16,17 @@ legal_fields = ('legal_name', 'legal_type', 'legal_id')
 natural_fields = ('birthday', )
 sepa_fields = ('bank_account_iban', 'bank_account_owner')
 
+optional_fields = (
+    'address_stair', 'address_door', 'phone',
+) + legal_fields + natural_fields + sepa_fields
+
 registration_fields = (
-    'first_name', 'last_name',
-    'person_type', 'membership_start',
+    'first_name', 'last_name', 'person_type',
     'shares_number', 'shares_payment_type',
+    'survey_first_heard',
+    'survey_motivation',
+    'survey_working_groups',
+    'survey_skills',
 ) + legal_fields + natural_fields + sepa_fields
 
 readonly_fields = ('id', ) + registration_fields
@@ -79,6 +86,11 @@ class MemberRegisterSerializer(MemberSerializer):
         model = Member
         fields = editable_fields + registration_fields + tag_fields + ('id', )
         read_only_fields = ('id', )
+        extra_kwargs = {
+            field: {'required': field not in optional_fields}
+            for field in fields
+        }
+        extra_kwargs['shares_number']['min_value'] = 1
 
     def validate(self, attrs):
         """Remove tag fields before model creation."""

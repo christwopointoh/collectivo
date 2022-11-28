@@ -103,12 +103,12 @@ class Member(models.Model):
         'MemberCard', null=True, on_delete=models.SET_NULL)
 
     # Membership - Coop shares
-    shares_number = models.IntegerField(default=0)
+    shares_number = models.IntegerField(null=True)
     shares_payment_date = models.DateField(null=True)
     shares_payment_type = models.CharField(
         max_length=20,
         help_text='Type of payment.',
-        default='sepa',
+        null=True,
         choices=[
             ('sepa', 'sepa'),
             ('transfer', 'transfer')

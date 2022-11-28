@@ -16,6 +16,19 @@ TEST_MEMBER = {
     'first_name': 'firstname',
     'last_name': 'lastname',
     'email': 'some_member@example.com',
+    'person_type': 'natural',
+    'gender': 'diverse',
+    'address_street': 'my street',
+    'address_number': '1',
+    'address_postcode': '0000',
+    'address_city': 'my city',
+    'address_country': 'my country',
+    'shares_number': 1,
+    'survey_first_heard': '-',
+    'survey_motivation': '-',
+    'survey_working_groups': '-',
+    'survey_skills': '-',
+    'shares_payment_type': 'sepa',
 }
 
 TEST_MEMBER_POST = {
@@ -89,7 +102,8 @@ class PrivateMemberApiTestsForNonMembers(MembersTestCase):
     def test_create_member(self):
         """Test that an authenticated user can create itself as a member."""
         res = self.client.post(REGISTER_URL, TEST_MEMBER_POST)
-        self.assertEqual(res.status_code, 201)
+        if res.status_code != 201:
+            raise Exception('Could not register member:', res.content)
         member = Member.objects.get(id=res.data['id'])
         for key, value in TEST_MEMBER.items():
             self.assertEqual(value, getattr(member, key))
@@ -102,6 +116,8 @@ class PrivateMemberApiTestsForMembers(MembersTestCase):
         """Register authorized user as member."""
         super().setUp()
         res = self.client.post(REGISTER_URL, TEST_MEMBER_POST)
+        if res.status_code != 201:
+            raise Exception('Could not register member:', res.content)
         self.members_id = res.data['id']
 
     def test_member_cannot_access_admin_area(self):

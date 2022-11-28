@@ -179,16 +179,17 @@ class PrivateMemberApiTestsForAdmins(TestCase):
     def test_update_member_admin_fields(self):
         """Test that admins can write to admin fields."""
         res1 = self.client.post(MEMBERS_URL, self.payload)
+        self.assertEqual(res1.status_code, 201)
         res2 = self.client.patch(
             reverse(
                 'collectivo:collectivo.members:member-detail',
                 args=[res1.data['id']]),
-            {'membership_status': '2_provisional'}
+            {'membership_status': 'provisional'}
         )
         self.assertEqual(res2.status_code, 200)
         member = Member.objects.get(id=res1.data['id'])
         self.assertEqual(
-            getattr(member, 'membership_status'), '2_provisional')
+            getattr(member, 'membership_status'), 'provisional')
 
     def test_member_sorting(self):
         """Test that all member fields can be sorted."""

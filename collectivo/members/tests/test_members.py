@@ -149,9 +149,6 @@ class PrivateMemberApiTestsForAdmins(TestCase):
         Member.objects.all().delete()
         user = UserInfo(
             roles=['members_admin'],
-            email='test_member_1@example.com',
-            first_name='firstname',
-            last_name='lastname',
             is_authenticated=True,
         )
         self.client.force_authenticate(user)
@@ -162,19 +159,16 @@ class PrivateMemberApiTestsForAdmins(TestCase):
             'email': 'test_member_1@example.com',
         }
 
-    def create_members(self, n_users):
-        """Create a set of members for testing."""
-        for i, user in enumerate(range(n_users)):
+    def create_members(self):
+        """Create an unordered set of members for testing."""
+        for i in [0, 2, 1]:
             payload = {**self.payload, 'first_name': str(i)}
             self.client.post(MEMBERS_URL, payload)
 
     def test_create_members(self):
-        """Test that admins can create members with access to all fields."""
-        n_users_new = 5
-        n_users_before = len(Member.objects.all())
-        n_users_after = n_users_before + n_users_new
-        self.create_members(n_users_new)
-        self.assertEqual(len(Member.objects.all()), n_users_after)
+        """Test that admins can create members."""
+        self.create_members()
+        self.assertEqual(len(Member.objects.all()), 3)
 
     def test_update_member_admin_fields(self):
         """Test that admins can write to admin fields."""
@@ -192,10 +186,9 @@ class PrivateMemberApiTestsForAdmins(TestCase):
 
     def test_member_sorting(self):
         """Test that all member fields can be sorted."""
-        n_users = 3
-        self.create_members(n_users)
+        self.create_members()
 
-        res = self.client.get(MEMBERS_URL+'?orderingx=first_name')
+        res = self.client.get(MEMBERS_URL+'?ordering=first_name')
         self.assertEqual(
             [entry['first_name'] for entry in res.data],
             ['0', '1', '2']
@@ -207,33 +200,20 @@ class PrivateMemberApiTestsForAdmins(TestCase):
             ['2', '1', '0']
         )
 
-    # def test_member_filtering(self):
-    #     """Test that all member fields can be filtered."""
-    #     n_users = 3
-    #     self.create_members(n_users)
+    def test_member_filtering(self):
+        """Test that member names can be filtered with 'contains'."""
+        self.create_members()
 
-    #     res = self.client.get(MEMBERS_URL+'?first_name=1')
-    #     self.assertEqual(
-    #         [entry['first_name'] for entry in res.data],
-    #         ['1']
-    #     )
-
-    #     res = self.client.get(MEMBERS_URL+'?first_name__gte=1')
-    #     self.assertEqual(
-    #         [entry['first_name'] for entry in res.data],
-    #         ['1', '2']
-    #     )
-
-    #     res = self.client.get(MEMBERS_URL+'?first_name__contains=1')
-    #     self.assertEqual(
-    #         [entry['first_name'] for entry in res.data],
-    #         ['1']
-    #     )
+        res = self.client.get(MEMBERS_URL+'?first_name__contains=1')
+        self.assertEqual(
+            [entry['first_name'] for entry in res.data],
+            ['1']
+        )
 
     def test_member_pagination(self):
         """Test that pagination works for members."""
-        n_users = 10
-        self.create_members(n_users)
+        for _ in range(3):
+            self.create_members()
 
         limit = 3
         offset = 5

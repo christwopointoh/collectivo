@@ -1,4 +1,4 @@
-"""Tests of the test_extension extension."""
+"""Tests of the devtools extension."""
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
@@ -21,15 +21,16 @@ class TestExtensionRegistrationTests(TestCase):
         """Prepare client."""
         self.client = APIClient()
         self.auth_manager = get_auth_manager()
+        self.name = 'collectivo.devtools'
 
     def test_extension_exists(self):
         """Test extension exists."""
-        extensions = Extension.objects.filter(name='test_extension')
+        extensions = Extension.objects.filter(name=self.name)
         self.assertTrue(extensions.exists())
 
     def test_default_menus(self):
         """Test menu items exist."""
-        items = MenuItem.objects.filter(extension='test_extension')
+        items = MenuItem.objects.filter(extension=self.name)
         self.assertEqual(len(items), 3)
 
     def test_test_users_exist(self):

@@ -3,43 +3,63 @@ from rest_framework import serializers
 from .models import Member, MemberTag
 
 
-# Fields for legal entities
-legal_fields = ('legal_name', 'legal_type', 'legal_id')
-legal_condition = {
-    'field': 'person_type', 'condition': 'exact', 'value': 'legal'}
-legal_schema_attrs = {
-    attr: {'condition': legal_condition} for attr in legal_fields}
-
 # Fields for all members
 editable_fields = (
-    'first_name', 'last_name',
-    'gender', 'birth_date',
+    'gender',
     'email', 'phone',
     'address_street', 'address_number',
     'address_stair', 'address_door', 'address_postcode',
     'address_city', 'address_country',
-) + legal_fields
+)
+
+legal_fields = ('legal_name', 'legal_type', 'legal_id')
+natural_fields = ('birthday', )
+sepa_fields = ('bank_account_iban', 'bank_account_owner')
+
 registration_fields = (
-    'person_type',
+    'first_name', 'last_name',
+    'person_type', 'membership_start',
     'shares_number', 'shares_payment_type',
-)
-readonly_fields = (
-    'id',
-)
+) + legal_fields + natural_fields + sepa_fields
+
+readonly_fields = ('id', ) + registration_fields
+
 summary_fields = (
-    'id', 'first_name', 'last_name',
+    'id',
+    'first_name', 'last_name',
     'person_type', 'membership_status',
+    'membership_start',
+    'membership_cancelled',
+    'membership_end',
     'tags',
 )
 tag_fields = (
-    'statutes_approved', 'public_use_approved', 'data_use_approved'
+    'statutes_approved',
+    'public_use_approved',
+    'data_use_approved'
 )
+
+# Create conditions
+schema_attrs = {}
+
+
+def add_conditions(fields, condition_field, value):
+    """Add conditions to schema attributes."""
+    condition = {
+        'field': condition_field, 'condition': 'exact', 'value': value}
+    schema_attrs.update({
+        attr: {'condition': condition} for attr in fields})
+
+
+add_conditions(legal_fields, 'person_type', 'legal')
+add_conditions(natural_fields, 'person_type', 'natural')
+add_conditions(sepa_fields, 'shares_payment_type', 'sepa')
 
 
 class MemberSerializer(serializers.ModelSerializer):
     """Base serializer for member serializers."""
 
-    schema_attrs = legal_schema_attrs
+    schema_attrs = schema_attrs
 
 
 class MemberRegisterSerializer(MemberSerializer):
@@ -57,9 +77,8 @@ class MemberRegisterSerializer(MemberSerializer):
         """Serializer settings."""
 
         model = Member
-        fields = editable_fields + registration_fields + readonly_fields \
-            + tag_fields
-        read_only_fields = readonly_fields
+        fields = editable_fields + registration_fields + tag_fields + ('id', )
+        read_only_fields = ('id', )
 
     def validate(self, attrs):
         """Remove tag fields before model creation."""
@@ -76,8 +95,8 @@ class MemberProfileSerializer(MemberSerializer):
         """Serializer settings."""
 
         model = Member
-        fields = editable_fields + readonly_fields
-        read_only_fields = readonly_fields
+        fields = registration_fields + editable_fields + readonly_fields
+        read_only_fields = registration_fields + readonly_fields
 
 
 class MemberSummarySerializer(MemberSerializer):
@@ -101,4 +120,3 @@ class MemberAdminSerializer(MemberSerializer):
 
         model = Member
         fields = '__all__'
-        # extra_kwargs = {'tags': {'required': False}}

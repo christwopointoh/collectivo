@@ -16,6 +16,10 @@ TEST_MEMBER = {
     'first_name': 'firstname',
     'last_name': 'lastname',
     'email': 'some_member@example.com',
+}
+
+TEST_MEMBER_POST = {
+    **TEST_MEMBER,
     'email_verified': True,
 }
 
@@ -84,13 +88,11 @@ class PrivateMemberApiTestsForNonMembers(MembersTestCase):
 
     def test_create_member(self):
         """Test that an authenticated user can create itself as a member."""
-        res = self.client.post(REGISTER_URL, TEST_MEMBER)
+        res = self.client.post(REGISTER_URL, TEST_MEMBER_POST)
         self.assertEqual(res.status_code, 201)
         member = Member.objects.get(id=res.data['id'])
-        expected_user = {**TEST_MEMBER}
-        del expected_user['email_verified']  # not shown to user
-        for key in expected_user.keys():
-            self.assertEqual(expected_user[key], getattr(member, key))
+        for key, value in TEST_MEMBER.items():
+            self.assertEqual(value, getattr(member, key))
 
 
 class PrivateMemberApiTestsForMembers(MembersTestCase):
@@ -99,8 +101,7 @@ class PrivateMemberApiTestsForMembers(MembersTestCase):
     def setUp(self):
         """Register authorized user as member."""
         super().setUp()
-        res = self.client.post(REGISTER_URL, TEST_MEMBER)
-        self.authorize()  # Needed to refresh token with new role
+        res = self.client.post(REGISTER_URL, TEST_MEMBER_POST)
         self.members_id = res.data['id']
 
     def test_member_cannot_access_admin_area(self):
@@ -110,25 +111,21 @@ class PrivateMemberApiTestsForMembers(MembersTestCase):
 
     def test_cannot_create_same_member_twice(self):
         """Test that a member cannot create itself as a member again."""
-        res2 = self.client.post(REGISTER_URL, TEST_MEMBER)
+        res2 = self.client.post(REGISTER_URL, TEST_MEMBER_POST)
         self.assertEqual(res2.status_code, 403)
 
-    def test_get_own_member(self):
+    def test_get_profile(self):
         """Test that a member can view it's own data."""
         res = self.client.get(PROFILE_URL)
         self.assertEqual(res.status_code, 200)
-        expected_user = {**TEST_MEMBER}
-        del expected_user['email_verified']  # not shown to user
-        for key in expected_user.keys():
-            self.assertEqual(str(expected_user[key]), str(res.data[key]))
+        for key, value in TEST_MEMBER.items():
+            self.assertEqual(str(value), str(res.data[key]))
 
     def test_update_member(self):
         """Test that a member can edit non-admin fields of it's own data."""
-        self.client.patch(PROFILE_URL, {'first_name': 'New Name'})
+        self.client.patch(PROFILE_URL, {'address_street': 'my_street'})
         res = self.client.get(PROFILE_URL)
-        self.assertEqual(res.data['first_name'], 'New Name')
-        self.assertEqual(res.data['last_name'], 'lastname')
-        # TODO Check with keycloak userinfo
+        self.assertEqual(res.data['address_street'], 'my_street')
 
     def test_update_member_admin_fields_fails(self):
         """Test that a member cannot edit admin fields of it's own data."""
@@ -163,7 +160,9 @@ class PrivateMemberApiTestsForAdmins(TestCase):
         """Create an unordered set of members for testing."""
         for i in [0, 2, 1]:
             payload = {**self.payload, 'first_name': str(i)}
-            self.client.post(MEMBERS_URL, payload)
+            res = self.client.post(MEMBERS_URL, payload)
+            if res.status_code != 201:
+                raise ValueError("Create members failed: ", res.content)
 
     def test_create_members(self):
         """Test that admins can create members."""

@@ -17,9 +17,8 @@ member_fields = [field.name for field in models.Member._meta.get_fields()]
 filterset_fields = {
     'first_name': ('contains', ),
     'last_name': ('contains', ),
+    'person_type': ('exact', ),
     'membership_status': ('exact', ),
-    'membership_type': ('exact', ),
-    'shares_payment_status': ('exact', ),
 }
 
 

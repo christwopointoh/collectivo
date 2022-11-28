@@ -9,6 +9,7 @@ def post_migrate_callback(sender, **kwargs):
     from collectivo.extensions.utils import register_extension
     from collectivo.menus.utils import register_menuitem
     from collectivo.dashboard.utils import register_tile
+    from .utils import register_tag
 
     name = 'members'
     # TODO Language change
@@ -51,6 +52,15 @@ def post_migrate_callback(sender, **kwargs):
         component_name='members_registration_tile',
         blocked_role='members_user'
     )
+
+    tags = {
+        'statutes_approved': 'Statutes approved',
+        'public_use_approved': 'Public use approved',
+        'data_use_approved': 'Data use approved'
+    }
+
+    for tag_id, label in tags.items():
+        register_tag(tag_id=tag_id, label=label, built_in=True)
 
 
 class MembersConfig(AppConfig):

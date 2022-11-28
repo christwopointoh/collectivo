@@ -39,7 +39,8 @@ TEST_MEMBER_POST = {
 
 TEST_MEMBER_GET = {
     **TEST_MEMBER,
-    'membership_start': localdate()
+    'membership_start': localdate(),
+    # Add expected tags
 }
 
 TEST_USER = {
@@ -105,14 +106,32 @@ class PrivateMemberApiTestsForNonMembers(MembersTestCase):
         self.assertEqual(res.data['detail'],
                          'User is not registered as a member.')
 
+    def create_member(self, payload=TEST_MEMBER_POST):
+        """Create a sample member."""
+        res = self.client.post(REGISTER_URL, payload)
+        if res.status_code != 201:
+            raise ValueError('Could not register member:', res.content)
+        member = Member.objects.get(id=res.data['id'])
+        return member
+
     def test_create_member(self):
         """Test that an authenticated user can create itself as a member."""
-        res = self.client.post(REGISTER_URL, TEST_MEMBER_POST)
-        if res.status_code != 201:
-            raise Exception('Could not register member:', res.content)
-        member = Member.objects.get(id=res.data['id'])
+        member = self.create_member()
         for key, value in TEST_MEMBER_GET.items():
             self.assertEqual(value, getattr(member, key))
+
+    def test_create_member_tags_missing(self):
+        """Test that unchecked tag fields do not become tags."""
+        member = self.create_member()
+        self.assertFalse(
+            member.tags.filter(tag_id='data_use_approved').exists())
+
+    def test_create_member_tags(self):
+        """Test that checked tag fields become tags."""
+        payload = {**TEST_MEMBER_POST, 'data_use_approved': True}
+        member = self.create_member(payload)
+        self.assertTrue(
+            member.tags.filter(tag_id='data_use_approved').exists())
 
 
 class PrivateMemberApiTestsForMembers(MembersTestCase):

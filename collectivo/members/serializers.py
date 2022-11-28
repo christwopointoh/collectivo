@@ -73,19 +73,17 @@ class MemberRegisterSerializer(MemberSerializer):
     """Serializer for users to register themselves as members."""
 
     # Tag fields
-    # statutes_approved = serializers.BooleanField(
-    #     default=False, write_only=True)
-    public_use_approved = serializers.BooleanField(
-        default=False, write_only=True)
-    data_use_approved = serializers.BooleanField(
-        default=False, write_only=True)
+    # TODO Add after Gründung
+    # statutes_approved = serializers.BooleanField(write_only=True)
+    public_use_approved = serializers.BooleanField(write_only=True)
+    data_use_approved = serializers.BooleanField(write_only=True)
 
     class Meta:
         """Serializer settings."""
 
         model = Member
-        fields = editable_fields + registration_fields + tag_fields + ('id', )
-        read_only_fields = ('id', )
+        fields = editable_fields + registration_fields + tag_fields + ('id',)
+        read_only_fields = ('id',)
         extra_kwargs = {
             field: {'required': field not in optional_fields}
             for field in fields
@@ -94,9 +92,13 @@ class MemberRegisterSerializer(MemberSerializer):
 
     def validate(self, attrs):
         """Remove tag fields before model creation."""
-        # TODO Logic for tag fields
+        # TODO Include checkboxes in validation
+        attrs['tags'] = []
         for field in tag_fields:
+            value = attrs[field]
             attrs.pop(field, None)
+            if value is True:
+                attrs['tags'].append(field)
         return super().validate(attrs)
 
 
@@ -132,3 +134,29 @@ class MemberAdminSerializer(MemberSerializer):
 
         model = Member
         fields = '__all__'
+
+
+class MemberTagCreateSerializer(serializers.ModelSerializer):
+    """Serializer for new dashboard tiles."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = MemberTag
+        fields = '__all__'
+
+
+class MemberTagSerializer(serializers.ModelSerializer):
+    """Serializer for existing dashboard tiles."""
+
+    class Meta:
+        """
+        Serializer settings.
+
+        The name cannot be changed because it is the primary key to identify
+        the object. A new object has to be created to set a new name.
+        """
+
+        model = MemberTag
+        fields = '__all__'
+        read_only_fields = ('tag_id', )

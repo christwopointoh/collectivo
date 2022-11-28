@@ -68,10 +68,13 @@ class GenericMemberViewSet(
             raise PermissionDenied('User is already registered as a member.')
         self.sync_user_data(serializer)
         self.sync_user_roles(user_id)
-        serializer.save(
-            user_id=user_id,
-            membership_start=localdate(),
-        )
+        extra_fields = {
+            'user_id': user_id,
+            'membership_start': localdate(),
+        }
+        if 'tags' in serializer.validated_data:
+            extra_fields['tags'] = serializer.validated_data['tags']
+        serializer.save(**extra_fields)
 
     def perform_update(self, serializer):
         """Update member."""
@@ -91,7 +94,7 @@ class MemberRegisterView(mixins.CreateModelMixin, GenericMemberViewSet):
     permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        """Create member with user_id."""
+        """Create member with user_id from keycloak."""
         user_id = self.request.userinfo.user_id
         self._perform_create(user_id, serializer)
 
@@ -153,3 +156,16 @@ class MembersAdminViewSet(viewsets.ModelViewSet, GenericMemberViewSet):
             serializer.save()
             return
         self._perform_create(user_id, serializer)
+
+
+class MemberTagViewSet(viewsets.ModelViewSet):
+    """Manage member tags."""
+
+    permission_classes = [IsMembersAdmin]
+    queryset = models.MemberTag.objects.all()
+
+    def get_serializer_class(self):
+        """Set name to read-only except for create."""
+        if self.request.method == 'POST':
+            return serializers.MemberTagCreateSerializer
+        return serializers.MemberTagSerializer

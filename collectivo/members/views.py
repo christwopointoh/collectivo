@@ -150,4 +150,3 @@ class MembersAdminViewSet(viewsets.ModelViewSet, GenericMemberViewSet):
             serializer.save()
             return
         self._perform_create(user_id, serializer)
-

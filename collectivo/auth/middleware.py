@@ -57,7 +57,7 @@ class KeycloakMiddleware(MiddlewareMixin):
 
         # Add unauthenticated user to request
         request.userinfo = user = UserInfo()
-        correlation_id = request.META.get(
+        request_id = request.META.get(
             'X-Correlation-ID', 'NO-CORRELATION-ID')
         # Return unauthenticated request if no authorization is found
         if "HTTP_AUTHORIZATION" not in request.META:
@@ -69,21 +69,21 @@ class KeycloakMiddleware(MiddlewareMixin):
             auth = request.META.get("HTTP_AUTHORIZATION").split()
             access_token = auth[1] if len(auth) == 2 else auth[0]
         except Exception as e:
-            return self.auth_failed(correlation_id, 'Could not read token', e)
+            return self.auth_failed(request_id, 'Could not read token', e)
 
         # Check the validity of the token
         try:
             self.keycloak.userinfo(access_token)
             user.is_authenticated = True
         except Exception as e:
-            return self.auth_failed(correlation_id, 'Could not verify token', e)
+            return self.auth_failed(request_id, 'Could not verify token', e)
 
         # Decode token
         try:
             data = decode(
                 access_token, options={"verify_signature": False})
         except Exception as e:
-            return self.auth_failed(correlation_id, 'Could not decode token', e)
+            return self.auth_failed(request_id, 'Could not decode token', e)
 
         # Add userinfos to request
         try:
@@ -97,7 +97,8 @@ class KeycloakMiddleware(MiddlewareMixin):
             for role in roles:
                 user.roles.append(role)
         except Exception as e:
-            return self.auth_failed(correlation_id, 'Could not extract userinfo', e)
+            return self.auth_failed(
+                request_id, 'Could not extract userinfo', e)
 
         # Return authenticated request if no exception is thrown
         return None

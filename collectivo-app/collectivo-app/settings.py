@@ -24,7 +24,7 @@ DEVELOPMENT = os.environ.get('DEVELOPMENT', False)
 if os.environ.get('ALLOWED_HOSTS') is not None:
     ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').replace(' ', '').split(',')
 elif DEVELOPMENT:
-    ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "testserver"]
+    ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "collectivo.local"]
 else:
     ALLOWED_HOSTS = []
 
@@ -78,7 +78,7 @@ MIDDLEWARE = [
 
 if DEVELOPMENT:
     INSTALLED_APPS += ['collectivo.devtools', 'corsheaders']
-    MIDDLEWARE += ['corsheaders.middleware.CorsMiddleware']
+    MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
     CORS_ALLOW_HEADERS = [
         'accept',
         'accept-encoding',
@@ -181,7 +181,6 @@ REST_FRAMEWORK = {
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
     ],
-    'EXCEPTION_HANDLER': 'collectivo.middleware.customExceptionHandler.customExceptionHandler'
 }
 
 
@@ -235,14 +234,11 @@ SPECTACULAR_SETTINGS = {
 # Logging
 # https://docs.djangoproject.com/en/4.1/ref/logging/
 
+LOGGING_LEVEL = 'DEBUG'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
-        'timeandname': {
-            'format': '[{name}] {message}',  # {asctime},
-            'style': '{',
-        },
         'verbose': {
             'format': '[%(levelname)s %(asctime)s %(pathname)s@%(lineno)s]: %(message)s'
         },
@@ -251,11 +247,6 @@ LOGGING = {
         },
     },
     'handlers': {
-        # 'file': {
-        #     'level': 'DEBUG',
-        #     'class': 'logging.FileHandler',
-        #     'filename': 'dataflair-debug.log',
-        # },
         'console': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
@@ -264,17 +255,7 @@ LOGGING = {
     'loggers': {
         'collectivo': {
             'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'test_extension': {
-            'handlers': ['console'],  # 'file',
-            'level': 'DEBUG',  # os.getenv('DJANGO_LOG_LEVEL', 'DEBUG')
-            'propagate': True,
-        },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'DEBUG',  # change debug level as appropiate
+            'level': LOGGING_LEVEL,
             'propagate': True,
         },
     },

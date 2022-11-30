@@ -13,9 +13,9 @@ services:
     # Synchronize source code inside and outside the docker container.
     # The collectivo app is placed inside the test app (see Dockerfile).
     volumes:
-      - ./collectivo-app:/collectivo-app
-      - ./collectivo:/collectivo-app/collectivo
-      - ./docker/static:/collectivo-app/static
+      - ./collectivo_app:/collectivo_app
+      - ./collectivo:/collectivo_app/collectivo
+      - ./docker/static:/collectivo_app/static
     # Wait for database to be ready (this command will work only on linux),
     # migrate the database changes and start a development server.
     # TODO Is this needed if already given in dockerfile?

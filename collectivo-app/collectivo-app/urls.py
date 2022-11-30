@@ -1,4 +1,4 @@
-"""URL Configuration of collectivo-app."""
+"""URL Configuration of collectivo_app."""
 from django.urls import path, include
 
 
@@ -8,7 +8,7 @@ urlpatterns = [path('', include('collectivo.urls'))]
 try:
     from extensions import urls
     urlpatterns += urls.urlpatterns
-except ModuleNotFoundError:
+except (ImportError, ModuleNotFoundError):
     pass
 
 handler400 = 'rest_framework.exceptions.bad_request'

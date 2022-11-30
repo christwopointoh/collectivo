@@ -1,1 +1,1 @@
-"""The collectivo-app."""
+"""The collectivo_app."""

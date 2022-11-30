@@ -10,7 +10,7 @@ Different community tools can be added to collectivo through extensions.
 
 Folders:
 - `collectivo` - A django package, the core of the framework.
-- `collectivo-app` - A django app that can be used to run collectivo.
+- `collectivo_app` - A django app that can be used to run collectivo.
 
 ## Development
 

@@ -29,16 +29,16 @@ RUN apk add --update --no-cache postgresql-client  && \
 COPY ./requirements.txt /tmp/requirements.txt
 
 # Copy source code of the test app into the container
-COPY ./collectivo-app /collectivo-app
+COPY ./collectivo_app /collectivo_app
 
 # Copy source code of the collectivo app into the test app
-COPY ./collectivo /collectivo-app/collectivo
+COPY ./collectivo /collectivo_app/collectivo
 
 # Copy source code of the test-extension into the test app
 COPY --from=build-env /app/dist /collectivo/devtools/static/devtools
 
 # Move working directory into the test app
-WORKDIR /collectivo-app
+WORKDIR /collectivo_app
 
 # Set port through which the test app can be accessed
 EXPOSE 8000
@@ -62,12 +62,12 @@ RUN apk del .tmp-build-deps && \
 ENV PATH="/py/bin:$PATH"
 
 # Create a static folder for the app
-RUN mkdir -p /collectivo-app/static | true && \
-    chown -R django-user:django-user /collectivo-app && \
-    chmod -R 755 /collectivo-app/static
+RUN mkdir -p /collectivo_app/static | true && \
+    chown -R django-user:django-user /collectivo_app && \
+    chmod -R 755 /collectivo_app/static
 
 # Create a static folder for microfrontends
-RUN mkdir -p /collectivo-app/test_extension/static/test_extension
+RUN mkdir -p /collectivo_app/test_extension/static/test_extension
 
 # Switch to the new user
 USER django-user

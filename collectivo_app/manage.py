@@ -6,13 +6,10 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    if os.path.isfile('collectivo_extensions/settings.py'):
-        # Use custom settings if given in collectivo_extensions folder
-        os.environ.setdefault(
-            'DJANGO_SETTINGS_MODULE', 'collectivo_extensions.settings')
-    else:
-        os.environ.setdefault(
-            'DJANGO_SETTINGS_MODULE', 'collectivo_app.settings')
+    os.environ.setdefault(
+        'DJANGO_SETTINGS_MODULE',
+        os.environ.get('COLLECTIVO_SETTINGS', 'collectivo_app.settings')
+    )
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:

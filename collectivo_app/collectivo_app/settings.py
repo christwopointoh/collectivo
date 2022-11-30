@@ -1,12 +1,12 @@
 """
 Default django settings for collectivo_app.
 
-Will not be used if custom settings are given in
-'/collectivo_extensions/settings.py' (see manage.py)
+Will not be used if custom settings are defined through
+the COLLECTIVO_SETTINGS environment variable (see manage.py).
 """
 import os
 from pathlib import Path
-import logging
+from collectivo.errors import CollectivoError
 from collectivo.version import __version__
 
 
@@ -26,21 +26,17 @@ elif DEVELOPMENT:
 else:
     ALLOWED_HOSTS = []
 
-# Install built-in collectivo extensions
-# If core is given, all core extensions are installed first
-_built_in_extensions = [
-    f'collectivo.{ext}' for ext in
-    os.environ.get('COLLECTIVO_EXTENSIONS', 'core').replace(' ', '').split(',')
-]
-if 'collectivo.core' in _built_in_extensions:
-    _core_apps = [
-        'collectivo.menus', 'collectivo.auth', 'collectivo.extensions',
-        'collectivo.dashboard', 'collectivo.members'
-    ]
-    for _app in _core_apps + ['collectivo.core']:
-        if _app in _built_in_extensions:
-            _built_in_extensions.remove(_app)
-    _built_in_extensions = _core_apps + _built_in_extensions
+# Choose built-in collectivo extensions from environment
+_built_in_extensions = ['members']
+_chosen_extensions = \
+    os.environ.get('COLLECTIVO_EXTENSIONS', '').replace(' ', '').split(',')
+for ext in _chosen_extensions:
+    if ext not in _built_in_extensions:
+        raise CollectivoError(
+            "Error in environment variable 'COLLECTIVO_EXTENSIONS': "
+            f"'{ext}' is not a built-in extension of collectivo."
+            f"Available extensions are: {_built_in_extensions}."
+        )
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -50,15 +46,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'collectivo',
+    'collectivo.menus',
+    'collectivo.auth',
+    'collectivo.extensions',
+    'collectivo.dashboard',
     'django_filters',
     'rest_framework',
     'drf_spectacular',
-    *_built_in_extensions,
+    *[f'collectivo.{ext}' for ext in _chosen_extensions],
 ]
 
 MIDDLEWARE = [
     'collectivo.middleware.requestId.AddRequestId',
-
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -66,7 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'collectivo.auth.middleware.KeycloakMiddleware',                                                 
+    'collectivo.auth.middleware.KeycloakMiddleware',
     'collectivo.middleware.requestLog.RequestLogMiddleware',
 ]
 

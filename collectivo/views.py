@@ -40,6 +40,7 @@ input_types = {
     'FloatField': 'number',
     'DateField': 'date',
     'BooleanField': 'checkbox',
+    'ManyToManyField': 'multiselect',
     'PhoneField': 'phone',
     'CountryField': 'country'
 }

@@ -85,7 +85,7 @@ jobs:
           SECRET_KEY: badkey
           KEYCLOAK_SERVER_URL: http://keycloak:8080
           KEYCLOAK_CLIENT_SECRET_KEY: '**********'
-          COLLECTIVO_EXTENSIONS: core
+          COLLECTIVO_EXTENSIONS: members
           DEBUG: True
           DEVELOPMENT: True
         run: |

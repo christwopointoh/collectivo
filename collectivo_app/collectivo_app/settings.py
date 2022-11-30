@@ -34,7 +34,7 @@ for ext in _chosen_extensions:
     if ext not in _built_in_extensions:
         raise CollectivoError(
             "Error in environment variable 'COLLECTIVO_EXTENSIONS': "
-            f"'{ext}' is not a built-in extension of collectivo."
+            f"'{ext}' is not a built-in extension. "
             f"Available extensions are: {_built_in_extensions}."
         )
 

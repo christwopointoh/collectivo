@@ -8,11 +8,12 @@ import os
 from pathlib import Path
 from collectivo.errors import CollectivoError
 from collectivo.version import __version__
-
+from .utils import string_to_list
 
 # TODO FOR PRODUCTION
 # Go through https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 # Remove unused django functions
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ['SECRET_KEY']
@@ -20,7 +21,7 @@ DEBUG = os.environ.get('DEBUG', False)
 DEVELOPMENT = os.environ.get('DEVELOPMENT', False)
 
 if os.environ.get('ALLOWED_HOSTS') is not None:
-    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').replace(' ', '').split(',')
+    ALLOWED_HOSTS = string_to_list(os.environ.get('ALLOWED_HOSTS'))
 elif DEVELOPMENT:
     ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "collectivo.local"]
 else:
@@ -28,8 +29,7 @@ else:
 
 # Choose built-in collectivo extensions from environment
 _built_in_extensions = ['members']
-_chosen_extensions = \
-    os.environ.get('COLLECTIVO_EXTENSIONS', '').replace(' ', '').split(',')
+_chosen_extensions = string_to_list(os.environ.get('COLLECTIVO_EXTENSIONS'))
 for ext in _chosen_extensions:
     if ext not in _built_in_extensions:
         raise CollectivoError(

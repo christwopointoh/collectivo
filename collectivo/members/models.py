@@ -7,7 +7,6 @@ class MemberTag(models.Model):
 
     tag_id = models.CharField(max_length=255, primary_key=True)
     label = models.CharField(max_length=255)
-    built_in = models.BooleanField(default=False)
 
 
 class MemberCard(models.Model):
@@ -15,6 +14,20 @@ class MemberCard(models.Model):
 
     date_created = models.DateField()
     active = models.BooleanField(default=False)
+
+
+class MemberGroup(models.Model):
+    """A group that can be assigned to members."""
+
+    group_id = models.CharField(max_length=255, primary_key=True)
+    label = models.CharField(max_length=255)
+
+
+class MemberSkill(models.Model):
+    """A skill that can be assigned to members."""
+
+    skill_id = models.CharField(max_length=255, primary_key=True)
+    label = models.CharField(max_length=255)
 
 
 class MemberAddon(models.Model):
@@ -73,9 +86,9 @@ class Member(models.Model):
     address_country = models.CharField(max_length=255, null=True)
     phone = models.CharField(max_length=255, null=True)
 
-    # FUTURE Personal data (only for active members)
-    # FUTURE kids = models.ManyToManyField('MemberAddon')
-    # FUTURE coshoppers = models.ManyToManyField('MemberAddon')
+    # Personal data (only for active members)
+    children = models.ManyToManyField('MemberAddon')
+    coshoppers = models.ManyToManyField('MemberAddon')
 
     # Personal data (only for natural people)
     birthday = models.DateField(null=True)
@@ -89,15 +102,23 @@ class Member(models.Model):
     membership_start = models.DateField(null=True)
     membership_cancelled = models.DateField(null=True)
     membership_end = models.DateField(null=True)
-    membership_status = models.CharField(
+    membership_type = models.CharField(
         max_length=20,
-        help_text='Current status of membership.',
-        default='1_applicant',
         choices=[
-            ('applicant', 'applicant'),
-            ('provisional', 'provisional'),
             ('active', 'active'),
             ('investing', 'investing'),
+        ]
+    )
+    membership_status = models.CharField(
+        max_length=20,
+        default='applicant',
+        choices=[
+            ('applicant', 'applicant'),
+            ('pending payment', 'pending payment'),
+            ('payment denied', 'payment denied'),
+            ('pending approval', 'pending approval'),
+            ('approved', 'approved'),
+            ('suspended', 'suspended'),
             ('ended', 'ended'),
         ]
     )
@@ -121,11 +142,13 @@ class Member(models.Model):
     # FUTURE shares_installment_plan = models.BooleanField(default=False)
 
     # Survey data
-    survey_first_heard = models.TextField(null=True)
+    survey_contact = models.TextField(null=True)
     survey_motivation = models.TextField(null=True)
-    survey_working_groups = models.TextField(null=True)
-    survey_skills = models.TextField(null=True)
+    groups_interested = models.ManyToManyField('MemberGroup')
+    skills = models.ManyToManyField('MemberSkill')
 
     # Other
     tags = models.ManyToManyField('MemberTag')
     admin_notes = models.TextField(null=True)
+    groups = models.ManyToManyField('MemberGroup')
+

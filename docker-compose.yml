@@ -76,6 +76,9 @@ services:
     container_name: collectivo-ux
     build: https://github.com/MILA-Wien/collectivo-ux.git#main
     restart: always
+    environment:
+      VITE_APP_API: http://collectivo.local:8000
+      VITE_KEYCLOAK_URL: http://keycloak.local:8080
     ports:
       - "8001:80"
 

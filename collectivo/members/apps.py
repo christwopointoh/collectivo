@@ -58,9 +58,8 @@ def post_migrate_callback(sender, **kwargs):
         'public_use_approved': 'Public use approved',
         'data_use_approved': 'Data use approved'
     }
-
     for tag_id, label in tags.items():
-        register_tag(tag_id=tag_id, label=label, built_in=True)
+        register_tag(tag_id=tag_id, label=label)
 
 
 class MembersConfig(AppConfig):

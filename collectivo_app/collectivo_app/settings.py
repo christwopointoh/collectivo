@@ -1,19 +1,17 @@
-"""Django settings for collectivo-app."""
+"""
+Default django settings for collectivo_app.
+
+Will not be used if custom settings are given in
+'/collectivo_extensions/settings.py' (see manage.py)
+"""
 import os
 from pathlib import Path
 from collectivo.version import __version__
 
+
 # TODO FOR PRODUCTION
 # Go through https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-# Change allowed_hosts
 # Remove unused django functions
-
-# Try to import custom settings
-try:
-    from extensions import settings
-    _custom_settings = vars(settings)
-except ModuleNotFoundError:
-    _custom_settings = {}
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ['SECRET_KEY']
@@ -23,7 +21,7 @@ DEVELOPMENT = os.environ.get('DEVELOPMENT', False)
 if os.environ.get('ALLOWED_HOSTS') is not None:
     ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').replace(' ', '').split(',')
 elif DEVELOPMENT:
-    ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "testserver"]
+    ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "collectivo.local"]
 else:
     ALLOWED_HOSTS = []
 
@@ -44,7 +42,6 @@ if 'collectivo.core' in _built_in_extensions:
     _built_in_extensions = _core_apps + _built_in_extensions
 
 INSTALLED_APPS = [
-    *_custom_settings.get('INSTALLED_APPS_TOP', []),
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -56,11 +53,9 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_spectacular',
     *_built_in_extensions,
-    *_custom_settings.get('INSTALLED_APPS', [])
 ]
 
 MIDDLEWARE = [
-    *_custom_settings.get('MIDDLEWARE_TOP', []),
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -69,7 +64,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'collectivo.auth.middleware.KeycloakMiddleware',
-    *_custom_settings.get('MIDDLEWARE', [])
 ]
 
 if DEVELOPMENT:
@@ -88,7 +82,7 @@ if DEVELOPMENT:
     ]
     CORS_ORIGIN_ALLOW_ALL = True
 
-ROOT_URLCONF = 'collectivo-app.urls'
+ROOT_URLCONF = 'collectivo_app.urls'
 
 TEMPLATES = [
     {
@@ -106,7 +100,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'collectivo-app.wsgi.application'
+WSGI_APPLICATION = 'collectivo_app.wsgi.application'
 
 
 # Database
@@ -276,8 +270,6 @@ COLLECTIVO = {
     'default_auth_manager': 'collectivo.auth.manager.KeycloakAuthManager',
     'default_user_model': 'collectivo.members.models.Member',
     'default_extension_model': 'collectivo.extensions.models.Extension',
-
-    **_custom_settings.get('COLLECTIVO', {})
 }
 
 

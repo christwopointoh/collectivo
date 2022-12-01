@@ -1,6 +1,7 @@
 """Django settings for collectivo-app."""
 import os
 from pathlib import Path
+import logging
 from collectivo.version import __version__
 
 # TODO FOR PRODUCTION
@@ -23,7 +24,7 @@ DEVELOPMENT = os.environ.get('DEVELOPMENT', False)
 if os.environ.get('ALLOWED_HOSTS') is not None:
     ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').replace(' ', '').split(',')
 elif DEVELOPMENT:
-    ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "testserver"]
+    ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "collectivo.local"]
 else:
     ALLOWED_HOSTS = []
 
@@ -60,6 +61,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'collectivo.middleware.requestId.AddRequestId',
+
     *_custom_settings.get('MIDDLEWARE_TOP', []),
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -69,12 +72,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'collectivo.auth.middleware.KeycloakMiddleware',
+    'collectivo.middleware.requestLog.RequestLogMiddleware',
     *_custom_settings.get('MIDDLEWARE', [])
 ]
 
 if DEVELOPMENT:
     INSTALLED_APPS += ['collectivo.devtools', 'corsheaders']
-    MIDDLEWARE += ['corsheaders.middleware.CorsMiddleware']
+    MIDDLEWARE = ['corsheaders.middleware.CorsMiddleware'] + MIDDLEWARE
     CORS_ALLOW_HEADERS = [
         'accept',
         'accept-encoding',
@@ -176,7 +180,7 @@ REST_FRAMEWORK = {
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
         'rest_framework.filters.OrderingFilter',
-    ]
+    ],
 }
 
 
@@ -230,39 +234,28 @@ SPECTACULAR_SETTINGS = {
 # Logging
 # https://docs.djangoproject.com/en/4.1/ref/logging/
 
+LOGGING_LEVEL = 'DEBUG'
 LOGGING = {
     'version': 1,
-    'disable_existing_loggers': False,
+    'disable_existing_loggers': True,
     'formatters': {
-        'timeandname': {
-            'format': '[{name}] {message}',  # {asctime},
-            'style': '{',
+        'verbose': {
+            'format': '[%(levelname)s %(asctime)s %(pathname)s@%(lineno)s]: %(message)s'
         },
         'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
+            'format': '[%(levelname)s %(asctime)s]: %(message)s'
         },
     },
     'handlers': {
-        # 'file': {
-        #     'level': 'DEBUG',
-        #     'class': 'logging.FileHandler',
-        #     'filename': 'dataflair-debug.log',
-        # },
         'console': {
             'class': 'logging.StreamHandler',
-            'formatter': 'timeandname',
+            'formatter': 'verbose',
         },
     },
     'loggers': {
         'collectivo': {
             'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True,
-        },
-        'test_extension': {
-            'handlers': ['console'],  # 'file',
-            'level': 'DEBUG',  # os.getenv('DJANGO_LOG_LEVEL', 'DEBUG')
+            'level': LOGGING_LEVEL,
             'propagate': True,
         },
     },

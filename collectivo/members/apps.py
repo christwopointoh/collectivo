@@ -56,7 +56,8 @@ def post_migrate_callback(sender, **kwargs):
     )
 
     tags = [
-        'Statutes approved', 'Public use approved', 'Data use approved'
+        'Statutes approved', 'Public use approved', 'Data use approved',
+        'Founding event'
     ]
     for label in tags:
         register_tag(label=label)

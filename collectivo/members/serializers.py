@@ -45,6 +45,7 @@ tag_fields = {
     'statutes_approved': 'Statutes approved',
     'public_use_approved': 'Public use approved',
     'data_use_approved': 'Data use approved',
+    'founding_event': 'Founding event'
 }
 many_to_many_fields = (
     'skills', 'groups', 'groups_interested', 'children', 'coshoppers'
@@ -79,6 +80,7 @@ class MemberRegisterSerializer(MemberSerializer):
     statutes_approved = serializers.BooleanField(write_only=True)
     public_use_approved = serializers.BooleanField(write_only=True)
     data_use_approved = serializers.BooleanField(write_only=True)
+    founding_event = serializers.BooleanField(write_only=True)
 
     class Meta:
         """Serializer settings."""

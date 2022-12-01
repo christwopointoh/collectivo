@@ -132,6 +132,20 @@ class PrivateMemberApiTestsForNonMembers(MembersTestCase):
         self.assertTrue(
             member.tags.filter(label='Data use approved').exists())
 
+    def test_multiple_choice_str(self):
+        """Test that multiple choices can be selected with strings."""
+        payload = {**TEST_MEMBER_POST, 'groups_interested': ['1', '2', '3']}
+        member = self.create_member(payload)
+        group_ids = [group.id for group in member.groups_interested.all()]
+        self.assertEqual(group_ids, [1, 2, 3])
+
+    def test_multiple_choice_with_int(self):
+        """Test that multiple choices can be selected with numbers."""
+        payload = {**TEST_MEMBER_POST, 'groups_interested': [1, 2, 3]}
+        member = self.create_member(payload)
+        group_ids = [group.id for group in member.groups_interested.all()]
+        self.assertEqual(group_ids, [1, 2, 3])
+
 
 class PrivateMemberApiTestsForMembers(MembersTestCase):
     """Test the private members API for users that are members."""

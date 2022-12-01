@@ -1,6 +1,6 @@
 """Serializers of the members extension."""
 from rest_framework import serializers
-from .models import Member, MemberTag
+from . import models
 
 
 # Fields for all members
@@ -18,15 +18,16 @@ sepa_fields = ('bank_account_iban', 'bank_account_owner')
 
 optional_fields = (
     'address_stair', 'address_door', 'phone',
+    'groups_interested', 'skills'
 ) + legal_fields + natural_fields + sepa_fields
 
 registration_fields = (
     'first_name', 'last_name', 'person_type',
     'shares_number', 'shares_payment_type',
-    'survey_first_heard',
+    'survey_contact', 'membership_type',
     'survey_motivation',
-    'survey_working_groups',
-    'survey_skills',
+    'groups_interested',
+    'skills',
 ) + legal_fields + natural_fields + sepa_fields
 
 readonly_fields = ('id', 'membership_start',) + registration_fields
@@ -45,7 +46,9 @@ tag_fields = (
     'public_use_approved',
     'data_use_approved'
 )
-
+many_to_many_fields = (
+    'skills', 'groups', 'groups_interested', 'children', 'coshoppers'
+)
 # Create conditions
 schema_attrs = {}
 
@@ -81,7 +84,7 @@ class MemberRegisterSerializer(MemberSerializer):
     class Meta:
         """Serializer settings."""
 
-        model = Member
+        model = models.Member
         fields = editable_fields + registration_fields + tag_fields + ('id',)
         read_only_fields = ('id',)
         extra_kwargs = {
@@ -108,7 +111,7 @@ class MemberProfileSerializer(MemberSerializer):
     class Meta:
         """Serializer settings."""
 
-        model = Member
+        model = models.Member
         fields = registration_fields + editable_fields + readonly_fields
         read_only_fields = registration_fields + readonly_fields
 
@@ -119,20 +122,17 @@ class MemberSummarySerializer(MemberSerializer):
     class Meta:
         """Serializer settings."""
 
-        model = Member
+        model = models.Member
         fields = summary_fields
 
 
 class MemberAdminSerializer(MemberSerializer):
     """Serializer for admins to manage members in detail."""
 
-    tags = serializers.PrimaryKeyRelatedField(
-        many=True, required=False, queryset=MemberTag.objects.all())
-
     class Meta:
         """Serializer settings."""
 
-        model = Member
+        model = models.Member
         fields = '__all__'
 
 
@@ -142,21 +142,35 @@ class MemberTagCreateSerializer(serializers.ModelSerializer):
     class Meta:
         """Serializer settings."""
 
-        model = MemberTag
+        model = models.MemberTag
         fields = '__all__'
 
 
 class MemberTagSerializer(serializers.ModelSerializer):
-    """Serializer for existing dashboard tiles."""
+    """Serializer for member tags."""
 
     class Meta:
-        """
-        Serializer settings.
+        """Serializer settings."""
 
-        The name cannot be changed because it is the primary key to identify
-        the object. A new object has to be created to set a new name.
-        """
-
-        model = MemberTag
+        model = models.MemberTag
         fields = '__all__'
-        read_only_fields = ('tag_id', )
+
+
+class MemberSkillSerializer(serializers.ModelSerializer):
+    """Serializer for member skills."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = models.MemberSkill
+        fields = '__all__'
+
+
+class MemberGroupSerializer(serializers.ModelSerializer):
+    """Serializer for member groups."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = models.MemberGroup
+        fields = '__all__'

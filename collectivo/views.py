@@ -20,6 +20,7 @@ class AboutView(APIView):
 
 
 # TODO Default does not work yet
+# TODO Choices can be big for large datasets
 field_attrs = [
     'label', 'help_text',
     'required', 'default',
@@ -40,7 +41,8 @@ input_types = {
     'FloatField': 'number',
     'DateField': 'date',
     'BooleanField': 'checkbox',
-    'ManyToManyField': 'multiselect',
+    'ManyRelatedField': 'multiselect',
+    'PrimaryKeyRelatedField': 'select',
     'PhoneField': 'phone',
     'CountryField': 'country'
 }

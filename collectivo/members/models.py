@@ -5,8 +5,28 @@ from django.db import models
 class MemberTag(models.Model):
     """A tag that can be assigned to members."""
 
-    tag_id = models.CharField(max_length=255, primary_key=True)
-    label = models.CharField(max_length=255)
+    label = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.label
+
+
+class MemberGroup(models.Model):
+    """A group that can be assigned to members."""
+
+    label = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.label
+
+
+class MemberSkill(models.Model):
+    """A skill that can be assigned to members."""
+
+    label = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        return self.label
 
 
 class MemberCard(models.Model):
@@ -14,20 +34,6 @@ class MemberCard(models.Model):
 
     date_created = models.DateField()
     active = models.BooleanField(default=False)
-
-
-class MemberGroup(models.Model):
-    """A group that can be assigned to members."""
-
-    group_id = models.CharField(max_length=255, primary_key=True)
-    label = models.CharField(max_length=255)
-
-
-class MemberSkill(models.Model):
-    """A skill that can be assigned to members."""
-
-    skill_id = models.CharField(max_length=255, primary_key=True)
-    label = models.CharField(max_length=255)
 
 
 class MemberAddon(models.Model):
@@ -53,7 +59,7 @@ class Member(models.Model):
 
     # Account
     user_id = models.UUIDField(null=True, unique=True)
-    email = models.EmailField()
+    email = models.EmailField(null=True)
     email_verified = models.BooleanField(null=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
@@ -87,8 +93,10 @@ class Member(models.Model):
     phone = models.CharField(max_length=255, null=True)
 
     # Personal data (only for active members)
-    children = models.ManyToManyField('MemberAddon')
-    coshoppers = models.ManyToManyField('MemberAddon')
+    children = models.ManyToManyField(
+        'MemberAddon', related_name="children", blank=True)
+    coshoppers = models.ManyToManyField(
+        'MemberAddon', related_name="coshoppers", blank=True)
 
     # Personal data (only for natural people)
     birthday = models.DateField(null=True)
@@ -129,9 +137,8 @@ class Member(models.Model):
     shares_number = models.IntegerField(null=True)
     shares_payment_date = models.DateField(null=True)
     shares_payment_type = models.CharField(
-        max_length=20,
+        max_length=20, null=True,
         help_text='Type of payment.',
-        null=True,
         choices=[
             ('sepa', 'sepa'),
             ('transfer', 'transfer')
@@ -139,16 +146,18 @@ class Member(models.Model):
     )
     bank_account_iban = models.CharField(max_length=255, null=True)
     bank_account_owner = models.CharField(max_length=255, null=True)
-    # FUTURE shares_installment_plan = models.BooleanField(default=False)
+    # TODO FUTURE shares_installment_plan = models.BooleanField(default=False)
+    # TODO FUTURE Handle via tags?
 
     # Survey data
     survey_contact = models.TextField(null=True)
     survey_motivation = models.TextField(null=True)
-    groups_interested = models.ManyToManyField('MemberGroup')
-    skills = models.ManyToManyField('MemberSkill')
+    groups_interested = models.ManyToManyField(
+        'MemberGroup', related_name="groups_interested", blank=True)
+    skills = models.ManyToManyField('MemberSkill', blank=True)
 
     # Other
-    tags = models.ManyToManyField('MemberTag')
+    tags = models.ManyToManyField('MemberTag', blank=True)
+    groups = models.ManyToManyField(
+        'MemberGroup', related_name="groups", blank=True)
     admin_notes = models.TextField(null=True)
-    groups = models.ManyToManyField('MemberGroup')
-

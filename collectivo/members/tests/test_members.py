@@ -18,6 +18,7 @@ TEST_MEMBER = {
     'last_name': 'lastname',
     'email': 'some_member@example.com',
     'person_type': 'natural',
+    'membership_type': 'investing',
     'gender': 'diverse',
     'address_street': 'my street',
     'address_number': '1',
@@ -25,10 +26,8 @@ TEST_MEMBER = {
     'address_city': 'my city',
     'address_country': 'my country',
     'shares_number': 1,
-    'survey_first_heard': '-',
+    'survey_contact': '-',
     'survey_motivation': '-',
-    'survey_working_groups': '-',
-    'survey_skills': '-',
     'shares_payment_type': 'sepa',
 }
 
@@ -124,14 +123,14 @@ class PrivateMemberApiTestsForNonMembers(MembersTestCase):
         """Test that unchecked tag fields do not become tags."""
         member = self.create_member()
         self.assertFalse(
-            member.tags.filter(tag_id='data_use_approved').exists())
+            member.tags.filter(label='Data use approved').exists())
 
     def test_create_member_tags(self):
         """Test that checked tag fields become tags."""
-        payload = {**TEST_MEMBER_POST, 'data_use_approved': True}
+        payload = {**TEST_MEMBER_POST, 'Data use approved': True}
         member = self.create_member(payload)
         self.assertTrue(
-            member.tags.filter(tag_id='data_use_approved').exists())
+            member.tags.filter(label='Data use approved').exists())
 
 
 class PrivateMemberApiTestsForMembers(MembersTestCase):
@@ -200,7 +199,7 @@ class PrivateMemberApiTestsForAdmins(TestCase):
     def create_members(self):
         """Create an unordered set of members for testing."""
         for i in [0, 2, 1]:
-            payload = {**self.payload, 'first_name': str(i)}
+            payload = {**TEST_MEMBER, 'first_name': str(i)}
             res = self.client.post(MEMBERS_URL, payload)
             if res.status_code != 201:
                 raise ValueError("Create members failed: ", res.content)

@@ -162,10 +162,21 @@ class MemberTagViewSet(viewsets.ModelViewSet):
     """Manage member tags."""
 
     permission_classes = [IsMembersAdmin]
+    serializer_class = serializers.MemberTagSerializer
     queryset = models.MemberTag.objects.all()
 
-    def get_serializer_class(self):
-        """Set name to read-only except for create."""
-        if self.request.method == 'POST':
-            return serializers.MemberTagCreateSerializer
-        return serializers.MemberTagSerializer
+
+class MemberSkillViewSet(viewsets.ModelViewSet):
+    """Manage member skills."""
+
+    permission_classes = [IsMembersAdmin]
+    serializer_class = serializers.MemberSkillSerializer
+    queryset = models.MemberTag.objects.all()
+
+
+class MemberGroupViewSet(viewsets.ModelViewSet):
+    """Manage member groups."""
+
+    permission_classes = [IsMembersAdmin]
+    serializer_class = serializers.MemberGroupSerializer
+    queryset = models.MemberTag.objects.all()

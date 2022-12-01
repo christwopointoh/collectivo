@@ -1,5 +1,6 @@
 """Configuration file for the members extension."""
 from django.apps import AppConfig
+from django.conf import settings
 from django.db.models.signals import post_migrate
 from collectivo.version import __version__
 
@@ -9,7 +10,7 @@ def post_migrate_callback(sender, **kwargs):
     from collectivo.extensions.utils import register_extension
     from collectivo.menus.utils import register_menuitem
     from collectivo.dashboard.utils import register_tile
-    from .utils import register_tag
+    from .utils import register_tag, register_group, register_skill
 
     name = 'members'
     # TODO Language change
@@ -53,13 +54,30 @@ def post_migrate_callback(sender, **kwargs):
         blocked_role='members_user'
     )
 
-    tags = {
-        'statutes_approved': 'Statutes approved',
-        'public_use_approved': 'Public use approved',
-        'data_use_approved': 'Data use approved'
-    }
-    for tag_id, label in tags.items():
-        register_tag(tag_id=tag_id, label=label)
+    tags = [
+        'Statutes approved', 'Public use approved', 'Data use approved'
+    ]
+    for label in tags:
+        register_tag(label=label)
+
+    if settings.DEVELOPMENT:
+        groups = [
+            'Infogespräche', 'Sortiment', 'Öffentlichkeitsarbeit', 'Finanzen',
+            'Genossenschaft', 'IT und Digitales', 'Events', 'Standort', 'Minimarkt'
+        ]
+        for label in groups:
+            register_group(label=label)
+        skills = [
+            "Immobilien/Architektur/Planung",
+            "Einzelhandel",
+            "Handwerk (Elektrik, Tischlerei, …)",
+            "Genossenschaft/ Partizipation/Organisationsentwicklung",
+            "Kommunikation (Medien, Grafik, Text,…)",
+            "IT/ Digitales",
+            "Finanzen (BWL, Buchhaltung,…)",
+        ]
+        for label in skills:
+            register_skill(label=label)
 
 
 class MembersConfig(AppConfig):

@@ -10,7 +10,8 @@ def post_migrate_callback(sender, **kwargs):
     from collectivo.extensions.utils import register_extension
     from collectivo.menus.utils import register_menuitem
     from collectivo.dashboard.utils import register_tile
-    from .utils import register_tag, register_group, register_skill
+    from .utils import (
+        register_tag, register_group, register_skill, register_status)
 
     name = 'members'
     # TODO Language change
@@ -60,10 +61,19 @@ def post_migrate_callback(sender, **kwargs):
     for label in tags:
         register_tag(label=label)
 
+    status_fields = [
+        'Antrag ausstehend', 'Zahlung ausstehend', 'Bestätigung ausstehend',
+        'Zahlung fehlgeschlagen', 'Mitglied', 'Gesperrt', 'Beendet'
+    ]
+    for label in status_fields:
+        register_status(label=label)
+
     if settings.DEVELOPMENT:
         groups = [
-            'Infogespräche', 'Sortiment', 'Öffentlichkeitsarbeit', 'Finanzen',
-            'Genossenschaft', 'IT und Digitales', 'Events', 'Standort', 'Minimarkt'
+            'Infogespräche', 'Sortiment',
+            'Öffentlichkeitsarbeit', 'Finanzen',
+            'Genossenschaft', 'IT und Digitales',
+            'Events', 'Standort', 'Minimarkt'
         ]
         for label in groups:
             register_group(label=label)

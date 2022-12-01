@@ -127,7 +127,7 @@ class PrivateMemberApiTestsForNonMembers(MembersTestCase):
 
     def test_create_member_tags(self):
         """Test that checked tag fields become tags."""
-        payload = {**TEST_MEMBER_POST, 'Data use approved': True}
+        payload = {**TEST_MEMBER_POST, 'data_use_approved': True}
         member = self.create_member(payload)
         self.assertTrue(
             member.tags.filter(label='Data use approved').exists())
@@ -169,12 +169,10 @@ class PrivateMemberApiTestsForMembers(MembersTestCase):
 
     def test_update_member_admin_fields_fails(self):
         """Test that a member cannot edit admin fields of it's own data."""
-        res2 = self.client.put(
-            PROFILE_URL, {'membership_status': '2_provisional'})
-        self.assertEqual(res2.status_code, 400)
+        self.client.patch(PROFILE_URL, {'admin_notes': 'my note'})
         member = Member.objects.get(id=self.members_id)
         self.assertNotEqual(
-            getattr(member, 'membership_status'), '2_provisional')
+            getattr(member, 'admin_notes'), 'my note')
 
 
 class PrivateMemberApiTestsForAdmins(TestCase):
@@ -189,12 +187,6 @@ class PrivateMemberApiTestsForAdmins(TestCase):
             is_authenticated=True,
         )
         self.client.force_authenticate(user)
-        self.payload = {
-            'first_name': 'firstname',
-            'last_name': 'lastname',
-            'email_verified': True,
-            'email': 'test_member_1@example.com',
-        }
 
     def create_members(self):
         """Create an unordered set of members for testing."""
@@ -211,18 +203,18 @@ class PrivateMemberApiTestsForAdmins(TestCase):
 
     def test_update_member_admin_fields(self):
         """Test that admins can write to admin fields."""
-        res1 = self.client.post(MEMBERS_URL, self.payload)
+        res1 = self.client.post(MEMBERS_URL, TEST_MEMBER)
         self.assertEqual(res1.status_code, 201)
         res2 = self.client.patch(
             reverse(
                 'collectivo:collectivo.members:member-detail',
-                args=[res1.data['id']]),
-            {'membership_status': 'provisional'}
+                args=[res1.data['id']]), {'admin_notes': 'my note'}
         )
-        self.assertEqual(res2.status_code, 200)
+        if res2.status_code != 200:
+            raise ValueError("API call failed: ", res2.content)
         member = Member.objects.get(id=res1.data['id'])
         self.assertEqual(
-            getattr(member, 'membership_status'), 'provisional')
+            getattr(member, 'admin_notes'), 'my note')
 
     def test_member_sorting(self):
         """Test that all member fields can be sorted."""

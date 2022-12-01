@@ -8,6 +8,7 @@ class MemberTag(models.Model):
     label = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
+        """Return string representation."""
         return self.label
 
 
@@ -17,6 +18,7 @@ class MemberGroup(models.Model):
     label = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
+        """Return string representation."""
         return self.label
 
 
@@ -26,6 +28,17 @@ class MemberSkill(models.Model):
     label = models.CharField(max_length=255, unique=True)
 
     def __str__(self):
+        """Return string representation."""
+        return self.label
+
+
+class MemberStatus(models.Model):
+    """A status that can be assigned to members."""
+
+    label = models.CharField(max_length=255, unique=True)
+
+    def __str__(self):
+        """Return string representation."""
         return self.label
 
 
@@ -117,19 +130,8 @@ class Member(models.Model):
             ('investing', 'investing'),
         ]
     )
-    membership_status = models.CharField(
-        max_length=20,
-        default='applicant',
-        choices=[
-            ('applicant', 'applicant'),
-            ('pending payment', 'pending payment'),
-            ('payment denied', 'payment denied'),
-            ('pending approval', 'pending approval'),
-            ('approved', 'approved'),
-            ('suspended', 'suspended'),
-            ('ended', 'ended'),
-        ]
-    )
+    membership_status = models.ForeignKey(
+        'MemberStatus', null=True, on_delete=models.SET_NULL)
     membership_card = models.ForeignKey(
         'MemberCard', null=True, on_delete=models.SET_NULL)
 

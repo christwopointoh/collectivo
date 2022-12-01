@@ -41,11 +41,11 @@ summary_fields = (
     'membership_end',
     'tags',
 )
-tag_fields = (
-    # 'statutes_approved', TODO Add nach Gründung
-    'public_use_approved',
-    'data_use_approved'
-)
+tag_fields = {
+    'statutes_approved': 'Statutes approved',
+    'public_use_approved': 'Public use approved',
+    'data_use_approved': 'Data use approved',
+}
 many_to_many_fields = (
     'skills', 'groups', 'groups_interested', 'children', 'coshoppers'
 )
@@ -76,8 +76,7 @@ class MemberRegisterSerializer(MemberSerializer):
     """Serializer for users to register themselves as members."""
 
     # Tag fields
-    # TODO Add after Gründung
-    # statutes_approved = serializers.BooleanField(write_only=True)
+    statutes_approved = serializers.BooleanField(write_only=True)
     public_use_approved = serializers.BooleanField(write_only=True)
     data_use_approved = serializers.BooleanField(write_only=True)
 
@@ -85,7 +84,8 @@ class MemberRegisterSerializer(MemberSerializer):
         """Serializer settings."""
 
         model = models.Member
-        fields = editable_fields + registration_fields + tag_fields + ('id',)
+        fields = editable_fields + registration_fields \
+            + tuple(tag_fields.keys()) + ('id',)
         read_only_fields = ('id',)
         extra_kwargs = {
             field: {'required': field not in optional_fields}
@@ -97,11 +97,12 @@ class MemberRegisterSerializer(MemberSerializer):
         """Remove tag fields before model creation."""
         # TODO Include checkboxes in validation
         attrs['tags'] = []
-        for field in tag_fields:
+        for field, tag_label in tag_fields.items():
             value = attrs[field]
             attrs.pop(field, None)
             if value is True:
-                attrs['tags'].append(field)
+                tag_id = models.MemberTag.objects.get(label=tag_label).id
+                attrs['tags'].append(tag_id)
         return super().validate(attrs)
 
 
@@ -173,4 +174,14 @@ class MemberGroupSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = models.MemberGroup
+        fields = '__all__'
+
+
+class MemberStatusSerializer(serializers.ModelSerializer):
+    """Serializer for member status."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = models.MemberStatus
         fields = '__all__'

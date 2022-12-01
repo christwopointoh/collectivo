@@ -29,7 +29,7 @@ members = [
         "enabled": True,
         "firstName": f"Test Member {str(i).zfill(2)}",
         "lastName": "Example",
-        "emailVerified": True
+        "emailVerified": True,
     }
     for i in range(1, N_TEST_MEMBERS+1)
 ] + superusers
@@ -89,6 +89,8 @@ def populate_keycloak_with_test_data():
 
             'first_name': member['firstName'],
             'last_name': member['lastName'],
+
+            'membership_type': 'active',
         }
         register_viewset(
             MembersAdminViewSet,

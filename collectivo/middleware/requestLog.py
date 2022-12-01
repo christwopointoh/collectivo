@@ -27,12 +27,13 @@ class RequestLogMiddleware:
         # Request passes on to controller
         response = self.get_response(request)
 
-        log_data["status_code"] = response.status_code
+        if hasattr(request, 'status_code'):
+            log_data["status_code"] = response.status_code
+            if response.status_code == 403:
+                log_data["response_body"] = response.content
         if hasattr(request, 'userinfo') and \
                 hasattr(request.userinfo, 'user_id'):
             log_data["user_id"] = request.userinfo.user_id
-        if response.status_code == 403:
-            log_data["response_body"] = response.content
 
         if request.META["X-Request-ID"] is not None:
             log_data["request_id"] = request.META["X-Request-ID"]

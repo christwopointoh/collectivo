@@ -47,11 +47,12 @@ class MemberAuthSyncMixin:
 
     def sync_user_roles(self, user_id):
         """Add user to group members after creation."""
-        role = 'members_user'
-        auth_manager = get_auth_manager()
-        role_id = auth_manager.get_realm_role(role)['id']
-        auth_manager.assign_realm_roles(
-            user_id, {'id': role_id, 'name': role})
+        if user_id is not None:
+            role = 'members_user'
+            auth_manager = get_auth_manager()
+            role_id = auth_manager.get_realm_role(role)['id']
+            auth_manager.assign_realm_roles(
+                user_id, {'id': role_id, 'name': role})
 
 
 class GenericMemberViewSet(
@@ -68,22 +69,29 @@ class GenericMemberViewSet(
             raise PermissionDenied('User is already registered as a member.')
         self.sync_user_data(serializer)
         self.sync_user_roles(user_id)
+
+        # Fields that are automaticaly filled out during registration
         extra_fields = {
             'user_id': user_id,
             'membership_start': localdate(),
         }
         if 'tags' in serializer.validated_data:
             extra_fields['tags'] = serializer.validated_data['tags']
+
         serializer.save(**extra_fields)
 
     def perform_update(self, serializer):
         """Update member."""
         self.sync_user_data(serializer)
-        self.sync_user_roles(serializer.initial_data['user_id'])
+        # if 'user_id' in serializer.initial_data:
+        # self.sync_user_roles(serializer.initial_data['user_id'])
+        self.sync_user_roles(self.request.userinfo.user_id)
         serializer.save()
 
 
-class MemberRegisterView(mixins.CreateModelMixin, GenericMemberViewSet):
+class MemberRegisterView(
+        GenericMemberViewSet,
+        mixins.CreateModelMixin):
     """
     API for members to register themselves.
 
@@ -100,9 +108,9 @@ class MemberRegisterView(mixins.CreateModelMixin, GenericMemberViewSet):
 
 
 class MemberViewSet(
+        GenericMemberViewSet,
         mixins.RetrieveModelMixin,
         mixins.UpdateModelMixin,
-        GenericMemberViewSet
         ):
     """
     API for members to manage themselves.
@@ -121,7 +129,10 @@ class MemberViewSet(
             raise PermissionDenied('User is not registered as a member.')
 
 
-class MembersAdminSummaryView(mixins.ListModelMixin, GenericMemberViewSet):
+class MembersAdminSummaryView(
+        GenericMemberViewSet,
+        mixins.ListModelMixin
+        ):
     """
     API for admins to get a summary of members.
 
@@ -134,7 +145,9 @@ class MembersAdminSummaryView(mixins.ListModelMixin, GenericMemberViewSet):
     ordering_fields = member_fields
 
 
-class MembersAdminViewSet(viewsets.ModelViewSet, GenericMemberViewSet):
+class MembersAdminViewSet(
+        GenericMemberViewSet,
+        viewsets.ModelViewSet):
     """
     API for admins to manage members.
 
@@ -171,7 +184,7 @@ class MemberSkillViewSet(viewsets.ModelViewSet):
 
     permission_classes = [IsMembersAdmin]
     serializer_class = serializers.MemberSkillSerializer
-    queryset = models.MemberTag.objects.all()
+    queryset = models.MemberSkill.objects.all()
 
 
 class MemberGroupViewSet(viewsets.ModelViewSet):
@@ -179,4 +192,12 @@ class MemberGroupViewSet(viewsets.ModelViewSet):
 
     permission_classes = [IsMembersAdmin]
     serializer_class = serializers.MemberGroupSerializer
-    queryset = models.MemberTag.objects.all()
+    queryset = models.MemberGroup.objects.all()
+
+
+class MemberStatusViewSet(viewsets.ModelViewSet):
+    """Manage member status."""
+
+    permission_classes = [IsMembersAdmin]
+    serializer_class = serializers.MemberStatusSerializer
+    queryset = models.MemberStatus.objects.all()

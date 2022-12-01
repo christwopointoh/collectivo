@@ -234,7 +234,7 @@ SPECTACULAR_SETTINGS = {
 # Logging
 # https://docs.djangoproject.com/en/4.1/ref/logging/
 
-LOGGING_LEVEL = 'DEBUG'
+LOGGING_LEVEL = 'WARNING'
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,

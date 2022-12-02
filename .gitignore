@@ -3,7 +3,7 @@ node_modules/
 
 # Collectivo
 .env
-collectivo-app/collectivo
+collectivo_app/collectivo
 collectivo/devtools/static/devtools
 
 # Byte-compiled / optimized / DLL files

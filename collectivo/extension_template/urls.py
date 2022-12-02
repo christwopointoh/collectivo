@@ -11,5 +11,5 @@ router.register('mymodel', MyModelViewSet)
 
 
 urlpatterns = [
-    path('api/extension_template/v1/', include(router.urls)),
+    path('api/extension_template/', include(router.urls)),
 ]

@@ -6,10 +6,10 @@
 .docker
 
 # Python
-collectivo-app/__pycache__/
-collectivo-app/*/__pycache__/
-collectivo-app/*/*/__pycache__/
-collectivo-app/*/*/*/__pycache__/
+collectivo_app/__pycache__/
+collectivo_app/*/__pycache__/
+collectivo_app/*/*/__pycache__/
+collectivo_app/*/*/*/__pycache__/
 .env/
 .venv/
 venv/

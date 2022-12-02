@@ -21,7 +21,8 @@ optional_fields = (
 ) + legal_fields + natural_fields + sepa_fields
 
 registration_fields = (
-    'first_name', 'last_name', 'person_type',
+    'person_type',
+    'first_name', 'last_name',
     'shares_number', 'shares_payment_type',
     'survey_contact', 'membership_type',
     'survey_motivation',
@@ -29,10 +30,13 @@ registration_fields = (
     'skills',
 ) + legal_fields + natural_fields + sepa_fields
 
-readonly_fields = ('id', 'membership_start',) + registration_fields
+readonly_fields = (
+    'id', 'membership_start',
+    'email',
+    ) + registration_fields
 
 summary_fields = (
-    'id',
+    'id', 'user_id',
     'first_name', 'last_name',
     'person_type', 'membership_status',
     'membership_start',

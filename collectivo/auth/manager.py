@@ -47,7 +47,7 @@ class KeycloakAuthManager(AuthManager, KeycloakAdmin):
         try:
             super().update_user(user_id=user_id, payload=payload)
         except KeycloakPutError as e:
-            raise ParseError(e)
+            raise ParseError(f'Could not update user {user_id}: {e}')
 
     def add_user_to_group(self, user_id, group_name):
         """Add a user to a keycloak group."""

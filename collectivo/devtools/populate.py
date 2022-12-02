@@ -2,6 +2,7 @@
 import logging
 from collectivo.utils import get_auth_manager, register_viewset
 from collectivo.members.views import MembersViewSet
+from collectivo.members.models import Member
 from keycloak.exceptions import KeycloakGetError, KeycloakDeleteError
 
 
@@ -63,6 +64,7 @@ def populate_keycloak_with_test_data():
         try:
             user_id = auth_manager.get_user_id(user['email'])
             auth_manager.delete_user(user_id)
+            Member.objects.filter(email=user['email']).delete()
         except (KeycloakGetError, KeycloakDeleteError):
             pass
         user_id = auth_manager.create_user(user)
@@ -81,7 +83,7 @@ def populate_keycloak_with_test_data():
     # Make members into members
     # This automatically adds them to the group 'members'
     for member in members:
-        user_id = auth_manager.get_user_id(member['username'])
+        user_id = auth_manager.get_user_id(member['email'])
         payload = {
             'user_id': user_id,
 

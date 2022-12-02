@@ -1,1 +1,0 @@
-"""The collectivo-app."""

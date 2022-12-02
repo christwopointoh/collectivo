@@ -1,20 +1,19 @@
-"""Django settings for collectivo-app."""
+"""
+Default django settings for collectivo_app.
+
+Will not be used if custom settings are defined through
+the COLLECTIVO_SETTINGS environment variable (see manage.py).
+"""
 import os
 from pathlib import Path
-import logging
+from collectivo.errors import CollectivoError
 from collectivo.version import __version__
+from .utils import string_to_list
 
 # TODO FOR PRODUCTION
 # Go through https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-# Change allowed_hosts
 # Remove unused django functions
 
-# Try to import custom settings
-try:
-    from extensions import settings
-    _custom_settings = vars(settings)
-except ModuleNotFoundError:
-    _custom_settings = {}
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ['SECRET_KEY']
@@ -22,30 +21,24 @@ DEBUG = os.environ.get('DEBUG', False)
 DEVELOPMENT = os.environ.get('DEVELOPMENT', False)
 
 if os.environ.get('ALLOWED_HOSTS') is not None:
-    ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').replace(' ', '').split(',')
+    ALLOWED_HOSTS = string_to_list(os.environ.get('ALLOWED_HOSTS'))
 elif DEVELOPMENT:
     ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "collectivo.local"]
 else:
     ALLOWED_HOSTS = []
 
-# Install built-in collectivo extensions
-# If core is given, all core extensions are installed first
-_built_in_extensions = [
-    f'collectivo.{ext}' for ext in
-    os.environ.get('COLLECTIVO_EXTENSIONS', 'core').replace(' ', '').split(',')
-]
-if 'collectivo.core' in _built_in_extensions:
-    _core_apps = [
-        'collectivo.menus', 'collectivo.auth', 'collectivo.extensions',
-        'collectivo.dashboard', 'collectivo.members'
-    ]
-    for _app in _core_apps + ['collectivo.core']:
-        if _app in _built_in_extensions:
-            _built_in_extensions.remove(_app)
-    _built_in_extensions = _core_apps + _built_in_extensions
+# Choose built-in collectivo extensions from environment
+_built_in_extensions = ['members']
+_chosen_extensions = string_to_list(os.environ.get('COLLECTIVO_EXTENSIONS'))
+for ext in _chosen_extensions:
+    if ext not in _built_in_extensions:
+        raise CollectivoError(
+            "Error in environment variable 'COLLECTIVO_EXTENSIONS': "
+            f"'{ext}' is not a built-in extension. "
+            f"Available extensions are: {_built_in_extensions}."
+        )
 
 INSTALLED_APPS = [
-    *_custom_settings.get('INSTALLED_APPS_TOP', []),
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -53,17 +46,18 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'collectivo',
+    'collectivo.menus',
+    'collectivo.auth',
+    'collectivo.extensions',
+    'collectivo.dashboard',
     'django_filters',
     'rest_framework',
     'drf_spectacular',
-    *_built_in_extensions,
-    *_custom_settings.get('INSTALLED_APPS', [])
+    *[f'collectivo.{ext}' for ext in _chosen_extensions],
 ]
 
 MIDDLEWARE = [
     'collectivo.middleware.requestId.AddRequestId',
-
-    *_custom_settings.get('MIDDLEWARE_TOP', []),
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -73,7 +67,6 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'collectivo.auth.middleware.KeycloakMiddleware',
     'collectivo.middleware.requestLog.RequestLogMiddleware',
-    *_custom_settings.get('MIDDLEWARE', [])
 ]
 
 if DEVELOPMENT:
@@ -92,7 +85,7 @@ if DEVELOPMENT:
     ]
     CORS_ORIGIN_ALLOW_ALL = True
 
-ROOT_URLCONF = 'collectivo-app.urls'
+ROOT_URLCONF = 'collectivo_app.urls'
 
 TEMPLATES = [
     {
@@ -110,7 +103,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'collectivo-app.wsgi.application'
+WSGI_APPLICATION = 'collectivo_app.wsgi.application'
 
 
 # Database
@@ -269,8 +262,6 @@ COLLECTIVO = {
     'default_auth_manager': 'collectivo.auth.manager.KeycloakAuthManager',
     'default_user_model': 'collectivo.members.models.Member',
     'default_extension_model': 'collectivo.extensions.models.Extension',
-
-    **_custom_settings.get('COLLECTIVO', {})
 }
 
 

@@ -22,7 +22,7 @@ urlpatterns = [
 ]
 
 for app in settings.INSTALLED_APPS:
-    if app.startswith('collectivo.'):
+    if app.startswith('collectivo') and app != 'collectivo':
         pattern = path('', include(f'{app}.urls'))
         urlpatterns.append(pattern)
 

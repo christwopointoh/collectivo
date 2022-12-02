@@ -10,7 +10,7 @@ Different community tools can be added to collectivo through extensions.
 
 Folders:
 - `collectivo` - A django package, the core of the framework.
-- `collectivo-app` - A django app that can be used to run collectivo.
+- `collectivo_app` - A django app that can be used to run collectivo.
 
 ## Development
 
@@ -120,22 +120,42 @@ The members extension can be used to manage member data.
     - `/members/members`: Manage the data of all users (required role: `members_admin` or `superuser`).
     - `/members/summary`: Get summary data of all users (required role: `members_admin` or `superuser`).
 
-## Custom extensions
+## Custom settings and extensions
 
-Custom extensions can be added in a folder `/extensions`.
+When using the collectivo docker image,
+a folder with custom settings and extensions can be added as a volume.
 
-Custom settings can be set in `/extensions/settings.py`.
-
-Possible options are:
+Here is an example of a folder with custom settings, url patterns, and an extension:
 
 ```
-INSTALLED_APPS_TOP
-INSTALLED_APPS
-
-MIDDLEWARE_TOP
-MIDDLEWARE
-
-COLLECTIVO
+- collectivo_extensions/
+    - requirements.txt
+    - settings.py
+    - urls.py
+    - my_extension/
+        - apps.py
+        - ...
 ```
 
-TODO: How to set custom dependencies?
+The following configuration in `docker-compose.yml`
+places this folder within the collectivo app
+and defines the custom settings to override the default settings.
+
+```yml
+  collectivo:
+    environment:
+        COLLECTIVO_SETTINGS: collectivo_extensions.settings
+    volumes:
+      - ./collectivo_extensions:/collectivo-app/collectivo_extensions
+```
+
+The following configuration of `collectivo_extensions/settings.py`
+copies the default settings and adds the custom url patterns and extension.
+
+```python
+from collectivo_app.settings import *
+INSTALLED_APPS.append('collectivo_extensions.my_extension')
+ROOT_URLCONF = 'collectivo_extensions.urls'
+```
+
+TODO: How to handle requirements.txt?

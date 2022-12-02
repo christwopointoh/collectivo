@@ -85,18 +85,18 @@ jobs:
           SECRET_KEY: badkey
           KEYCLOAK_SERVER_URL: http://keycloak:8080
           KEYCLOAK_CLIENT_SECRET_KEY: '**********'
-          COLLECTIVO_EXTENSIONS: core
+          COLLECTIVO_EXTENSIONS: members
           DEBUG: True
           DEVELOPMENT: True
         run: |
-          cp -a collectivo collectivo-app
-          cd collectivo-app
+          cp -a collectivo collectivo_app
+          cd collectivo_app
           python manage.py migrate
           coverage run manage.py test
       - name: Run Lint Checks
         run: |
-          cp -a collectivo collectivo-app
-          cd collectivo-app
+          cp -a collectivo collectivo_app
+          cd collectivo_app
           flake8
       - name: Collect docker logs on failure
         if: failure()

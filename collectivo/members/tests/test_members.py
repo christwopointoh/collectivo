@@ -214,7 +214,6 @@ class MemberAuthSyncTests(TestCase):
 
     def test_auth_sync_as_admin(self):
         """Test that auth fields are updated on auth server for /members."""
-
         # Patch the name of a member
         res2 = self.client.patch(
             reverse(MEMBER_URL_LABEL, args=[self.member_id]),

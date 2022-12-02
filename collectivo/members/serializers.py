@@ -5,8 +5,7 @@ from . import models
 
 # Fields for all members
 editable_fields = (
-    'gender',
-    'phone', 'email',
+    'gender', 'phone',
     'address_street', 'address_number',
     'address_stair', 'address_door', 'address_postcode',
     'address_city', 'address_country',

@@ -1,7 +1,7 @@
 """Populate collectivo & keycloak with test users."""
 import logging
 from collectivo.utils import get_auth_manager, register_viewset
-from collectivo.members.views import MembersAdminViewSet
+from collectivo.members.views import MembersViewSet
 from keycloak.exceptions import KeycloakGetError, KeycloakDeleteError
 
 
@@ -71,11 +71,12 @@ def populate_keycloak_with_test_data():
 
     # Assign superuser role to superusers
     for user in superusers:
-        role = 'superuser'
-        user_id = auth_manager.get_user_id(user['email'])
-        role_id = auth_manager.get_realm_role(role)['id']
-        auth_manager.assign_realm_roles(
-            user_id, {'id': role_id, 'name': role})
+        roles = ('superuser', 'members_admin', 'shifts_admin')
+        for role in roles:
+            user_id = auth_manager.get_user_id(user['email'])
+            role_id = auth_manager.get_realm_role(role)['id']
+            auth_manager.assign_realm_roles(
+                user_id, {'id': role_id, 'name': role})
 
     # Make members into members
     # This automatically adds them to the group 'members'
@@ -93,6 +94,6 @@ def populate_keycloak_with_test_data():
             'membership_type': 'active',
         }
         register_viewset(
-            MembersAdminViewSet,
+            MembersViewSet,
             payload=payload
         )

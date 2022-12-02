@@ -17,7 +17,6 @@ REGISTER_URL = reverse('collectivo:collectivo.members:register')
 TEST_MEMBER = {
     'first_name': 'firstname',
     'last_name': 'lastname',
-    'email': 'some_member@example.com',
     'person_type': 'natural',
     'membership_type': 'investing',
     'gender': 'diverse',
@@ -34,6 +33,7 @@ TEST_MEMBER = {
 
 TEST_MEMBER_POST = {
     **TEST_MEMBER,
+    'email': 'some_member@example.com',
     'email_verified': True,
 }
 

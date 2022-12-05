@@ -108,8 +108,9 @@ class Member(models.Model):
     # Personal data (only for active members)
     children = models.ManyToManyField(
         'MemberAddon', related_name="children", blank=True)
-    coshoppers = models.ManyToManyField(
-        'MemberAddon', related_name="coshoppers", blank=True)
+    coshopper = models.ForeignKey(
+        'MemberAddon', related_name="coshoppers",
+        null=True, on_delete=models.SET_NULL)
 
     # Personal data (only for natural people)
     birthday = models.DateField(null=True)

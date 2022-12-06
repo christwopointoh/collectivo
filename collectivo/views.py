@@ -74,6 +74,6 @@ class SchemaMixin:
                 for key, value in serializer.schema_attrs[field_name].items():
                     data[field_name][key] = value
             # Ensure that read only fields cannot be required
-            if field_data.get('read_only') == True:
+            if field_data.get('read_only') is True:
                 field_data['required'] = False
         return Response(data)

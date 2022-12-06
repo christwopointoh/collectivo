@@ -23,9 +23,16 @@ conditions = {
 field_settings = {
     'id': {
         'permissions': ['read', 'table'],
+        'kwargs': {
+            'label': 'Membership number',
+            'help_text': 'This number can be used to identify you.',
+        },
+    },
+    'email': {
+        'permissions': ['read', 'table'],
     },
     'person_type': {
-        'permissions': ['read', 'create', 'table'],
+        'permissions': ['create', 'table'],
         'kwargs': {'required': True},
     },
     'first_name': {
@@ -102,7 +109,7 @@ field_settings = {
 
     # Membership fields
     'membership_type': {
-        'permissions': ['read', 'create', 'table'],
+        'permissions': ['create', 'table'],
         'schema': {
             'condition': conditions['natural'],
             'required': True
@@ -113,7 +120,12 @@ field_settings = {
     },
     'shares_number': {
         'permissions': ['read', 'create', 'table'],
-        'kwargs': {'required': True, 'min_value': 1}
+        'kwargs': {
+            'label': 'Number of shares',
+            'help_text': 'The amount of shares that you own.',
+            'required': True,
+            'min_value': 1
+        }
     },
     'shares_payment_type': {
         'permissions': ['create'],

@@ -17,8 +17,6 @@ REGISTER_URL = reverse('collectivo:collectivo.members:register')
 TEST_MEMBER = {
     'first_name': 'firstname',
     'last_name': 'lastname',
-    'person_type': 'natural',
-    'membership_type': 'investing',
     'gender': 'diverse',
     'address_street': 'my street',
     'address_number': '1',
@@ -31,6 +29,8 @@ TEST_MEMBER = {
 TEST_MEMBER_POST = {
     **TEST_MEMBER,
     'email': 'some_member@example.com',
+    'person_type': 'natural',
+    'membership_type': 'investing',
     'email_verified': True,
     'survey_contact': '-',
     'survey_motivation': '-',
@@ -248,7 +248,7 @@ class PrivateMemberApiTestsForAdmins(TestCase):
     def create_members(self):
         """Create an unordered set of members for testing."""
         for i in [0, 2, 1]:
-            payload = {**TEST_MEMBER, 'first_name': str(i)}
+            payload = {**TEST_MEMBER_POST, 'first_name': str(i)}
             res = self.client.post(MEMBERS_URL, payload)
             if res.status_code != 201:
                 raise ValueError("Create members failed: ", res.content)
@@ -260,7 +260,7 @@ class PrivateMemberApiTestsForAdmins(TestCase):
 
     def test_update_member_admin_fields(self):
         """Test that admins can write to admin fields."""
-        res1 = self.client.post(MEMBERS_URL, TEST_MEMBER)
+        res1 = self.client.post(MEMBERS_URL, TEST_MEMBER_POST)
         self.assertEqual(res1.status_code, 201)
         res2 = self.client.patch(
             reverse(

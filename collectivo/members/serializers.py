@@ -1,5 +1,6 @@
 """Serializers of the members extension."""
 from rest_framework import serializers
+from rest_framework.exceptions import ParseError
 from . import models
 
 conditions = {
@@ -22,7 +23,7 @@ conditions = {
 
 field_settings = {
     'id': {
-        'permissions': ['read', 'table'],
+        'permissions': ['read', 'create', 'table'],
         'kwargs': {
             'label': 'Membership number',
             'help_text': 'This number can be used to identify you.',
@@ -237,8 +238,39 @@ field_settings = {
             'label': 'Tags',
         },
     },
-}
 
+    # Special boolean fields for registration
+    # Will be converted to tags during validation
+    # 'statutes_approved': {
+    #     'permissions': ['create'],
+    #     'kwargs': {
+    #         'label': 'Statutes approved',
+    #         'help_text': 'TEXT PENDING JULIANNA'
+    #     },
+    # },
+    'public_use_approved': {
+        'permissions': ['create'],
+        'kwargs': {
+            'label': 'Public use approved',
+            'help_text': 'TEXT PENDING JULIANNA'
+        },
+    },
+    'data_use_approved': {
+        'permissions': ['create'],
+        'kwargs': {
+            'required': True,
+            'label': 'Data use approved',
+            'help_text': 'TEXT PENDING JULIANNA'
+        },
+    },
+    'founding_event': {
+        'permissions': ['create'],
+        'kwargs': {
+            'label': 'Founding event',
+            'help_text': 'TEXT PENDING JULIANNA'
+        },
+    },
+}
 
 # Boolean fields that will be converted to tags
 register_fields = [
@@ -259,13 +291,10 @@ summary_fields = [
     f for f, s in field_settings.items()
     if 'table' in s['permissions']
 ]
-
-tag_fields = {
-    'statutes_approved': 'Statutes approved',
-    'public_use_approved': 'Public use approved',
-    'data_use_approved': 'Data use approved',
-    'founding_event': 'Founding event'
-}
+register_tag_fields = [
+    # 'statutes_approved'
+    'public_use_approved', 'data_use_approved', 'founding_event'
+]
 
 
 class MemberSerializer(serializers.ModelSerializer):
@@ -288,30 +317,36 @@ class MemberRegisterSerializer(MemberSerializer):
     """Serializer for users to register themselves as members."""
 
     # Tag fields
-    statutes_approved = serializers.BooleanField(write_only=True)
-    public_use_approved = serializers.BooleanField(write_only=True)
-    data_use_approved = serializers.BooleanField(write_only=True)
-    founding_event = serializers.BooleanField(write_only=True)
+    # These will change after the founding event
+    # statutes_approved = serializers.BooleanField(write_only=True)
+    public_use_approved = serializers.BooleanField(
+        write_only=True, required=False)
+    data_use_approved = serializers.BooleanField(
+        write_only=True, required=True)
+    founding_event = serializers.BooleanField(
+        write_only=True, required=False)
 
     class Meta:
         """Serializer settings."""
 
         model = models.Member
-        fields = register_fields + [*tag_fields.keys()] + ['id']
-        read_only_fields = ('id',)
+        fields = register_fields + register_tag_fields
+        read_only_fields = ['id']  # Return the id after creation
         extra_kwargs = {
-            field: field_settings[field]['kwargs']
-            for field in fields
-            if field in field_settings
-            and 'kwargs' in field_settings[field]
+            field: field_settings[field]['kwargs'] for field in fields
+            if field in field_settings and 'kwargs' in field_settings[field]
         }
 
     def validate(self, attrs):
-        """Remove tag fields before model creation."""
-        # TODO Include checkboxes in validation
+        """Validate and transform tag fields before validation."""
         attrs['tags'] = []
-        for field, tag_label in tag_fields.items():
+        for field in register_tag_fields:
+            tag_setting = field_settings[field]
+            tag_label = tag_setting['kwargs']['label']
             value = attrs[field]
+            if tag_setting['kwargs'].get('required') is True \
+                    and value is not True:
+                raise ParseError(f'{field} must be true')
             attrs.pop(field, None)
             if value is True:
                 tag_id = models.MemberTag.objects.get(label=tag_label).id
@@ -329,9 +364,8 @@ class MemberProfileSerializer(MemberSerializer):
         fields = profile_fields
         read_only_fields = profile_read_only_fields
         extra_kwargs = {
-            field: field_settings[field]['kwargs']
-            for field in fields
-            if 'kwargs' in field_settings[field]
+            field: field_settings[field]['kwargs'] for field in fields
+            if field in field_settings and 'kwargs' in field_settings[field]
         }
 
 

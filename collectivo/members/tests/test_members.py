@@ -38,6 +38,7 @@ TEST_MEMBER_POST = {
     'survey_contact': '-',
     'survey_motivation': '-',
     'shares_payment_type': 'sepa',
+    'data_use_approved': True,
 }
 
 TEST_MEMBER_GET = {
@@ -133,14 +134,14 @@ class MemberRegistrationTests(MembersTestCase):
         """Test that unchecked tag fields do not become tags."""
         member = self.create_member()
         self.assertFalse(
-            member.tags.filter(label='Data use approved').exists())
+            member.tags.filter(label='Public use approved').exists())
 
     def test_create_member_tags(self):
         """Test that checked tag fields become tags."""
-        payload = {**TEST_MEMBER_POST, 'data_use_approved': True}
+        payload = {**TEST_MEMBER_POST, 'public_use_approved': True}
         member = self.create_member(payload)
         self.assertTrue(
-            member.tags.filter(label='Data use approved').exists())
+            member.tags.filter(label='Public use approved').exists())
 
     def test_multiple_choice_str(self):
         """Test that multiple choices can be selected with strings."""

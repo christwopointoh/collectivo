@@ -26,15 +26,15 @@ TEST_MEMBER = {
     'address_city': 'my city',
     'address_country': 'my country',
     'shares_number': 1,
-    'survey_contact': '-',
-    'survey_motivation': '-',
-    'shares_payment_type': 'sepa',
 }
 
 TEST_MEMBER_POST = {
     **TEST_MEMBER,
     'email': 'some_member@example.com',
     'email_verified': True,
+    'survey_contact': '-',
+    'survey_motivation': '-',
+    'shares_payment_type': 'sepa',
 }
 
 TEST_MEMBER_GET = {

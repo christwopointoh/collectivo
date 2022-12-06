@@ -108,6 +108,9 @@ field_settings = {
             'required': True
         }
     },
+    'membership_start': {
+        'permissions': ['read', 'table'],
+    },
     'shares_number': {
         'permissions': ['read', 'create', 'table'],
         'kwargs': {'required': True, 'min_value': 1}
@@ -147,9 +150,6 @@ field_settings = {
 
     # Table view
     'user_id': {
-        'permissions': ['table'],
-    },
-    'membership_start': {
         'permissions': ['table'],
     },
     'membership_cancelled': {

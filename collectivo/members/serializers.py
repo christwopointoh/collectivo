@@ -120,6 +120,10 @@ class MemberProfileSerializer(MemberSerializer):
         model = models.Member
         fields = registration_fields + editable_fields + readonly_fields
         read_only_fields = registration_fields + readonly_fields
+        extra_kwargs = {
+            field: {'required': field not in optional_fields}
+            for field in fields
+        }
 
 
 class MemberSummarySerializer(MemberSerializer):

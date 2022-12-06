@@ -116,7 +116,7 @@ field_settings = {
         'kwargs': {'required': True, 'min_value': 1}
     },
     'shares_payment_type': {
-        'permissions': ['read', 'create'],
+        'permissions': ['create'],
         'kwargs': {'required': True},
     },
     'bank_account_iban': {

@@ -13,6 +13,9 @@ MEMBERS_URL = reverse('collectivo:collectivo.members:member-list')
 MEMBER_URL_LABEL = 'collectivo:collectivo.members:member-detail'
 PROFILE_URL = reverse('collectivo:collectivo.members:profile')
 REGISTER_URL = reverse('collectivo:collectivo.members:register')
+REGISTRATION_SCHEMA_URL = reverse(
+    'collectivo:collectivo.members:register-schema')
+PROFILE_SCHEMA_URL = reverse('collectivo:collectivo.members:profile-schema')
 
 TEST_MEMBER = {
     'first_name': 'firstname',
@@ -194,6 +197,14 @@ class PrivateMemberApiTestsForMembers(MembersTestCase):
         member = Member.objects.get(id=self.members_id)
         self.assertNotEqual(
             getattr(member, 'admin_notes'), 'my note')
+
+    def test_members_profile_schema(self):
+        """Test that the schema for members registration is correct."""
+        res = self.client.get(PROFILE_SCHEMA_URL)
+        self.assertTrue('birthday' not in res.data)
+        self.assertEqual(res.data['first_name']['read_only'], True)
+        self.assertEqual(res.data['first_name']['required'], False)
+        self.assertEqual(res.data['address_street']['required'], True)
 
 
 class MemberAuthSyncTests(TestCase):

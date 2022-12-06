@@ -30,25 +30,35 @@ field_settings = {
     },
     'email': {
         'permissions': ['read', 'table'],
+        'kwargs': {
+            'label': 'Email address',
+            'help_text': 'The address used for communication and login.',
+        },
     },
     'person_type': {
         'permissions': ['create', 'table'],
-        'kwargs': {'required': True},
+        'kwargs': {
+            'label': 'Type of person',
+            'help_text': 'Whether you represent a natural person or '
+                         'a legal entity.',
+            'required': True
+        },
     },
     'first_name': {
         'permissions': ['read', 'create', 'table'],
-        'kwargs': {'required': True},
+        'kwargs': {'label': 'First name', 'required': True},
     },
     'last_name': {
         'permissions': ['read', 'create', 'table'],
-        'kwargs': {'required': True},
+        'kwargs': {'label': 'Last name', 'required': True},
     },
     'gender': {
         'permissions': ['read', 'create', 'change'],
-        'kwargs': {'required': True},
+        'kwargs': {'label': 'Gender', 'required': True},
     },
     'birthday': {
         'permissions': ['create'],
+        'kwargs': {'label': 'Birthday'},
         'schema': {
             'condition': conditions['natural'],
             'required': True
@@ -56,37 +66,42 @@ field_settings = {
     },
     'address_street': {
         'permissions': ['read', 'create', 'change'],
-        'kwargs': {'required': True},
+        'kwargs': {'label': 'Street', 'required': True},
     },
     'address_number': {
         'permissions': ['read', 'create', 'change'],
-        'kwargs': {'required': True},
+        'kwargs': {'label': 'Number', 'required': True},
     },
     'address_stair': {
         'permissions': ['read', 'create', 'change'],
+        'kwargs': {'label': 'Stair'},
     },
     'address_door': {
         'permissions': ['read', 'create', 'change'],
+        'kwargs': {'label': 'Door'},
     },
     'address_postcode': {
         'permissions': ['read', 'create', 'change', 'table'],
-        'kwargs': {'required': True},
+        'kwargs': {'label': 'Postcode', 'required': True},
     },
     'address_city': {
         'permissions': ['read', 'create', 'change'],
-        'kwargs': {'required': True},
+        'kwargs': {'label': 'City', 'required': True},
     },
     'address_country': {
         'permissions': ['read', 'create', 'change', 'table'],
-        'kwargs': {'required': True},
+        'kwargs': {'label': 'Country', 'required': True},
+        'schema': {'default': 'Austria'}
     },
     'phone': {
         'permissions': ['read', 'create', 'change'],
+        'kwargs': {'label': 'Phone number'},
     },
 
     # Legal person fields
     'legal_name': {
         'permissions': ['create'],
+        'kwargs': {'label': 'Name of the organisation'},
         'schema': {
             'condition': conditions['legal'],
             'required': True
@@ -94,6 +109,10 @@ field_settings = {
     },
     'legal_type': {
         'permissions': ['create'],
+        'kwargs': {
+            'label': 'Type of the organisation',
+            'help_text': 'Such as company, association, or cooperative.'
+        },
         'schema': {
             'condition': conditions['legal'],
             'required': True
@@ -101,6 +120,10 @@ field_settings = {
     },
     'legal_id': {
         'permissions': ['create'],
+        'kwargs': {
+            'label': 'Idenfication number of the organisation',
+            'help_text': 'Legal entity identifier or registry number.'
+        },
         'schema': {
             'condition': conditions['legal'],
             'required': True
@@ -110,12 +133,19 @@ field_settings = {
     # Membership fields
     'membership_type': {
         'permissions': ['create', 'table'],
+        'kwargs': {
+            'label': 'Type of membership',
+            'help_text': 'Whether you are an active or investing member.'
+        },
         'schema': {
             'condition': conditions['natural'],
             'required': True
         }
     },
     'membership_start': {
+        'kwargs': {
+            'label': 'Starting date of your membership.',
+        },
         'permissions': ['read', 'table'],
     },
     'shares_number': {
@@ -129,10 +159,17 @@ field_settings = {
     },
     'shares_payment_type': {
         'permissions': ['create'],
-        'kwargs': {'required': True},
+        'kwargs': {
+            'required': True,
+            'label': 'Payment type',
+            'help_text': 'How you want to pay for your shares.',
+        },
     },
     'bank_account_iban': {
         'permissions': ['create'],
+        'kwargs': {
+            'label': 'Bank account number (IBAN)',
+        },
         'schema': {
             'condition': conditions['sepa'],
             'required': True
@@ -140,6 +177,9 @@ field_settings = {
     },
     'bank_account_owner': {
         'permissions': ['create'],
+        'kwargs': {
+            'label': 'Bank account owner',
+        },
         'schema': {
             'condition': conditions['sepa'],
             'required': True
@@ -149,29 +189,53 @@ field_settings = {
     # Registration survey fields
     'survey_contact': {
         'permissions': ['create', 'table'],
+        'kwargs': {
+            'label': 'How did you hear of MILA?',
+        },
     },
     'survey_motivation': {
         'permissions': ['create', 'table'],
+        'kwargs': {
+            'label': 'What convinced you to join MILA?',
+        },
     },
     'groups_interested': {
         'permissions': ['create', 'table'],
+        'kwargs': {
+            'label': 'In which working group do you want to be active?',
+        },
     },
     'skills': {
         'permissions': ['create', 'table'],
+        'kwargs': {
+            'label': 'What are your occupations/skills/interests?',
+        },
     },
 
     # Table view
     'user_id': {
         'permissions': ['table'],
+        'kwargs': {
+            'label': 'UUID',
+        },
     },
     'membership_cancelled': {
         'permissions': ['table'],
+        'kwargs': {
+            'label': 'Membership cancelled',
+        },
     },
     'membership_end': {
         'permissions': ['table'],
+        'kwargs': {
+            'label': 'Membership end',
+        },
     },
     'tags': {
         'permissions': ['table'],
+        'kwargs': {
+            'label': 'Tags',
+        },
     },
 }
 

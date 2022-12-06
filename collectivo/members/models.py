@@ -149,8 +149,6 @@ class Member(models.Model):
     )
     bank_account_iban = models.CharField(max_length=255, null=True)
     bank_account_owner = models.CharField(max_length=255, null=True)
-    # TODO FUTURE shares_installment_plan = models.BooleanField(default=False)
-    # TODO FUTURE Handle via tags?
 
     # Survey data
     survey_contact = models.TextField(null=True)

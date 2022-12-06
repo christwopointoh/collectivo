@@ -213,6 +213,12 @@ class MemberSerializer(serializers.ModelSerializer):
         if 'schema' in settings
     }
 
+    def validate(self, attrs):
+        """Adjust membership type based on person type."""
+        if attrs.get('person_type') == 'legal':
+            attrs['membership_type'] = 'investing'
+        return super().validate(attrs)
+
 
 class MemberRegisterSerializer(MemberSerializer):
     """Serializer for users to register themselves as members."""

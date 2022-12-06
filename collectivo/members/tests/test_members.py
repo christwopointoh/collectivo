@@ -30,7 +30,7 @@ TEST_MEMBER_POST = {
     **TEST_MEMBER,
     'email': 'some_member@example.com',
     'person_type': 'natural',
-    'membership_type': 'investing',
+    'membership_type': 'active',
     'email_verified': True,
     'survey_contact': '-',
     'survey_motivation': '-',
@@ -96,7 +96,7 @@ class MembersTestCase(TestCase):
         self.client.credentials(HTTP_AUTHORIZATION=token['access_token'])
 
 
-class PrivateMemberApiTestsForNonMembers(MembersTestCase):
+class MemberRegistrationTests(MembersTestCase):
     """Test the private members API for users that are not members."""
 
     def test_cannot_access_profile(self):
@@ -119,6 +119,12 @@ class PrivateMemberApiTestsForNonMembers(MembersTestCase):
         member = self.create_member()
         for key, value in TEST_MEMBER_GET.items():
             self.assertEqual(value, getattr(member, key))
+
+    def test_create_legal_member(self):
+        """Test that a legal member automatically becomes type investing."""
+        payload = {**TEST_MEMBER_POST, 'person_type': 'legal'}
+        member = self.create_member(payload)
+        self.assertEqual(member.membership_type, 'investing')
 
     def test_create_member_tags_missing(self):
         """Test that unchecked tag fields do not become tags."""

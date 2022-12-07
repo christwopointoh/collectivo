@@ -11,6 +11,8 @@ from drf_spectacular.utils import extend_schema, OpenApiResponse
 class AboutView(APIView):
     """API views of the project version."""
 
+    permission_classes = [IsAuthenticated]
+
     @extend_schema(responses={200: OpenApiResponse()})
     def get(self, request):
         """Return the current version of the project."""

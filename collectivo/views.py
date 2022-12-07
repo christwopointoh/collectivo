@@ -23,6 +23,7 @@ class AboutView(APIView):
 
 
 # TODO Default does not work yet
+# TODO Choices can be big for large datasets
 field_attrs = [
     'label', 'help_text',
     'required', 'default',
@@ -43,6 +44,8 @@ input_types = {
     'FloatField': 'number',
     'DateField': 'date',
     'BooleanField': 'checkbox',
+    'ManyRelatedField': 'multiselect',
+    'PrimaryKeyRelatedField': 'select',
     'PhoneField': 'phone',
     'CountryField': 'country'
 }
@@ -52,7 +55,7 @@ class SchemaMixin:
     """Adds an action 'schema' to a viewset."""
 
     @extend_schema(responses={200: OpenApiResponse()})
-    @action(detail=False, url_path='schema',
+    @action(detail=False, url_path='schema', url_name='schema',
             permission_classes=[IsAuthenticated])
     def _schema(self, request):
         """Return model schema."""
@@ -60,7 +63,7 @@ class SchemaMixin:
         data = {}
         for field_name, field_obj in serializer.fields.items():
             field_type = field_obj.__class__.__name__
-            data[field_name] = {
+            data[field_name] = field_data = {
                 "field_type": field_type,
                 "input_type": input_types[field_type]
             }
@@ -73,4 +76,7 @@ class SchemaMixin:
                     field_name in serializer.schema_attrs:
                 for key, value in serializer.schema_attrs[field_name].items():
                     data[field_name][key] = value
+            # Ensure that read only fields cannot be required
+            if field_data.get('read_only') is True:
+                field_data['required'] = False
         return Response(data)

@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 from collectivo.errors import CollectivoError
 from collectivo.version import __version__
-from .utils import string_to_list
+from .utils import string_to_list, get_env_bool
 
 # TODO FOR PRODUCTION
 # Go through https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
@@ -17,8 +17,8 @@ from .utils import string_to_list
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ['SECRET_KEY']
-DEBUG = os.environ.get('DEBUG', False)
-DEVELOPMENT = os.environ.get('DEVELOPMENT', False)
+DEBUG = get_env_bool('DEBUG', False)
+DEVELOPMENT = get_env_bool('DEVELOPMENT', False)
 
 if os.environ.get('ALLOWED_HOSTS') is not None:
     ALLOWED_HOSTS = string_to_list(os.environ.get('ALLOWED_HOSTS'))

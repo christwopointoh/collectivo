@@ -27,8 +27,8 @@ if settings.DEBUG:
 
         # API Documentation
         path('api/dev/schema/',
-            SpectacularAPIView.as_view(), name='api-schema'),
+             SpectacularAPIView.as_view(), name='api-schema'),
         path('api/dev/docs/',
-            SpectacularSwaggerView.as_view(url_name='collectivo:api-schema'),
-            name='api-docs'),
+             SpectacularSwaggerView.as_view(url_name='collectivo:api-schema'),
+             name='api-docs'),
     ]

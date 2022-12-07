@@ -170,6 +170,9 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
     'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.AcceptHeaderVersioning',
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
     'DEFAULT_AUTHENTICATION_CLASSES': [],
     'DEFAULT_FILTER_BACKENDS': [
         'django_filters.rest_framework.DjangoFilterBackend',
@@ -185,7 +188,7 @@ _schema_versions = ['0.1.0']
 _swagger_urls = ''
 for version in _schema_versions:
     _swagger_urls += (
-        f'{{url: "/api/collectivo/schema/?version={version}", '
+        f'{{url: "/api/dev/schema/?version={version}", '
         f'name: "API Version {version}"}}, '
     )
 

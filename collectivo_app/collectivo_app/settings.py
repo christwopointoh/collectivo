@@ -23,7 +23,8 @@ DEVELOPMENT = os.environ.get('DEVELOPMENT', False)
 if os.environ.get('ALLOWED_HOSTS') is not None:
     ALLOWED_HOSTS = string_to_list(os.environ.get('ALLOWED_HOSTS'))
 elif DEVELOPMENT:
-    ALLOWED_HOSTS = ['*',"0.0.0.0","127.0.0.1", "localhost", "collectivo.local"]
+    ALLOWED_HOSTS = ['*', "0.0.0.0", "127.0.0.1",
+                     "localhost", "collectivo.local"]
 else:
     ALLOWED_HOSTS = []
 
@@ -82,8 +83,14 @@ if DEVELOPMENT:
         'user-agent',
         'x-csrftoken',
         'x-requested-with',
+        'X-Request-ID',
+
     ]
     CORS_ORIGIN_ALLOW_ALL = True
+
+CORS_EXPOSE_HEADERS = [
+    'X-Request-ID',
+]
 
 ROOT_URLCONF = 'collectivo_app.urls'
 
@@ -272,6 +279,3 @@ KEYCLOAK = {
     'CLIENT_ID': os.environ.get('KEYCLOAK_CLIENT_ID', 'collectivo'),
     'CLIENT_SECRET_KEY': os.environ.get('KEYCLOAK_CLIENT_SECRET_KEY')
 }
-
-
-

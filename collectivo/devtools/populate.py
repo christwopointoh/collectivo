@@ -93,7 +93,18 @@ def populate_keycloak_with_test_data():
             'first_name': member['firstName'],
             'last_name': member['lastName'],
 
+            'gender': 'diverse',
+            'address_street': 'My street',
+            'address_number': '5',
+            'address_stair': 'A',
+            'address_door': '8',
+            'address_postcode': '1230',
+            'address_city': 'Wien',
+            'address_country': 'Österreich',
+            'phone': '066003745385',
+
             'membership_type': 'active',
+            'shares_number': 5
         }
         register_viewset(
             MembersViewSet,

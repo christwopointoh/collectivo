@@ -4,6 +4,7 @@ from rest_framework.fields import empty
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from collectivo.version import __version__
+from collectivo.auth.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 
@@ -49,7 +50,8 @@ class SchemaMixin:
     """Adds an action 'schema' to a viewset."""
 
     @extend_schema(responses={200: OpenApiResponse()})
-    @action(detail=False, url_path='schema', permission_classes=[])
+    @action(detail=False, url_path='schema',
+            permission_classes=[IsAuthenticated])
     def _schema(self, request):
         """Return model schema."""
         serializer = self.get_serializer_class()()

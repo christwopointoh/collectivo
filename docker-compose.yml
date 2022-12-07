@@ -35,8 +35,8 @@ services:
       KEYCLOAK_CLIENT_SECRET_KEY: '**********'
       COLLECTIVO_EXTENSIONS: members
       COLLECTIVO_SETTINGS: collectivo_extensions.settings
-      DEBUG: 1
-      DEVELOPMENT: 1
+      DEBUG: True
+      DEVELOPMENT: True
       # Optional environment variables:
       # ALLOWED_HOSTS
       # See https://docs.djangoproject.com/en/3.2/topics/i18n/

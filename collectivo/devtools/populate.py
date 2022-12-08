@@ -103,6 +103,7 @@ def populate_keycloak_with_test_data():
             'address_country': 'Österreich',
             'phone': '066003745385',
 
+            'membership_start':'2022-12-08',
             'membership_type': 'active',
             'shares_number': 5
         }

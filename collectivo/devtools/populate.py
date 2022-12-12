@@ -69,7 +69,7 @@ def populate_keycloak_with_test_data():
             pass
         user_id = auth_manager.create_user(user)
         auth_manager.set_user_password(  # noqa
-            user_id, password='test', temporary=False)  # noqa
+            user_id, password='Test123!', temporary=False)  # noqa
 
     # Assign superuser role to superusers
     for user in superusers:

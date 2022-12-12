@@ -1,6 +1,5 @@
 """Configuration file for the members extension."""
 from django.apps import AppConfig
-from django.conf import settings
 from django.db.models.signals import post_migrate
 from collectivo.version import __version__
 
@@ -14,11 +13,6 @@ def post_migrate_callback(sender, **kwargs):
         register_tag, register_group, register_skill, register_status)
 
     name = 'members'
-    # TODO Language change
-    # TODO Error handling
-    # TODO Path handling
-    # TODO Test put and patch
-    # TODO Role filtering menu
 
     register_extension(
         name=name,
@@ -51,7 +45,7 @@ def post_migrate_callback(sender, **kwargs):
 
     register_tile(
         tile_id='members_registration_tile',
-        label='Register as a member',
+        label='Membership application',
         extension=name,
         component_name='members_registration_tile',
         blocked_role='members_user'
@@ -71,26 +65,25 @@ def post_migrate_callback(sender, **kwargs):
     for label in status_fields:
         register_status(label=label)
 
-    if settings.DEVELOPMENT:
-        groups = [
-            'Infogespräche', 'Sortiment',
-            'Öffentlichkeitsarbeit', 'Finanzen',
-            'Genossenschaft', 'IT und Digitales',
-            'Events', 'Standort', 'Minimarkt'
-        ]
-        for label in groups:
-            register_group(label=label)
-        skills = [
-            "Immobilien/Architektur/Planung",
-            "Einzelhandel",
-            "Handwerk (Elektrik, Tischlerei, …)",
-            "Genossenschaft/ Partizipation/Organisationsentwicklung",
-            "Kommunikation (Medien, Grafik, Text,…)",
-            "IT/ Digitales",
-            "Finanzen (BWL, Buchhaltung,…)",
-        ]
-        for label in skills:
-            register_skill(label=label)
+    groups = [
+        'Infogespräche', 'Sortiment',
+        'Öffentlichkeitsarbeit', 'Finanzen',
+        'Genossenschaft', 'IT und Digitales',
+        'Events', 'Standort', 'Minimarkt'
+    ]
+    for label in groups:
+        register_group(label=label)
+    skills = [
+        "Immobilien/Architektur/Planung",
+        "Einzelhandel",
+        "Handwerk (Elektrik, Tischlerei, …)",
+        "Genossenschaft/Partizipation/Organisationsentwicklung",
+        "Kommunikation (Medien, Grafik, Text,…)",
+        "IT/Digitales",
+        "Finanzen (BWL, Buchhaltung,…)",
+    ]
+    for label in skills:
+        register_skill(label=label)
 
 
 class MembersConfig(AppConfig):

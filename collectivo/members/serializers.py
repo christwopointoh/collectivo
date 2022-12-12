@@ -75,11 +75,11 @@ field_settings = {
     },
     'address_stair': {
         'permissions': ['read', 'create', 'change'],
-        'kwargs': {'label': 'Stair'},
+        'kwargs': {'label': 'Stair', 'allow_blank': True},
     },
     'address_door': {
         'permissions': ['read', 'create', 'change'],
-        'kwargs': {'label': 'Door'},
+        'kwargs': {'label': 'Door', 'allow_blank': True},
     },
     'address_postcode': {
         'permissions': ['read', 'create', 'change', 'table'],
@@ -96,7 +96,7 @@ field_settings = {
     },
     'phone': {
         'permissions': ['read', 'create', 'change'],
-        'kwargs': {'label': 'Phone number'},
+        'kwargs': {'label': 'Phone number', 'allow_blank': True},
     },
 
     # Legal person fields
@@ -136,11 +136,11 @@ field_settings = {
         'permissions': ['create', 'table'],
         'kwargs': {
             'label': 'Type of membership',
-            'help_text': 'Whether you are an active or investing member.'
+            'help_text': 'Whether you are an active or investing member.',
+            'required': False
         },
         'schema': {
             'condition': conditions['natural'],
-            'required': True
         }
     },
     'membership_start': {
@@ -154,8 +154,9 @@ field_settings = {
         'kwargs': {
             'label': 'Number of shares',
             'help_text': 'The amount of shares that you own.',
-            'required': True,
-            'min_value': 1
+            'required': False,
+            'min_value': 1,
+            'max_value': 100,
         }
     },
     'shares_payment_type': {
@@ -192,12 +193,14 @@ field_settings = {
         'permissions': ['create', 'table'],
         'kwargs': {
             'label': 'How did you hear of MILA?',
+            'allow_blank': True
         },
     },
     'survey_motivation': {
         'permissions': ['create', 'table'],
         'kwargs': {
             'label': 'What convinced you to join MILA?',
+            'allow_blank': True
         },
     },
     'groups_interested': {
@@ -298,12 +301,6 @@ class MemberSerializer(serializers.ModelSerializer):
         if 'schema' in settings
     }
 
-    def validate(self, attrs):
-        """Adjust membership type based on person type."""
-        if attrs.get('person_type') == 'legal':
-            attrs['membership_type'] = 'investing'
-        return super().validate(attrs)
-
 
 class MemberRegisterSerializer(MemberSerializer):
     """Serializer for users to register themselves as members."""
@@ -315,17 +312,44 @@ class MemberRegisterSerializer(MemberSerializer):
         write_only=True, required=False)
     founding_event = serializers.BooleanField(
         write_only=True, required=False)
+    shares_tarif = serializers.CharField(required=False)
 
     class Meta:
         """Serializer settings."""
 
         model = models.Member
-        fields = register_fields + register_tag_fields
+        fields = register_fields + register_tag_fields + ['shares_tarif']
         read_only_fields = ['id']  # Return the id after creation
         extra_kwargs = {
             field: field_settings[field]['kwargs'] for field in fields
             if field in field_settings and 'kwargs' in field_settings[field]
         }
+
+    def _validate_membership_type(self, attrs):
+        """Adjust membership type based on person type."""
+        pt = attrs.get('person_type')
+        if pt == 'natural':
+            if attrs.get('membership_type') is None:
+                raise ParseError('membership_type required for natural person')
+        elif pt == 'legal':
+            attrs['membership_type'] = 'investing'
+        else:
+            raise ParseError('person_type is invalid')
+        return attrs
+
+    def _convert_shares_tarif(self, attrs):
+        """Convert shares_tarif choice into shares_number value."""
+        shares_tarif = attrs.pop('shares_tarif', None)
+        if shares_tarif == 'social':
+            attrs['shares_number'] = 1
+        elif shares_tarif == 'normal':
+            attrs['shares_number'] = 9
+        elif shares_tarif == 'more':
+            if 'shares_number' not in attrs:
+                raise ParseError('shares_number: This field is required.')
+        else:
+            raise ParseError('shares_tarif: This field is incorrect.')
+        return attrs
 
     def validate(self, attrs):
         """Validate and transform tag fields before validation."""
@@ -333,7 +357,10 @@ class MemberRegisterSerializer(MemberSerializer):
         for field in register_tag_fields:
             tag_setting = field_settings[field]
             tag_label = tag_setting['kwargs']['label']
-            value = attrs[field]
+            if field in attrs:
+                value = attrs[field]
+            else:
+                value = False
             if tag_setting['kwargs'].get('required') is True \
                     and value is not True:
                 raise ParseError(f'{field} must be true')
@@ -341,6 +368,8 @@ class MemberRegisterSerializer(MemberSerializer):
             if value is True:
                 tag_id = models.MemberTag.objects.get(label=tag_label).id
                 attrs['tags'].append(tag_id)
+        attrs = self._convert_shares_tarif(attrs)
+        attrs = self._validate_membership_type(attrs)
         return super().validate(attrs)
 
 

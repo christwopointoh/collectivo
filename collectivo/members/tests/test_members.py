@@ -31,7 +31,6 @@ TEST_MEMBER = {
 
 TEST_MEMBER_POST = {
     **TEST_MEMBER,
-    'email': 'some_member@example.com',
     'person_type': 'natural',
     'membership_type': 'active',
     'email_verified': True,
@@ -44,6 +43,7 @@ TEST_MEMBER_POST = {
 TEST_MEMBER_GET = {
     **TEST_MEMBER,
     'membership_start': localdate(),
+    'email': 'some_member@example.com',
     # Add expected tags
 }
 

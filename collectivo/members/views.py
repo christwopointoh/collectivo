@@ -79,6 +79,7 @@ class MemberRegisterViewSet(MemberMixin, mixins.CreateModelMixin):
         self.sync_user_data_with_auth(user_id, serializer.validated_data)
         extra_fields = {
             'user_id': user_id,
+            'email': self.request.userinfo.email,
             'membership_start': localdate(),
         }
         if 'tags' in serializer.validated_data:

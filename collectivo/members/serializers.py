@@ -29,6 +29,14 @@ field_settings = {
             'help_text': 'This number can be used to identify you.',
         },
     },
+    'first_name': {
+        'permissions': ['read', 'create', 'table'],
+        'kwargs': {'label': 'First name', 'required': True},
+    },
+    'last_name': {
+        'permissions': ['read', 'create', 'table'],
+        'kwargs': {'label': 'Last name', 'required': True},
+    },
     'email': {
         'permissions': ['read', 'table'],
         'kwargs': {
@@ -45,14 +53,6 @@ field_settings = {
             'required': True
         },
     },
-    'first_name': {
-        'permissions': ['read', 'create', 'table'],
-        'kwargs': {'label': 'First name', 'required': True},
-    },
-    'last_name': {
-        'permissions': ['read', 'create', 'table'],
-        'kwargs': {'label': 'Last name', 'required': True},
-    },
     'gender': {
         'permissions': ['read', 'create', 'change'],
         'kwargs': {'label': 'Gender', 'required': True},
@@ -60,6 +60,14 @@ field_settings = {
     'birthday': {
         'permissions': ['create'],
         'kwargs': {'label': 'Birthday'},
+        'schema': {
+            'condition': conditions['natural'],
+            'required': True
+        }
+    },
+    'occupation': {
+        'permissions': ['read', 'create', 'change', 'table'],
+        'kwargs': {'label': 'Occupation'},
         'schema': {
             'condition': conditions['natural'],
             'required': True
@@ -142,6 +150,9 @@ field_settings = {
         'schema': {
             'condition': conditions['natural'],
         }
+    },
+    'membership_status': {
+        'permissions': ['table'],
     },
     'membership_start': {
         'kwargs': {

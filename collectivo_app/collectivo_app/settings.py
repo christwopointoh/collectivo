@@ -11,10 +11,6 @@ from collectivo.version import __version__
 from corsheaders.defaults import default_headers
 from .utils import string_to_list, get_env_bool
 
-# TODO FOR PRODUCTION
-# Go through https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
-# Remove unused django functions
-
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ['SECRET_KEY']
@@ -32,6 +28,7 @@ else:
 
 # Choose built-in collectivo extensions from environment
 _built_in_extensions = ['members']
+_sub_extensions = []
 _chosen_extensions = string_to_list(os.environ.get('COLLECTIVO_EXTENSIONS'))
 for ext in _chosen_extensions:
     if ext not in _built_in_extensions:
@@ -40,6 +37,10 @@ for ext in _chosen_extensions:
             f"'{ext}' is not a built-in extension. "
             f"Available extensions are: {_built_in_extensions}."
         )
+    if ext == 'members':
+        _sub_extensions.append('members.emails')
+_chosen_extensions += _sub_extensions
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -130,6 +131,18 @@ DATABASES = {
         'PASSWORD': os.environ.get('DB_PASS'),
     }
 }
+
+
+# Celery settings
+CELERY_TASK_SERIALIZER = 'pickle'
+CELERY_RESULT_SERIALIZER = 'pickle'
+CELERY_EVENT_SERIALIZER = 'pickle'
+CELERY_ACCEPT_CONTENT = ['pickle']
+CELERY_TASK_ACCEPT_CONTENT = ['pickle']
+CELERY_RESULT_ACCEPT_CONTENT = ['pickle']
+CELERY_EVENT_ACCEPT_CONTENT = ['pickle']
+CELERY_BROKER_URL = os.environ.get("CELERY_BROKER", "redis://127.0.0.1:6379/0")
+CELERY_RESULT_BACKEND = os.environ.get("CELERY_BACKEND", "redis://127.0.0.1:6379/0")
 
 
 # Password validation
@@ -267,8 +280,23 @@ LOGGING = {
             'level': LOGGING_LEVEL,
             'propagate': True,
         },
+        'celery': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
     },
 }
+
+
+# Email settings
+EMAIL_HOST = os.environ.get('EMAIL_HOST')
+EMAIL_PORT = os.environ.get('EMAIL_PORT', 465)
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = get_env_bool('EMAIL_USE_TLS', False)
+EMAIL_USE_SSL = get_env_bool('EMAIL_USE_SSL', False)
+DEFAULT_FROM_EMAIL = os.environ.get('EMAIL_FROM')
+
 
 # Settings for collectivo
 COLLECTIVO = {

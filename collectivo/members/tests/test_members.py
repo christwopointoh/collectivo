@@ -10,6 +10,7 @@ from ..models import Member
 
 
 MEMBERS_URL = reverse('collectivo:collectivo.members:member-list')
+MEMBERS_CREATE_URL = reverse('collectivo:collectivo.members:create-list')
 MEMBER_URL_LABEL = 'collectivo:collectivo.members:member-detail'
 PROFILE_URL = reverse('collectivo:collectivo.members:profile')
 REGISTER_URL = reverse('collectivo:collectivo.members:register')
@@ -33,7 +34,6 @@ TEST_MEMBER_POST = {
     **TEST_MEMBER,
     'person_type': 'natural',
     'membership_type': 'active',
-    'email_verified': True,
     'survey_contact': '-',
     'survey_motivation': '-',
     'shares_payment_type': 'sepa',
@@ -52,8 +52,6 @@ TEST_USER = {
     'username': 'some_member@example.com',
     'firstName': 'firstname',
     'lastName': 'lastname',
-    "enabled": True,
-    "emailVerified": True,
 }
 
 
@@ -81,7 +79,16 @@ class MembersTestCase(TestCase):
     def setUp(self):
         """Create client with authorized test user."""
         self.auth_manager = get_auth_manager()
-        user_id = self.auth_manager.create_user(TEST_USER, exist_ok=True)
+        user_id = self.auth_manager.get_user_id('some_member@example.com')
+        if user_id is not None:
+            self.auth_manager.delete_user(user_id)
+        user_id = self.auth_manager.create_user(
+            first_name=TEST_USER['firstName'],
+            last_name=TEST_USER['lastName'],
+            email=TEST_USER['email'],
+            email_verified=True,
+            exist_ok=True
+        )
         self.auth_manager.set_user_password(  # noqa
                 user_id, password='Test123!', temporary=False)  # noqa
         self.client = APIClient()
@@ -89,9 +96,8 @@ class MembersTestCase(TestCase):
 
     def tearDown(self):
         """Delete test user."""
-        auth_manager = get_auth_manager()
-        user_id = auth_manager.get_user_id('some_member@example.com')
-        auth_manager.delete_user(user_id)
+        user_id = self.auth_manager.get_user_id('some_member@example.com')
+        self.auth_manager.delete_user(user_id)
 
     def authorize(self):
         """Authorize test user."""
@@ -220,14 +226,23 @@ class PrivateMemberApiTestsForAdmins(TestCase):
             is_authenticated=True,
         )
         self.client.force_authenticate(user)
+        self.ids = []
+        self.keycloak = get_auth_manager()
+
+    def tearDown(self) -> None:
+        """Delete test accoutns."""
+        for i in [0, 2, 1]:
+            user_id = self.keycloak.get_user_id(str(i)+'@example.com')
+            if user_id is not None:
+                self.keycloak.delete_user(user_id)
 
     def create_members(self):
         """Create an unordered set of members for testing."""
         for i in [0, 2, 1]:
-            payload = {**TEST_MEMBER_POST, 'first_name': str(i)}
-            res = self.client.post(MEMBERS_URL, payload)
-            if res.status_code != 201:
-                raise ValueError("Create members failed: ", res.content)
+            payload = {
+                **TEST_MEMBER_POST,
+                'email': str(i)+'@example.com', 'first_name': str(i)}
+            self.client.post(MEMBERS_CREATE_URL, payload)
 
     def test_create_members(self):
         """Test that admins can create members."""
@@ -236,8 +251,12 @@ class PrivateMemberApiTestsForAdmins(TestCase):
 
     def test_update_member_admin_fields(self):
         """Test that admins can write to admin fields."""
-        res1 = self.client.post(MEMBERS_URL, TEST_MEMBER_POST)
+        payload = {
+                **TEST_MEMBER_POST,
+                'email': '0@example.com'}
+        res1 = self.client.post(MEMBERS_CREATE_URL, payload)
         self.assertEqual(res1.status_code, 201)
+
         res2 = self.client.patch(
             reverse(
                 'collectivo:collectivo.members:member-detail',
@@ -277,8 +296,7 @@ class PrivateMemberApiTestsForAdmins(TestCase):
 
     def test_member_pagination(self):
         """Test that pagination works for members."""
-        for _ in range(3):
-            self.create_members()
+        self.create_members()
 
         limit = 3
         offset = 5

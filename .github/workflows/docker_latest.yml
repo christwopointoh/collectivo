@@ -17,5 +17,5 @@ jobs:
         uses: actions/checkout@v3
       - name: Build container image
         run: |
-          docker build -t milawien/collectivo:latest
+          docker build -t milawien/collectivo:latest .
           docker push milawien/collectivo:latest

@@ -16,6 +16,7 @@ TEMPLATES_URL = reverse("collectivo:collectivo.members.emails:template-list")
 CAMPAIGNS_URL = reverse("collectivo:collectivo.members.emails:campaign-list")
 DESIGNS_URL = reverse("collectivo:collectivo.members.emails:design-list")
 AUTO_URL = reverse("collectivo:collectivo.members.emails:automation-list")
+SETTINGS_URL = reverse("collectivo:collectivo.members.emails:settings")
 
 
 def run_mocked_celery_chain(mocked_chain):
@@ -26,6 +27,34 @@ def run_mocked_celery_chain(mocked_chain):
         for arg in args:
             task = arg.apply((task.result,))
         return task.result
+
+
+class EmailsSettingsTests(TestCase):
+    """Test the settings of the emails API."""
+
+    def setUp(self):
+        """Prepare test case."""
+        self.client = CollectivoAPIClient()
+        self.client.force_authenticate(
+            UserInfo(is_authenticated=True, roles=["members_admin"])
+        )
+
+    def test_email_settings(self):
+        """Test the email settings."""
+        settings = {
+            "email_host": "myhost",
+            "email_port": 123,
+            "email_host_user": "myuser",
+            "email_host_password": "mypassword",
+            "email_connection": "TLS",
+            "email_from": "myfrom@example.com",
+            "email_to": "myto@example.com",
+            "email_sending_rate": 10,
+        }
+        res = self.client.post(SETTINGS_URL, settings)
+        self.assertEqual(res.status_code, 200)
+        # TODO Get backend and check settings
+        # TODO Check email rate used correctly
 
 
 class EmailsTests(TestCase):

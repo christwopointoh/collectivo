@@ -86,11 +86,11 @@ class MemberMixin(SchemaMixin, viewsets.GenericViewSet):
         email = data.get("email")
 
         payload = {}
-        if first_name and userinfo["firstName"] != first_name:
+        if first_name and userinfo.first_name != first_name:
             payload["first_name"] = first_name
-        if last_name and userinfo["lastName"] != last_name:
+        if last_name and userinfo.last_name != last_name:
             payload["last_name"] = last_name
-        if email and userinfo["email"] != email:
+        if email and userinfo.email != email:
             payload["email"] = email
             payload["email_verified"] = False
 
@@ -108,7 +108,7 @@ class MemberMixin(SchemaMixin, viewsets.GenericViewSet):
         self.assign_members_role(user_id)
         extra_fields = {
             "user_id": user_id,
-            "email": userinfo["email"],
+            "email": userinfo.email,
             "membership_start": localdate(),
         }
         if "tags" in serializer.validated_data:

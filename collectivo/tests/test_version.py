@@ -2,7 +2,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from collectivo.version import __version__
-from collectivo.auth.clients import CollectivoAPIClient
+from collectivo.auth.clients import AuthClient
 
 
 class PublicCoreApiTests(TestCase):
@@ -10,10 +10,10 @@ class PublicCoreApiTests(TestCase):
 
     def setUp(self):
         """Set up the test client."""
-        self.client = CollectivoAPIClient()
-        self.client.force_roles(['superuser'])
+        self.client = AuthClient()
+        self.client.force_roles(["superuser"])
 
     def testGetVersion(self):
         """Test getting current version is correct."""
-        res = self.client.get(reverse('collectivo:version'))
-        self.assertEqual(res.data['version'], __version__)
+        res = self.client.get(reverse("collectivo:version"))
+        self.assertEqual(res.data["version"], __version__)

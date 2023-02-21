@@ -5,10 +5,10 @@ from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
 from collectivo.dashboard.models import DashboardTile
 from collectivo.auth.userinfo import UserInfo
-from collectivo.auth.clients import CollectivoAPIClient
+from collectivo.auth.clients import AuthClient
 
 
-TILES_URL = reverse('collectivo:collectivo.dashboard:tile-list')
+TILES_URL = reverse("collectivo:collectivo.dashboard:tile-list")
 
 
 class MembersRegistrationTests(TestCase):
@@ -16,8 +16,8 @@ class MembersRegistrationTests(TestCase):
 
     def setUp(self):
         """Initialize testing instance."""
-        self.name = 'members'
-        self.client = CollectivoAPIClient()
+        self.name = "members"
+        self.client = AuthClient()
 
     def test_extension_exists(self):
         """Test that the extension is automatically registered."""
@@ -39,13 +39,13 @@ class MembersRegistrationTests(TestCase):
         user = UserInfo(is_authenticated=True)
         self.client.force_authenticate(user)
         res = self.client.get(TILES_URL)
-        items = [i['tile_id'] for i in res.data]
-        self.assertTrue('members_registration_tile' in items)
+        items = [i["tile_id"] for i in res.data]
+        self.assertTrue("members_registration_tile" in items)
 
     def test_tile_blocked(self):
         """Test menuitem should not appear for user with blocked role."""
-        user = UserInfo(is_authenticated=True, roles=['members_user'])
+        user = UserInfo(is_authenticated=True, roles=["members_user"])
         self.client.force_authenticate(user)
         res = self.client.get(TILES_URL)
-        items = [i['tile_id'] for i in res.data]
-        self.assertFalse('members_registration_tile' in items)
+        items = [i["tile_id"] for i in res.data]
+        self.assertFalse("members_registration_tile" in items)

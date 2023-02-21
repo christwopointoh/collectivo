@@ -8,7 +8,7 @@ from jwt import decode
 import logging
 from .userinfo import UserInfo
 from collectivo.errors import CollectivoError
-
+from collectivo.auth.models import User
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,7 @@ class KeycloakMiddleware(MiddlewareMixin):
 
     def auth_failed(self, correlation_id, log_message, error):
         """Return authentication failed message in log and API."""
-        logger.debug(f'{correlation_id} {log_message}: {repr(error)}')
+        logger.debug(f"{correlation_id} {log_message}: {repr(error)}")
         return JsonResponse(
             {"detail": AuthenticationFailed.default_detail},
             status=AuthenticationFailed.status_code,
@@ -52,13 +52,12 @@ class KeycloakMiddleware(MiddlewareMixin):
     def process_view(self, request, view_func, view_args, view_kwargs):
         """Check for authentication and try to get user from keycloak."""
         # Skip middleware if userinfo is already provided
-        if hasattr(request, 'userinfo'):
+        if hasattr(request, "userinfo"):
             return None
 
         # Add unauthenticated user to request
         request.userinfo = user = UserInfo()
-        request_id = request.META.get(
-            'X-Correlation-ID', 'NO-CORRELATION-ID')
+        request_id = request.META.get("X-Correlation-ID", "NO-CORRELATION-ID")
         # Return unauthenticated request if no authorization is found
         if "HTTP_AUTHORIZATION" not in request.META:
             # logger.debug(f'No authorization found. Using public user.')
@@ -69,36 +68,45 @@ class KeycloakMiddleware(MiddlewareMixin):
             auth = request.META.get("HTTP_AUTHORIZATION").split()
             access_token = auth[1] if len(auth) == 2 else auth[0]
         except Exception as e:
-            return self.auth_failed(request_id, 'Could not read token', e)
+            return self.auth_failed(request_id, "Could not read token", e)
 
         # Check the validity of the token
         try:
             self.keycloak.userinfo(access_token)
             user.is_authenticated = True
         except Exception as e:
-            return self.auth_failed(request_id, 'Could not verify token', e)
+            return self.auth_failed(request_id, "Could not verify token", e)
 
         # Decode token
         try:
-            data = decode(
-                access_token, options={"verify_signature": False})
+            data = decode(access_token, options={"verify_signature": False})
         except Exception as e:
-            return self.auth_failed(request_id, 'Could not decode token', e)
+            return self.auth_failed(request_id, "Could not decode token", e)
+
+        # Get or create user
+        user_object, new = User.objects.get_or_create(
+            user_id=data.get("sub", None)
+        )
+        if new:
+            user_object.email = data.get("email", None)
+            user_object.first_name = data.get("given_name", None)
+            user_object.last_name = data.get("family_name", None)
+            user_object.save()
 
         # Add userinfos to request
         try:
-            user.user_id = data.get('sub', None)
-            user.email = data.get('email', None)
-            user.email_verified = data.get('email_verified', None)
-            user.first_name = data.get('given_name', None)
-            user.last_name = data.get('family_name', None)
-            roles = data.get(
-                'realm_access', {}).get('roles', [])
+            user.user_id = data.get("sub", None)
+            user.email = data.get("email", None)
+            user.email_verified = data.get("email_verified", None)
+            user.first_name = data.get("given_name", None)
+            user.last_name = data.get("family_name", None)
+            roles = data.get("realm_access", {}).get("roles", [])
             for role in roles:
                 user.roles.append(role)
         except Exception as e:
             return self.auth_failed(
-                request_id, 'Could not extract userinfo', e)
+                request_id, "Could not extract userinfo", e
+            )
 
         # Return authenticated request if no exception is thrown
         return None

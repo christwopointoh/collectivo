@@ -309,6 +309,7 @@ DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_FROM")
 # Settings for collectivo
 COLLECTIVO = {
     # Path to default models
+    "auth.manager": "collectivo.auth.manager.KeycloakAuthManager",
     "default_auth_manager": "collectivo.auth.manager.KeycloakAuthManager",
     "default_user_model": "collectivo.members.models.Member",
     "default_extension_model": "collectivo.extensions.models.Extension",

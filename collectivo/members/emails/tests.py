@@ -1,7 +1,7 @@
 """Test the features of the emails API."""
 from django.test import TestCase
 from django.urls import reverse
-from collectivo.auth.clients import CollectivoAPIClient
+from collectivo.auth.clients import AuthClient
 from collectivo.auth.userinfo import UserInfo
 from collectivo.members.models import Member
 from django.core import mail
@@ -33,7 +33,7 @@ class EmailsTests(TestCase):
 
     def setUp(self):
         """Prepare test case."""
-        self.client = CollectivoAPIClient()
+        self.client = AuthClient()
         self.client.force_authenticate(
             UserInfo(is_authenticated=True, roles=["members_admin"])
         )

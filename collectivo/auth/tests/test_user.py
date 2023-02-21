@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from ..clients import AuthClient
 from collectivo.auth.models import User
-from collectivo.auth.manager import AuthService
+from collectivo.auth.services import AuthService
 from collectivo.auth.exceptions import AuthDeleteError
 
 EMAIL = "test_user@example.com"
@@ -22,7 +22,7 @@ class AuthUserTests(TestCase):
     def setUp(self):
         """Set up test client."""
 
-        self.client: AuthClient = AuthClient()
+        self.client = AuthClient()
         self.auth_service = AuthService()
         self.tearDown()
 

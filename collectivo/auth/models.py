@@ -1,10 +1,10 @@
 """Models of the authentication module."""
 from django.db import models
-from collectivo.auth.manager import AuthService
+from collectivo.auth.services import AuthService
 
 
 class User(models.Model):
-    """A user of the system."""
+    """A user that corresponds to a user of the authentication service."""
 
     user_id = models.UUIDField(primary_key=True)
     email = models.EmailField(unique=True)

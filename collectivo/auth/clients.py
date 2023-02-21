@@ -1,6 +1,6 @@
 """Testing clients of the authentication module."""
 from rest_framework.test import APIClient, ForceAuthClientHandler
-from collectivo.utils import get_auth_manager
+from collectivo.auth.services import AuthService
 from .userinfo import UserInfo
 
 
@@ -43,6 +43,6 @@ class AuthClient(APIClient):
 
     def authorize(self, email: str, password: str = "Test123!"):
         """Authorize test user with the auth service."""
-        auth_manager = get_auth_manager()
-        token = auth_manager.openid.token(email, password)
+        auth_service = AuthService()
+        token = auth_service.openid.token(email, password)
         self.credentials(HTTP_AUTHORIZATION=token["access_token"])

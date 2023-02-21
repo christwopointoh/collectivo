@@ -1,10 +1,11 @@
 """Populate collectivo & keycloak with test users."""
 import logging
-from collectivo.utils import get_auth_manager, register_viewset
+from collectivo.utils import register_viewset
+from collectivo.auth.services import AuthService
 from collectivo.auth.exceptions import AuthDeleteError
 from collectivo.members.views import MembersAdminCreateViewSet
 from collectivo.members.models import Member
-from keycloak.exceptions import KeycloakGetError, KeycloakDeleteError
+from keycloak.exceptions import KeycloakGetError
 
 
 logger = logging.getLogger(__name__)
@@ -59,7 +60,7 @@ users = [
 def populate_keycloak_with_test_data():
     """Add users, groups, and roles to keycloak."""
     logger.debug("Creating test-population")
-    auth_manager = get_auth_manager()
+    auth_manager = AuthService()
 
     for user in users:
         try:

@@ -3,7 +3,7 @@ import logging
 from rest_framework import viewsets, mixins
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from collectivo.auth.permissions import IsAuthenticated
-from collectivo.utils import get_auth_manager
+from collectivo.auth.services import AuthService
 from collectivo.views import SchemaMixin
 from .permissions import IsMembersAdmin
 from . import models, serializers
@@ -30,25 +30,25 @@ class MemberMixin(SchemaMixin, viewsets.GenericViewSet):
 
     def members_role(self):
         """Return representation of the members_user role."""
-        auth_manager = get_auth_manager()
+        auth_service = AuthService()
         role = "members_user"
-        role_id = auth_manager.get_realm_role(role)["id"]
+        role_id = auth_service.get_realm_role(role)["id"]
         return {"id": role_id, "name": role}
 
     def assign_members_role(self, user_id):
         """Assign members_user role to user."""
         if user_id is None:
             return
-        auth_manager = get_auth_manager()
-        auth_manager.assign_realm_roles(user_id, self.members_role())
+        auth_service = AuthService()
+        auth_service.assign_realm_roles(user_id, self.members_role())
 
     def remove_members_role(self, user_id):
         """Remove members_user role from user."""
         if user_id is None:
             return
-        auth_manager = get_auth_manager()
+        auth_service = AuthService()
         try:
-            auth_manager.delete_realm_roles_of_user(
+            auth_service.delete_realm_roles_of_user(
                 user_id, self.members_role()
             )
         except KeycloakDeleteError:
@@ -57,8 +57,8 @@ class MemberMixin(SchemaMixin, viewsets.GenericViewSet):
 
     def get_or_create_user(self, data):
         """Create a user in the auth service."""
-        auth_manager = get_auth_manager()
-        user_id = auth_manager.get_user_id(data["email"])
+        auth_service = AuthService()
+        user_id = auth_service.get_user_id(data["email"])
         if user_id is None:
             user_data = {
                 k: v
@@ -78,8 +78,8 @@ class MemberMixin(SchemaMixin, viewsets.GenericViewSet):
         """
         if user_id is None:
             return
-        auth_manager = get_auth_manager()
-        userinfo = auth_manager.get_user(user_id)
+        auth_service = AuthService()
+        userinfo = auth_service.get_user(user_id)
 
         first_name = data.get("first_name")
         last_name = data.get("last_name")
@@ -95,8 +95,8 @@ class MemberMixin(SchemaMixin, viewsets.GenericViewSet):
             payload["email_verified"] = False
 
         if payload != {}:
-            auth_manager.update_user(user_id=user_id, **payload)
-            return auth_manager.get_user(user_id)
+            auth_service.update_user(user_id=user_id, **payload)
+            return auth_service.get_user(user_id)
         else:
             return userinfo
 

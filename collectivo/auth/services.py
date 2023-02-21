@@ -1,18 +1,17 @@
-"""Manager classes to connect collectivo to an authentication service."""
+"""Manager class to connect collectivo to an authentication service."""
 from keycloak import KeycloakAdmin, KeycloakOpenID
 from keycloak.exceptions import KeycloakPutError, KeycloakDeleteError
 from collectivo.auth.exceptions import AuthDeleteError
 from rest_framework.exceptions import ParseError
 from django.conf import settings
 from collectivo.utils import get_object_from_settings
-from typing import NewType
 from dataclasses import dataclass
 from uuid import UUID
 
 
 @dataclass
 class AuthUser:
-    """User representation for auth service."""
+    """Representation for users of the authentication service."""
 
     user_id: UUID
     email: str
@@ -21,24 +20,28 @@ class AuthUser:
 
 
 class AuthService:
-    """Template for authentication and authorization tools."""
+    """Representation of the authentication service."""
 
     def __init__(self):
         """Initialize auth manager as defined in settings."""
-        self._manager = get_object_from_settings("auth.manager")()
+        self._manager = get_object_from_settings("auth.service")()
 
-    def get_user_id(self, email) -> UUID:
+    def get_user_id(self, email: str) -> UUID:
         """Return user id from auth service."""
         return self._manager.get_user_id(email)
 
-    def get_user(self, user_id) -> AuthUser:
+    def get_user(self, user_id: UUID) -> AuthUser:
         """Return user from auth service."""
         return self._manager.get_user(user_id)
 
     def create_user(
-        self, first_name, last_name, email, email_verified: bool = False
-    ) -> UUID:
-        """Create user in auth service."""
+        self,
+        first_name: str,
+        last_name: str,
+        email: str,
+        email_verified: bool = False,
+    ) -> str:
+        """Create user in auth service. Returns user id."""
         return self._manager.create_user(
             first_name, last_name, email, email_verified
         )
@@ -49,7 +52,7 @@ class AuthService:
         """Update user password in auth service."""
         self._manager.set_user_password(user_id, password, temporary)
 
-    def delete_user(self, user_id):
+    def delete_user(self, user_id: UUID) -> None:
         """Delete user from auth service."""
         self._manager.delete_user(user_id)
 
@@ -58,8 +61,8 @@ class AuthService:
         return getattr(self._manager, name)
 
 
-class KeycloakAuthManager:
-    """Keycloak authentication and authorization tools."""
+class KeycloakAuthService:
+    """Keycloak authentication service."""
 
     def __init__(self):
         """Initialize keycloak admin."""

@@ -38,7 +38,7 @@ class DashboardTileViewSet(viewsets.ModelViewSet):
 
         queryset = models.DashboardTile.objects.filter(
             Q(required_role__in=user_roles) | Q(required_role=None),
-            ~Q(blocked_role__in=user_roles),
+            # TODO ~Q(blocked_role__in=user_roles),
         )
         return queryset
 

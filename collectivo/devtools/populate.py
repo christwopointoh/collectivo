@@ -1,6 +1,7 @@
 """Populate collectivo & keycloak with test users."""
 import logging
 from collectivo.utils import register_viewset
+from collectivo.users.models import User
 from collectivo.users.services import AuthService
 from collectivo.users.exceptions import AuthDeleteError
 from collectivo.members.views import MembersAdminCreateViewSet
@@ -66,6 +67,7 @@ def populate_keycloak_with_test_data():
         try:
             user_id = auth_manager.get_user_id(user["email"])
             auth_manager.delete_user(user_id)
+            User.objects.filter(email=user["email"]).delete()
             Member.objects.filter(email=user["email"]).delete()
         except (KeycloakGetError, AuthDeleteError):
             pass

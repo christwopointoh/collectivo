@@ -7,6 +7,7 @@ def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
     from collectivo.extensions.models import Extension
     from collectivo.menus.models import Menu, MenuItem
+    from collectivo.users.models import Role
     from .populate import create_groups_and_roles
 
     name = "users"
@@ -30,6 +31,20 @@ def post_migrate_callback(sender, **kwargs):
             extension=extension,
             action="component",
             component_name="logout",
+            order=99,
+        )
+
+    try:
+        MenuItem.objects.get(item_id="auth_superuser_button")
+    except MenuItem.DoesNotExist:
+        MenuItem.objects.create(
+            item_id="auth_superuser_button",
+            menu_id=Menu.objects.get(menu_id="main_menu"),
+            label="suupausa",
+            extension=extension,
+            action="component",
+            component_name="logout",
+            required_role=Role.objects.get_or_create(name="superuser")[0],
             order=99,
         )
 

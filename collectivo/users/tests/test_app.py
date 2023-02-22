@@ -1,4 +1,4 @@
-"""Tests of the authentication extension."""
+"""Tests of the users extension."""
 from django.test import TestCase
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
@@ -9,7 +9,7 @@ class AuthRegistrationTests(TestCase):
 
     def setUp(self):
         """Initialize testing instance."""
-        self.name = "auth"
+        self.name = "users"
 
     def test_extension_exists(self):
         """Test that the extension is automatically registered."""

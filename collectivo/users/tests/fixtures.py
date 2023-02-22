@@ -1,3 +1,4 @@
+"""Fixtures for the tests of the users module."""
 from django.urls import reverse
 
 EMAIL = "test_user@example.com"

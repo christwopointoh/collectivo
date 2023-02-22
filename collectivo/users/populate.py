@@ -12,16 +12,16 @@ def create_groups_and_roles():
     auth_service = AuthService()
 
     # TODO Get automatically from extensions
-    roles = [
-        "superuser",
-        "members_user",
-        "members_admin",
-        "shifts_user",
-        "shifts_admin",
-    ]
+    # roles = [
+    #     "superuser",
+    #     "members_user",
+    #     "members_admin",
+    #     "shifts_user",
+    #     "shifts_admin",
+    # ]
 
-    # Create roles
-    for role in roles:
-        auth_service.create_realm_role(
-            payload={"name": role}, skip_exists=True
-        )
+    # # Create roles
+    # for role in roles:
+    #     auth_service.create_realm_role(
+    #         payload={"name": role}, skip_exists=True
+    #     )

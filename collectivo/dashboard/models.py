@@ -8,8 +8,11 @@ class DashboardTile(models.Model):
     tile_id = models.CharField(max_length=255, unique=True, primary_key=True)
     label = models.CharField(max_length=255, null=True)
     extension = models.ForeignKey(
-        'extensions.Extension', on_delete=models.CASCADE)
+        "extensions.Extension", on_delete=models.CASCADE
+    )
     component_name = models.CharField(max_length=255)
     order = models.FloatField(default=1)
-    required_role = models.CharField(max_length=255, null=True)
+    required_role = models.ForeignKey(
+        "users.Role", null=True, on_delete=models.SET_NULL
+    )
     blocked_role = models.CharField(max_length=255, null=True)

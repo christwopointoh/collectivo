@@ -7,7 +7,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from jwt import decode
 import logging
 from collectivo.errors import CollectivoError
-from collectivo.auth.models import User, AnonymousUser, Role
+from collectivo.users.models import User, AnonymousUser, Role
 
 logger = logging.getLogger(__name__)
 

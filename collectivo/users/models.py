@@ -1,7 +1,7 @@
 """Models of the authentication module."""
 from django.db import models
 from django.conf import settings
-from collectivo.auth.services import AuthService
+from collectivo.users.services import AuthService
 from django.db.models.manager import EmptyManager
 from uuid import UUID
 

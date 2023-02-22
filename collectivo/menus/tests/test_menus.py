@@ -3,8 +3,8 @@ from django.test import TestCase
 from django.urls import reverse
 from ..utils import register_menuitem
 from collectivo.menus.models import Menu, MenuItem
-from collectivo.auth.clients import AuthClient
-from collectivo.auth.userinfo import UserInfo
+from collectivo.users.clients import AuthClient
+from collectivo.users.userinfo import UserInfo
 
 
 EXTENSIONS_URL = reverse("collectivo:collectivo.extensions:extension-list")

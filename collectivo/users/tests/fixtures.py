@@ -7,5 +7,5 @@ TEST_USER = {
     "last_name": "User",
     "email": EMAIL,
 }
-PUBLIC_URL = reverse("collectivo:collectivo.auth:test_view_public")
-PRIVATE_URL = reverse("collectivo:collectivo.auth:test_view_private")
+PUBLIC_URL = reverse("collectivo:collectivo.users:test_view_public")
+PRIVATE_URL = reverse("collectivo:collectivo.users:test_view_private")

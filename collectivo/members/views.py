@@ -2,8 +2,8 @@
 import logging
 from rest_framework import viewsets, mixins
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from collectivo.auth.permissions import IsAuthenticated
-from collectivo.auth.services import AuthService
+from collectivo.users.permissions import IsAuthenticated
+from collectivo.users.services import AuthService
 from collectivo.views import SchemaMixin
 from .permissions import IsMembersAdmin
 from . import models, serializers

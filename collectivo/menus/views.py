@@ -2,7 +2,7 @@
 from django.db.models import Q
 from rest_framework import viewsets
 from . import models, serializers
-from collectivo.auth.permissions import IsSuperuser, IsAuthenticated
+from collectivo.users.permissions import IsSuperuser, IsAuthenticated
 import logging
 
 

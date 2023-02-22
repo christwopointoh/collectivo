@@ -160,7 +160,7 @@ To activate authentication via keycloak, add the following line in `settings.py`
 ```python
 MIDDLEWARE = [
     ...
-    'collectivo.auth.middleware.KeycloakMiddleware'
+    'collectivo.users.middleware.KeycloakMiddleware'
 ]
 ```
 

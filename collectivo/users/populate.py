@@ -1,6 +1,6 @@
 """Populate auth service with groups and roles."""
 import logging
-from collectivo.auth.models import AuthService
+from collectivo.users.models import AuthService
 
 
 logger = logging.getLogger(__name__)

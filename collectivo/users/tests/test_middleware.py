@@ -8,13 +8,13 @@ from django.urls import reverse
 from ..clients import AuthClient
 from ..userinfo import UserInfo
 import logging
-from collectivo.auth.services import AuthService
+from collectivo.users.services import AuthService
 from django.test import TestCase
 from django.urls import reverse
 from ..clients import AuthClient
-from collectivo.auth.models import User, AnonymousUser, Role
-from collectivo.auth.services import AuthService
-from collectivo.auth.exceptions import AuthDeleteError
+from collectivo.users.models import User, AnonymousUser, Role
+from collectivo.users.services import AuthService
+from collectivo.users.exceptions import AuthDeleteError
 from .fixtures import TEST_USER, PASSWORD, EMAIL, PRIVATE_URL, PUBLIC_URL
 
 
@@ -80,9 +80,9 @@ class AuthAPITests(TestCase):
         self.user.set_email_verified(True)
         self.token = self.user.get_token(PASSWORD)
         self.access_token = self.token.access_token
-        self.private_endpoint = "collectivo:collectivo.auth:test_view_private"
-        self.public_endpoint = "collectivo:collectivo.auth:test_view_public"
-        self.admin_endpoint = "collectivo:collectivo.auth:test_view_admin"
+        self.private_endpoint = "collectivo:collectivo.users:test_view_private"
+        self.public_endpoint = "collectivo:collectivo.users:test_view_public"
+        self.admin_endpoint = "collectivo:collectivo.users:test_view_admin"
 
     def tearDown(self):
         """Delete test user."""

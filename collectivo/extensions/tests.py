@@ -2,7 +2,7 @@
 from django.urls import reverse
 from django.test import TestCase
 
-from collectivo.auth.clients import AuthClient
+from collectivo.users.clients import AuthClient
 from .models import Extension
 from .utils import register_extension
 

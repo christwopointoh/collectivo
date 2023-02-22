@@ -1,8 +1,8 @@
 """Populate collectivo & keycloak with test users."""
 import logging
 from collectivo.utils import register_viewset
-from collectivo.auth.services import AuthService
-from collectivo.auth.exceptions import AuthDeleteError
+from collectivo.users.services import AuthService
+from collectivo.users.exceptions import AuthDeleteError
 from collectivo.members.views import MembersAdminCreateViewSet
 from collectivo.members.models import Member
 from keycloak.exceptions import KeycloakGetError

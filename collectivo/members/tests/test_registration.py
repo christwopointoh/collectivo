@@ -4,8 +4,8 @@ from django.urls import reverse
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
 from collectivo.dashboard.models import DashboardTile
-from collectivo.auth.userinfo import UserInfo
-from collectivo.auth.clients import AuthClient
+from collectivo.users.userinfo import UserInfo
+from collectivo.users.clients import AuthClient
 
 
 TILES_URL = reverse("collectivo:collectivo.dashboard:tile-list")

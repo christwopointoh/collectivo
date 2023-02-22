@@ -1,7 +1,7 @@
 """Tests for the core API."""
 from django.test import TestCase
 from django.urls import reverse
-from collectivo.auth.clients import AuthClient
+from collectivo.users.clients import AuthClient
 
 
 class SchemaTests(TestCase):

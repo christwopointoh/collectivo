@@ -58,7 +58,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "collectivo",
     "collectivo.menus",
-    "collectivo.auth",
+    "collectivo.users",
     "collectivo.extensions",
     "collectivo.dashboard",
     "corsheaders",
@@ -78,7 +78,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "collectivo.auth.middleware.KeycloakMiddleware",
+    "collectivo.users.middleware.KeycloakMiddleware",
     "collectivo.middleware.requestLog.RequestLogMiddleware",
 ]
 
@@ -308,7 +308,7 @@ DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_FROM")
 
 # Settings for collectivo
 COLLECTIVO = {
-    "auth.service": "collectivo.auth.services.KeycloakAuthService",
+    "auth.service": "collectivo.users.services.KeycloakAuthService",
     "auth.sync": True,
 }
 

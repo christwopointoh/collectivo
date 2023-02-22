@@ -1,7 +1,7 @@
 """Testing clients of the authentication module."""
 from rest_framework.test import APIClient, ForceAuthClientHandler
-from collectivo.auth.services import AuthService
-from collectivo.auth.models import User
+from collectivo.users.services import AuthService
+from collectivo.users.models import User
 
 
 class CustomForceAuthClientHandler(ForceAuthClientHandler):

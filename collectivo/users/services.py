@@ -1,7 +1,7 @@
 """Manager class to connect collectivo to an authentication service."""
 from keycloak import KeycloakAdmin, KeycloakOpenID
 from keycloak.exceptions import KeycloakPutError, KeycloakDeleteError
-from collectivo.auth.exceptions import (
+from collectivo.users.exceptions import (
     AuthDeleteError,
     AuthGetError,
     AuthUpdateError,

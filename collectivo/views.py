@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from collections import OrderedDict
 from collectivo.version import __version__
-from collectivo.auth.permissions import IsAuthenticated
+from collectivo.users.permissions import IsAuthenticated
 from drf_spectacular.utils import extend_schema, OpenApiResponse
 
 

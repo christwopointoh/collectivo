@@ -1,8 +1,8 @@
 """Test the features of the emails API."""
 from django.test import TestCase
 from django.urls import reverse
-from collectivo.auth.clients import AuthClient
-from collectivo.auth.userinfo import UserInfo
+from collectivo.users.clients import AuthClient
+from collectivo.users.userinfo import UserInfo
 from collectivo.members.models import Member, MemberTag
 import json
 

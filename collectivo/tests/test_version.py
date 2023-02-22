@@ -2,7 +2,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from collectivo.version import __version__
-from collectivo.auth.clients import AuthClient
+from collectivo.users.clients import AuthClient
 
 
 class PublicCoreApiTests(TestCase):

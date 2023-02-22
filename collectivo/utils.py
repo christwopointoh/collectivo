@@ -65,7 +65,7 @@ def request(
     viewset: ViewSet, command="create", payload=None, user=None, **kwargs
 ) -> Response:
     """Make an internal http request to a DRF Viewset."""
-    from collectivo.auth.models import SuperUser
+    from collectivo.users.models import SuperUser
 
     rf = RequestFactory()
     drf_to_http = {

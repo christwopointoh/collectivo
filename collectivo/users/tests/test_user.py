@@ -1,10 +1,10 @@
 """Test the user model of the auth module."""
 from django.test import TestCase
 from ..clients import AuthClient
-from collectivo.auth.models import User
-from collectivo.auth.services import AuthToken
-from collectivo.auth.services import AuthService, AuthToken
-from collectivo.auth.exceptions import AuthDeleteError, AuthGetError
+from collectivo.users.models import User
+from collectivo.users.services import AuthToken
+from collectivo.users.services import AuthService, AuthToken
+from collectivo.users.exceptions import AuthDeleteError, AuthGetError
 from .fixtures import TEST_USER, EMAIL, PASSWORD, PUBLIC_URL
 
 

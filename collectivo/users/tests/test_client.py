@@ -5,7 +5,7 @@ from ..clients import AuthClient
 from django.test import TestCase
 from django.urls import reverse
 from ..clients import AuthClient
-from collectivo.auth.models import User, AnonymousUser
+from collectivo.users.models import User, AnonymousUser
 from .fixtures import TEST_USER, EMAIL, PASSWORD, PRIVATE_URL
 
 

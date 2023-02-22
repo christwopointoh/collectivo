@@ -9,7 +9,7 @@ def post_migrate_callback(sender, **kwargs):
     from collectivo.menus.models import Menu, MenuItem
     from .populate import create_groups_and_roles
 
-    name = "auth"
+    name = "users"
 
     try:
         extension = Extension.objects.get(name=name)
@@ -40,8 +40,7 @@ class AuthConfig(AppConfig):
     """Configuration class of the authentication module."""
 
     default_auto_field = "django.db.models.BigAutoField"
-    name = "collectivo.auth"
-    label = "collectivo_auth"  # Prevent conflict with django.contrib.auth
+    name = "collectivo.users"
 
     def ready(self):
         """

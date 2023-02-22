@@ -34,23 +34,22 @@ class DashboardTileViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """Show only items where user has required roles."""
-        user_roles = self.request.userinfo.roles
+        user_roles = self.request.auth_user.roles.all()
 
         queryset = models.DashboardTile.objects.filter(
-            Q(required_role__in=user_roles) |
-            Q(required_role=None),
-            ~Q(blocked_role__in=user_roles)
+            Q(required_role__in=user_roles) | Q(required_role=None),
+            ~Q(blocked_role__in=user_roles),
         )
         return queryset
 
     def get_permissions(self):
         """Set permissions for this viewset."""
-        if self.action == 'list':
+        if self.action == "list":
             return [IsAuthenticated()]
         return [IsSuperuser()]
 
     def get_serializer_class(self):
         """Set name to read-only except for create."""
-        if self.request.method == 'POST':
+        if self.request.method == "POST":
             return serializers.DashboardTileCreateSerializer
         return serializers.DashboardTileSerializer

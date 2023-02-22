@@ -9,7 +9,7 @@ class AuthRegistrationTests(TestCase):
 
     def setUp(self):
         """Initialize testing instance."""
-        self.name = 'auth'
+        self.name = "auth"
 
     def test_extension_exists(self):
         """Test that the extension is automatically registered."""

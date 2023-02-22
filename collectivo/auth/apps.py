@@ -5,31 +5,43 @@ from django.db.models.signals import post_migrate
 
 def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
-    from collectivo.extensions.utils import register_extension
-    from collectivo.menus.utils import register_menuitem
+    from collectivo.extensions.models import Extension
+    from collectivo.menus.models import Menu, MenuItem
     from .populate import create_groups_and_roles
 
-    name = 'auth'
-    description = 'API for user authentication.'
-    register_extension(name=name, built_in=True, description=description)
-    register_menuitem(
-        item_id='auth_logout_button',
-        menu_id='main_menu',
-        label='Log out',
-        extension=name,
-        action='component',
-        component_name='logout',
-        order=99
-    )
+    name = "auth"
+
+    try:
+        extension = Extension.objects.get(name=name)
+    except Extension.DoesNotExist:
+        extension = Extension.objects.create(
+            name=name,
+            built_in=True,
+            description="API for user authentication.",
+        )
+
+    try:
+        MenuItem.objects.get(item_id="auth_logout_button")
+    except MenuItem.DoesNotExist:
+        MenuItem.objects.create(
+            item_id="auth_logout_button",
+            menu_id=Menu.objects.get(menu_id="main_menu"),
+            label="Log out",
+            extension=extension,
+            action="component",
+            component_name="logout",
+            order=99,
+        )
+
     create_groups_and_roles()
 
 
 class AuthConfig(AppConfig):
     """Configuration class of the authentication module."""
 
-    default_auto_field = 'django.db.models.BigAutoField'
-    name = 'collectivo.auth'
-    label = 'collectivo_auth'
+    default_auto_field = "django.db.models.BigAutoField"
+    name = "collectivo.auth"
+    label = "collectivo_auth"  # Prevent conflict with django.contrib.auth
 
     def ready(self):
         """

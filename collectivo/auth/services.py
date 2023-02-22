@@ -1,12 +1,17 @@
 """Manager class to connect collectivo to an authentication service."""
 from keycloak import KeycloakAdmin, KeycloakOpenID
 from keycloak.exceptions import KeycloakPutError, KeycloakDeleteError
-from collectivo.auth.exceptions import AuthDeleteError
-from rest_framework.exceptions import ParseError
+from collectivo.auth.exceptions import (
+    AuthDeleteError,
+    AuthGetError,
+    AuthUpdateError,
+    AuthCreateError,
+)
 from django.conf import settings
 from collectivo.utils import get_object_from_settings
-from dataclasses import dataclass
 from uuid import UUID
+from typing import List
+from dataclasses import dataclass
 
 
 @dataclass
@@ -15,8 +20,19 @@ class AuthUser:
 
     user_id: UUID
     email: str
+    email_verified: bool
     first_name: str
     last_name: str
+
+
+@dataclass
+class AuthToken:
+    """Representation for tokens of the authentication service."""
+
+    access_token: str
+    refresh_token: str = None
+    access_expires_in: int = None
+    refresh_expires_in: int = None
 
 
 class AuthService:
@@ -34,6 +50,14 @@ class AuthService:
         """Return user from auth service."""
         return self._manager.get_user(user_id)
 
+    def get_user_by_email(self, email: str) -> AuthUser:
+        """Return user from auth service."""
+        return self._manager.get_user_by_email(email)
+
+    def get_token(self, email: str, password: str) -> AuthToken:
+        """Return token from auth service."""
+        return self._manager.get_token(email, password)
+
     def create_user(
         self,
         first_name: str,
@@ -44,6 +68,20 @@ class AuthService:
         """Create user in auth service. Returns user id."""
         return self._manager.create_user(
             first_name, last_name, email, email_verified
+        )
+
+    def update_user(
+        self,
+        user_id: UUID,
+        first_name: str = None,
+        last_name: str = None,
+        email: str = None,
+        email_verified: bool = None,
+        roles: List[str] = None,
+    ) -> None:
+        """Update user in auth service."""
+        self._manager.update_user(
+            user_id, first_name, last_name, email, email_verified, roles
         )
 
     def set_user_password(
@@ -91,8 +129,27 @@ class KeycloakAuthService:
         return AuthUser(
             user_id=user_id,
             email=user_rep["email"],
+            email_verified=user_rep["emailVerified"],
             first_name=user_rep["firstName"],
             last_name=user_rep["lastName"],
+        )
+
+    def get_user_by_email(self, email: str) -> AuthUser:
+        """Return user from keycloak."""
+        user_id = self.get_user_id(email)
+        return self.get_user(user_id)
+
+    def get_token(self, email: str, password: str) -> str:
+        """Return token from keycloak."""
+        try:
+            token = self.openid.token(email, password)
+        except Exception as e:
+            raise AuthGetError(e)
+        return AuthToken(
+            access_token=token["access_token"],
+            refresh_token=token["refresh_token"],
+            access_expires_in=token["expires_in"],
+            refresh_expires_in=token["refresh_expires_in"],
         )
 
     def get_user_id(self, email):
@@ -136,17 +193,18 @@ class KeycloakAuthService:
         try:
             user = self.admin.create_user(payload, exist_ok=exist_ok)
         except Exception as e:
-            raise ParseError(f"Could not create user: {e}")
+            raise AuthCreateError(f"Could not create user: {e}")
         return user
 
     def update_user(
         self,
-        user_id,
-        first_name=None,
-        last_name=None,
-        email=None,
-        email_verified=None,
-    ):
+        user_id: UUID,
+        first_name: str = None,
+        last_name: str = None,
+        email: str = None,
+        email_verified: bool = None,
+        roles: List[str] = None,
+    ) -> None:
         """Update a keycloak user."""
         payload = {
             "firstName": first_name,
@@ -157,8 +215,14 @@ class KeycloakAuthService:
         payload = {k: v for k, v in payload.items() if v is not None}
         try:
             self.admin.update_user(user_id=user_id, payload=payload)
+            if roles is not None:
+                roles = [
+                    {"id": self.admin.get_realm_role(role)["id"], "name": role}
+                    for role in roles
+                ]
+                self.admin.assign_realm_roles(user_id, roles)
         except KeycloakPutError as e:
-            raise ParseError(f"Could not update user {user_id}: {e}")
+            raise AuthUpdateError(f"Could not update user {user_id}: {e}")
 
     def add_user_to_group(self, user_id, group_name):
         """Add a user to a keycloak group."""
@@ -169,3 +233,8 @@ class KeycloakAuthService:
         """Remove a user from an authorization group."""
         group_id = self.get_group_by_path(f"/{group_name}")["id"]
         self.group_user_remove(user_id, group_id)
+
+    def assign_role_to_user(self, user_id, role_name):
+        """Add a role to a user."""
+        role_id = self.get_role_by_name(role_name)["id"]
+        self.assign_client_role(user_id, role_id)

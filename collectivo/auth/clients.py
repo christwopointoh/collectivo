@@ -1,15 +1,15 @@
 """Testing clients of the authentication module."""
 from rest_framework.test import APIClient, ForceAuthClientHandler
 from collectivo.auth.services import AuthService
-from .userinfo import UserInfo
+from collectivo.auth.models import User
 
 
-class AuthClientHandler(ForceAuthClientHandler):
-    """Force authentication client handler for AuthClient."""
+class CustomForceAuthClientHandler(ForceAuthClientHandler):
+    """Handler to force authentication with the user object."""
 
     def get_response(self, request):
         """Set forced user as user attribute."""
-        request.userinfo = self._force_user if self._force_user else UserInfo()
+        request.auth_user = self._force_user if self._force_user else User()
         return super().get_response(request)
 
 
@@ -29,17 +29,15 @@ class AuthClient(APIClient):
     ```
     """
 
-    def __init__(self, force=False, enforce_csrf_checks=False, **defaults):
+    def __init__(self, force=True, enforce_csrf_checks=False, **defaults):
         """Initialize client with custom handler."""
         super().__init__(enforce_csrf_checks, **defaults)
-        if force:
-            self.handler = AuthClientHandler(enforce_csrf_checks)
-            self.force_authenticate()
 
-    def force_roles(self, roles: list):
-        """Force authentication with passed role or roles."""
-        user = UserInfo(roles=roles, is_authenticated=True)
-        self.force_authenticate(user)
+    def force_authenticate(self, user=None):
+        """Force authentication with passed user or token."""
+        self.handler = CustomForceAuthClientHandler()
+        super().force_authenticate(user)
+        # TODO: Roles
 
     def authorize(self, email: str, password: str = "Test123!"):
         """Authorize test user with the auth service."""

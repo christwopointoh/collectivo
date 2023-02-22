@@ -6,9 +6,8 @@ from keycloak import KeycloakOpenID
 from rest_framework.exceptions import AuthenticationFailed
 from jwt import decode
 import logging
-from .userinfo import UserInfo
 from collectivo.errors import CollectivoError
-from collectivo.auth.models import User
+from collectivo.auth.models import User, AnonymousUser, Role
 
 logger = logging.getLogger(__name__)
 
@@ -18,32 +17,28 @@ class KeycloakMiddleware(MiddlewareMixin):
 
     def __init__(self, get_response):
         """One-time initialization of middleware."""
-        self.get_response = get_response  # Required by django
+        self.get_response = get_response
         try:
-            self.setup_KeycloakOpenID()
-        except Exception:
-            raise CollectivoError(
-                f"{__name__}: Failed to set up keycloak connection."
-                "Please check settings.KEYCLOAK."
+            config = settings.KEYCLOAK
+            self.keycloak = KeycloakOpenID(
+                server_url=config["SERVER_URL"],
+                realm_name=config["REALM_NAME"],
+                client_id=config["CLIENT_ID"],
+                client_secret_key=config["CLIENT_SECRET_KEY"],
             )
-
-    def setup_KeycloakOpenID(self):
-        """Set up KeyCloakOpenID with given settings."""
-        self.config = settings.KEYCLOAK  # TODO Use auth manager
-        self.keycloak = KeycloakOpenID(
-            server_url=self.config["SERVER_URL"],
-            realm_name=self.config["REALM_NAME"],
-            client_id=self.config["CLIENT_ID"],
-            client_secret_key=self.config["CLIENT_SECRET_KEY"],
-        )
+        except Exception as e:
+            raise CollectivoError(
+                f"Failed to set up keycloak connection: {repr(e)}"
+            )
 
     def __call__(self, request):
         """Handle default requests."""
-        return self.get_response(request)  # Required by django
+        return self.get_response(request)
 
-    def auth_failed(self, correlation_id, log_message, error):
+    def auth_failed(self, request, log_message, error):
         """Return authentication failed message in log and API."""
-        logger.debug(f"{correlation_id} {log_message}: {repr(error)}")
+        request_id = request.META.get("X-Correlation-ID", "NO-CORRELATION-ID")
+        logger.debug(f"{request_id} {log_message}: {repr(error)}")
         return JsonResponse(
             {"detail": AuthenticationFailed.default_detail},
             status=AuthenticationFailed.status_code,
@@ -51,16 +46,16 @@ class KeycloakMiddleware(MiddlewareMixin):
 
     def process_view(self, request, view_func, view_args, view_kwargs):
         """Check for authentication and try to get user from keycloak."""
-        # Skip middleware if userinfo is already provided
-        if hasattr(request, "userinfo"):
+
+        # Skip middleware if user is already provided
+        if hasattr(request, "auth_user"):
             return None
 
-        # Add unauthenticated user to request
-        request.userinfo = user = UserInfo()
-        request_id = request.META.get("X-Correlation-ID", "NO-CORRELATION-ID")
+        # Add anonymous user to request as default
+        request.auth_user = AnonymousUser()
+
         # Return unauthenticated request if no authorization is found
         if "HTTP_AUTHORIZATION" not in request.META:
-            # logger.debug(f'No authorization found. Using public user.')
             return None
 
         # Retrieve token and user or return failure message
@@ -68,45 +63,41 @@ class KeycloakMiddleware(MiddlewareMixin):
             auth = request.META.get("HTTP_AUTHORIZATION").split()
             access_token = auth[1] if len(auth) == 2 else auth[0]
         except Exception as e:
-            return self.auth_failed(request_id, "Could not read token", e)
+            return self.auth_failed(request, "Could not read token", e)
 
         # Check the validity of the token
         try:
             self.keycloak.userinfo(access_token)
-            user.is_authenticated = True
         except Exception as e:
-            return self.auth_failed(request_id, "Could not verify token", e)
+            return self.auth_failed(request, "Could not verify token", e)
 
         # Decode token
         try:
             data = decode(access_token, options={"verify_signature": False})
         except Exception as e:
-            return self.auth_failed(request_id, "Could not decode token", e)
+            return self.auth_failed(request, "Could not decode token", e)
 
-        # Get or create user
-        user_object, new = User.objects.get_or_create(
-            user_id=data.get("sub", None)
-        )
-        if new:
-            user_object.email = data.get("email", None)
-            user_object.first_name = data.get("given_name", None)
-            user_object.last_name = data.get("family_name", None)
-            user_object.save()
-
-        # Add userinfos to request
+        # Get or create user from token data
         try:
-            user.user_id = data.get("sub", None)
-            user.email = data.get("email", None)
-            user.email_verified = data.get("email_verified", None)
-            user.first_name = data.get("given_name", None)
-            user.last_name = data.get("family_name", None)
-            roles = data.get("realm_access", {}).get("roles", [])
-            for role in roles:
-                user.roles.append(role)
+            request.auth_user = User.objects.get(user_id=data.get("sub", None))
+        except User.DoesNotExist:
+            request.auth_user = User(user_id=data.get("sub", None))
         except Exception as e:
-            return self.auth_failed(
-                request_id, "Could not extract userinfo", e
-            )
+            return self.auth_failed(request, "Could not extract userinfo", e)
 
-        # Return authenticated request if no exception is thrown
+        try:
+            request.auth_user.email = data.get("email")
+            request.auth_user.first_name = data.get("given_name")
+            request.auth_user.last_name = data.get("family_name")
+            request.auth_user.save_without_sync()
+            request.auth_user.roles.clear()
+            for role in data.get("realm_access").get("roles"):
+                request.auth_user.roles.add(
+                    Role.objects.get_or_create(name=role)[0]
+                )
+            request.auth_user.save_without_sync()
+        except Exception as e:
+            return self.auth_failed(request, "Could not extract userinfo", e)
+
+        # Return authenticated request
         return None

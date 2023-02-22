@@ -7,7 +7,7 @@ class IsMembersUser(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """Check if the required permission is among user roles."""
-        return request.userinfo.has_role_or_is_superuser('members_user')
+        return request.auth_user.has_role_or_is_superuser("members_user")
 
 
 class IsMembersAdmin(permissions.BasePermission):
@@ -15,4 +15,4 @@ class IsMembersAdmin(permissions.BasePermission):
 
     def has_permission(self, request, view):
         """Check if the required permission is among user roles."""
-        return request.userinfo.has_role_or_is_superuser('members_admin')
+        return request.auth_user.has_role_or_is_superuser("members_admin")

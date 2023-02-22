@@ -3,7 +3,6 @@ from django.test import RequestFactory
 from django.conf import settings
 from rest_framework.response import Response
 from rest_framework.viewsets import ViewSet
-from collectivo.auth.userinfo import UserInfo
 import logging
 import importlib
 
@@ -63,9 +62,11 @@ def get_extension_model():
 
 
 def request(
-    viewset: ViewSet, command="create", payload=None, userinfo=None, **kwargs
+    viewset: ViewSet, command="create", payload=None, user=None, **kwargs
 ) -> Response:
     """Make an internal http request to a DRF Viewset."""
+    from collectivo.auth.models import SuperUser
+
     rf = RequestFactory()
     drf_to_http = {
         "create": "post",
@@ -81,11 +82,7 @@ def request(
         None, payload, content_type="application/json"
     )
 
-    if userinfo is not None:
-        request.userinfo = userinfo
-    else:
-        request.userinfo = UserInfo(roles=["superuser"])
-
+    request.auth_user = user if user is not None else SuperUser()
     response = viewset.as_view({method: command})(request, **kwargs)
 
     return response

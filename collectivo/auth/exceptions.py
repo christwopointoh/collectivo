@@ -1,17 +1,26 @@
-"""Exceptions for the auth module."""
+"""Exceptions of the authentication module."""
+from rest_framework.exceptions import ParseError
 
 
-class AuthDeleteError(Exception):
+class AuthDeleteError(ParseError):
+    """Exception raised when deleting a user fails (HTTP 400)."""
+
     pass
 
 
-class AuthUpdateError(Exception):
+class AuthUpdateError(ParseError):
+    """Exception raised when updating a user fails (HTTP 400)."""
+
     pass
 
 
-class AuthCreateError(Exception):
+class AuthCreateError(ParseError):
+    """Exception raised when creating a user fails (HTTP 400)."""
+
     pass
 
 
-class AuthGetError(Exception):
+class AuthGetError(ParseError):
+    """Exception raised when getting a user fails (HTTP 400)."""
+
     pass

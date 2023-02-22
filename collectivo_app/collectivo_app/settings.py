@@ -309,6 +309,7 @@ DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_FROM")
 # Settings for collectivo
 COLLECTIVO = {
     "auth.service": "collectivo.auth.services.KeycloakAuthService",
+    "auth.sync": True,
 }
 
 

@@ -1,15 +1,17 @@
 """Configuration file for the  extension."""
 import os
+
 from django.apps import AppConfig
 from django.db.models.signals import post_migrate
+
 from collectivo.version import __version__
 
 
 def post_migrate_callback(sender, **kwargs):
     """Initialize extension after database is ready."""
+    from collectivo.dashboard.utils import register_tile
     from collectivo.extensions.utils import register_extension
     from collectivo.menus.utils import register_menuitem
-    from collectivo.dashboard.utils import register_tile
 
     name = "direktkredit"
 
@@ -27,7 +29,7 @@ def post_migrate_callback(sender, **kwargs):
         action="link",
         link_source=os.environ.get("DIREKTKREDIT_SERVER_URL") + "/login-oidc",
         action_target="blank",
-        order=2,
+        order=10,
     )
     register_menuitem(
         item_id="direktkredit_admin",
@@ -38,11 +40,12 @@ def post_migrate_callback(sender, **kwargs):
         link_source=os.environ.get("DIREKTKREDIT_SERVER_URL")
         + "/login-oidc-admin",
         action_target="blank",
-        order=3,
+        required_role="members_admin",
+        order=11,
     )
     register_tile(
         tile_id="direktkredit_tile",
-        label="My Directkredits",
+        label="Direct loans",
         extension=name,
         component_name="direktkredit_tile",
     )

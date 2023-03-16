@@ -7,7 +7,7 @@ from rest_framework import mixins, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from collectivo.auth.permissions import IsAuthenticated
-from collectivo.filters import get_filterset_fields
+from collectivo.filters import get_filterset
 from collectivo.utils import get_auth_manager
 from collectivo.views import SchemaMixin
 
@@ -199,9 +199,7 @@ class MembersSummaryViewSet(MemberMixin, mixins.ListModelMixin):
 
     serializer_class = serializers.MemberSummarySerializer
     permission_classes = [IsMembersAdmin]
-    filterset_fields = get_filterset_fields(
-        serializers.MemberSummarySerializer
-    )
+    filterset_class = get_filterset(serializers.MemberSummarySerializer)
     ordering_fields = "__all__"
 
 
@@ -220,7 +218,7 @@ class MembersAdminViewSet(
 
     serializer_class = serializers.MemberAdminSerializer
     permission_classes = [IsMembersAdmin]
-    filterset_fields = get_filterset_fields(serializers.MemberAdminSerializer)
+    filterset_class = get_filterset(serializers.MemberAdminSerializer)
     ordering_fields = member_fields
 
 
@@ -233,9 +231,7 @@ class MembersAdminCreateViewSet(MemberMixin, mixins.CreateModelMixin):
 
     serializer_class = serializers.MemberAdminCreateSerializer
     permission_classes = [IsMembersAdmin]
-    filterset_fields = get_filterset_fields(
-        serializers.MemberAdminCreateSerializer
-    )
+    filterset_class = get_filterset(serializers.MemberAdminCreateSerializer)
     ordering_fields = member_fields
 
     def perform_create(self, serializer):
@@ -249,7 +245,7 @@ class MemberTagViewSet(SchemaMixin, viewsets.ModelViewSet):
 
     permission_classes = [IsMembersAdmin]
     serializer_class = serializers.MemberTagSerializer
-    filterset_fields = get_filterset_fields(serializers.MemberTagSerializer)
+    filterset_class = get_filterset(serializers.MemberTagSerializer)
     queryset = models.MemberTag.objects.all()
 
     def perform_destroy(self, instance):

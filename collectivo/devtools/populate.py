@@ -62,7 +62,7 @@ def populate_keycloak_with_test_data():
     auth_manager = get_auth_manager()
 
     for i in range(100):
-        MemberTag.objects.create(label=f"Test tag {i}")
+        MemberTag.objects.get_or_create(label=f"Test tag {i}")
 
     for user in users:
         try:

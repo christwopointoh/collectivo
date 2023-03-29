@@ -9,7 +9,7 @@ from django.forms import ValidationError
 from rest_framework import viewsets
 from rest_framework.response import Response
 
-from collectivo.views import SchemaMixin
+from collectivo.utils.mixins import SchemaMixin
 
 from . import models, serializers
 
@@ -214,12 +214,12 @@ class ShiftViewSet(SchemaMixin, viewsets.ModelViewSet):
 class AssignmentViewSet(SchemaMixin, viewsets.ModelViewSet):
     """Manage individual shifts."""
 
-    queryset = models.Assignment.objects.all()
+    queryset = models.ShiftAssignment.objects.all()
     serializer_class = serializers.AssignmentSerializer
 
 
 class ShiftUserViewSet(SchemaMixin, viewsets.ModelViewSet):
     """Manage shift users."""
 
-    queryset = models.ShiftUser.objects.all()
+    queryset = models.ShiftProfile.objects.all()
     serializer_class = serializers.ShiftUserSerializer

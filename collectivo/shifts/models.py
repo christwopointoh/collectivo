@@ -1,5 +1,7 @@
 """Models of the shift module."""
+from django.contrib.auth import get_user_model
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 
 class Shift(models.Model):
@@ -64,12 +66,14 @@ class Shift(models.Model):
         null=True,
     )
 
+    history = HistoricalRecords()
 
-class Assignment(models.Model):
+
+class ShiftAssignment(models.Model):
     """A shift to be done by a single user."""
 
     assigned_user = models.ForeignKey(
-        "ShiftUser",
+        "ShiftProfile",
         on_delete=models.SET_NULL,
         blank=True,
         null=True,
@@ -81,10 +85,14 @@ class Assignment(models.Model):
     attended = models.BooleanField(default=False)
     additional_info_individual = models.TextField(max_length=300)
 
+    history = HistoricalRecords()
 
-class ShiftUser(models.Model):
+
+class ShiftProfile(models.Model):
     """A user that can be assigned to a shift."""
 
-    # TODO should be set by keycloak and collectivo
-    username = models.CharField(max_length=30, blank=True)
-    creator = models.BooleanField(default=False)
+    user = models.OneToOneField(
+        get_user_model(), primary_key=True, on_delete=models.CASCADE
+    )
+
+    history = HistoricalRecords()

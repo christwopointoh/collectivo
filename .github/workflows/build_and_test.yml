@@ -38,7 +38,7 @@ jobs:
     strategy:
       # test against these python versions
       matrix:
-        python-version: ["3.9", "3.10"]
+        python-version: ["3.10"]
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout code
@@ -86,9 +86,10 @@ jobs:
           SECRET_KEY: badkey
           KEYCLOAK_SERVER_URL: http://keycloak:8080
           KEYCLOAK_CLIENT_SECRET_KEY: "**********"
-          COLLECTIVO_EXTENSIONS: members, shifts
+          COLLECTIVO_EXTENSIONS: profiles, memberships, emails, tags, payments, memberships.payments, shifts
           DEBUG: True
           DEVELOPMENT: True
+          DIREKTKREDIT_SERVER_URL: "http://direktkredit.local:8020"
         run: |
           cp -a collectivo collectivo_app
           cd collectivo_app

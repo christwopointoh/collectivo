@@ -1,34 +1,31 @@
 """URL patterns of the collectivo core."""
-from django.urls import path, re_path, include
 from django.conf import settings
 from django.contrib.staticfiles.views import serve
+from django.urls import include, path, re_path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-from collectivo import views
 
+app_name = "collectivo"
 
-app_name = 'collectivo'
+urlpatterns = []
 
-urlpatterns = [
-    # Core API views
-    path('api/collectivo/about/',
-         views.AboutView.as_view(), name='version'),
-]
-
+# Include url patterns from all collectivo extensions
 for app in settings.INSTALLED_APPS:
-    if app.startswith('collectivo') and app != 'collectivo':
-        pattern = path('', include(f'{app}.urls'))
+    if app.startswith("collectivo") and app != "collectivo":
+        pattern = path("", include(f"{app}.urls"))
         urlpatterns.append(pattern)
 
-if settings.DEBUG:
-
+# Add debug patterns
+if settings.DEVELOPMENT:
     urlpatterns += [
         # Access static files
-        re_path(r'^static/(?P<path>.*)$', serve),
-
+        re_path(r"^static/(?P<path>.*)$", serve),
         # API Documentation
-        path('api/dev/schema/',
-             SpectacularAPIView.as_view(), name='api-schema'),
-        path('api/dev/docs/',
-             SpectacularSwaggerView.as_view(url_name='collectivo:api-schema'),
-             name='api-docs'),
+        path(
+            "api/dev/schema/", SpectacularAPIView.as_view(), name="api-schema"
+        ),
+        path(
+            "api/dev/docs/",
+            SpectacularSwaggerView.as_view(url_name="collectivo:api-schema"),
+            name="api-docs",
+        ),
     ]

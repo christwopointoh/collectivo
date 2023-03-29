@@ -4,14 +4,18 @@ Default django settings for collectivo_app.
 Will not be used if custom settings are defined through
 the COLLECTIVO_SETTINGS environment variable (see manage.py).
 """
+import logging
 import os
 from pathlib import Path
 
 from corsheaders.defaults import default_headers
 
-from collectivo.errors import CollectivoError
+from collectivo.version import __version__
 
 from .utils import get_env_bool, string_to_list
+
+logger = logging.getLogger(__name__)
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ["SECRET_KEY"]
@@ -29,49 +33,63 @@ elif DEVELOPMENT:
         "collectivo.local",
     ]
 else:
-    raise CollectivoError(
+    logger.warning(
         "You must set the environment variable "
         "ALLOWED_HOSTS if DEVELOPMENT is False."
     )
 
 # Choose built-in collectivo extensions from environment
-_built_in_extensions = ["members", "shifts", "direktkredit"]
-_sub_extensions = []
+_built_in_extensions = [
+    "members",  # TODO: Deprecate
+    "profiles",
+    "memberships",
+    "memberships.payments",
+    "emails",
+    "tags",
+    "payments",
+    "shifts",
+    "direktkredit",
+]
 _chosen_extensions = string_to_list(os.environ.get("COLLECTIVO_EXTENSIONS"))
 for ext in _chosen_extensions:
     if ext not in _built_in_extensions:
-        raise CollectivoError(
-            "Error in environment variable 'COLLECTIVO_EXTENSIONS': "
-            f"'{ext}' is not a built-in extension. "
-            f"Available extensions are: {_built_in_extensions}."
+        _chosen_extensions.remove(ext)
+        logger.warning(
+            f"Environment variable '{ext}' in 'COLLECTIVO_EXTENSIONS' has "
+            f"been ignored. Available extensions are: {_built_in_extensions}."
         )
-    if ext == "members":
-        _sub_extensions.append("members.emails")
-_chosen_extensions += _sub_extensions
-
 
 INSTALLED_APPS = [
+    # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "collectivo",
-    "collectivo.menus",
-    "collectivo.auth",
-    "collectivo.extensions",
-    "collectivo.dashboard",
+    # Third-party apps
     "corsheaders",
     "django_filters",
     "rest_framework",
     "drf_spectacular",
+    "simple_history",
+    # Collectivo core apps
+    "collectivo",
+    "collectivo.core",
+    "collectivo.auth.keycloak",
+    "collectivo.menus",
+    "collectivo.extensions",
+    "collectivo.dashboard",
+    # Collectivo custom extensions
     *[f"collectivo.{ext}" for ext in _chosen_extensions],
+    # TODO: Move this to MILA Repository
+    "mila.registration",
+    "mila.direktkredit",
 ]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
-    "collectivo.middleware.requestId.AddRequestId",
+    "collectivo.core.middleware.AddRequestId",
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -79,12 +97,12 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "collectivo.auth.middleware.KeycloakMiddleware",
-    "collectivo.middleware.requestLog.RequestLogMiddleware",
+    "collectivo.core.middleware.RequestLogMiddleware",
+    "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
 if DEVELOPMENT:
-    INSTALLED_APPS += ["collectivo.devtools", "django_extensions"]
+    INSTALLED_APPS += ["django_extensions"]
 
 ROOT_URLCONF = "collectivo_app.urls"
 
@@ -207,7 +225,9 @@ REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
-    "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "collectivo.auth.keycloak.authentication.KeycloakAuthentication",
+    ],
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",
         "rest_framework.filters.OrderingFilter",
@@ -309,18 +329,10 @@ DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_FROM")
 
 # Settings for collectivo
 COLLECTIVO = {
-    # Path to default models
-    "default_auth_manager": "collectivo.auth.manager.KeycloakAuthManager",
-    "default_user_model": "collectivo.members.models.Member",
-    "default_extension_model": "collectivo.extensions.models.Extension",
-    "default_shifts_model": "collectivo.shifts.models.Shift",
-}
-
-
-# Configuration for collectivo.auth.middleware.KeycloakMiddleware
-KEYCLOAK = {
-    "SERVER_URL": os.environ.get("KEYCLOAK_SERVER_URL"),
-    "REALM_NAME": os.environ.get("KEYCLOAK_REALM_NAME", "collectivo"),
-    "CLIENT_ID": os.environ.get("KEYCLOAK_CLIENT_ID", "collectivo"),
-    "CLIENT_SECRET_KEY": os.environ.get("KEYCLOAK_CLIENT_SECRET_KEY"),
+    "dev.create_test_data": DEVELOPMENT,
+    "keycloak.synchronize": True,
+    "keycloak.server_url": os.environ.get("KEYCLOAK_SERVER_URL"),
+    "keycloak.realm_name": os.environ.get("KEYCLOAK_REALM_NAME", "collectivo"),
+    "keycloak.client_id": os.environ.get("KEYCLOAK_CLIENT_ID", "collectivo"),
+    "keycloak.client_secret_key": os.environ.get("KEYCLOAK_CLIENT_SECRET_KEY"),
 }

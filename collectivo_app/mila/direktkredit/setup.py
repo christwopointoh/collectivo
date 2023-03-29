@@ -44,7 +44,7 @@ def setup(sender, **kwargs):
         parent="admin",
         extension=extension,
         requires_group="collectivo.core.admin",
-        link=os.environ.get("DIREKTKREDIT_SERVER_URL") + "/login-oidc-admin",
+        link=f"{os.environ.get('DIREKTKREDIT_SERVER_URL')}/login-oidc-admin",
         target="blank",
         order=29,
     )

@@ -2,10 +2,12 @@
 from django.db.models import Avg, Max, Sum
 from rest_framework import serializers
 
+from collectivo.utils.serializers import UserFields
+
 from . import models
 
 
-class MembershipSerializer(serializers.ModelSerializer):
+class MembershipSerializer(UserFields):
     """Serializer for memberships."""
 
     class Meta:

@@ -10,6 +10,7 @@ from collectivo.utils.test import create_testuser
 User = get_user_model()
 
 SHIFTS_URL = reverse("collectivo:collectivo.shifts:shift-list")
+SHIFTS_SELF_URL = reverse("collectivo:collectivo.shifts:shift-self-list")
 ASSIGNMENT_URL = reverse("collectivo:collectivo.shifts:assignment-list")
 ASSIGNMENT_URL_LABEL = "collectivo:collectivo.shifts:assignment-detail"
 
@@ -82,6 +83,11 @@ class ShiftAPITests(TestCase):
             raise ValueError("Could not register shift user:", res.content)
         shift_user = ShiftProfile.objects.get(user=res.data["user"])
         return shift_user
+
+    def test_get_shifts_self(self):
+        """Test that shift list for user is returned."""
+        res = self.client.get(SHIFTS_SELF_URL)
+        self.assertEqual(res.status_code, 200)
 
     def test_create_shift(self):
         """Test creating a shift."""

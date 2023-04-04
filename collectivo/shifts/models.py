@@ -99,5 +99,6 @@ class ShiftProfile(models.Model):
         on_delete=models.CASCADE,
         related_name="shift_profile",
     )
+    shift_points = models.IntegerField(default=0)
 
     history = HistoricalRecords()

@@ -161,7 +161,7 @@ class ShiftAPITests(TestCase):
         shift = self.create_shift(payload=TEST_SHIFT_POST)
         user = self.create_shift_user(payload=TEST_CREATE_USER_POST)
         user2 = self.create_shift_user(payload=TEST_CREATE_USER_POST2)
-        assignment = shift.shiftassignment_set.all()[0]
+        assignment = shift.assignments.all()[0]
 
         # Test successful assignment
         assignment = self.assign_user_to_shift(assignment.id, user.user.id)
@@ -325,7 +325,7 @@ class ShiftAPITests(TestCase):
         """Test retrieving assigned users from shift."""
         shift = self.create_shift(payload=TEST_SHIFT_POST)
         user = self.create_shift_user(payload=TEST_CREATE_USER_POST)
-        assignment = shift.shiftassignment_set.all()[0]
+        assignment = shift.assignments.all()[0]
 
         # Test successful assignment
         assignment = self.assign_user_to_shift(assignment.id, user.user.id)

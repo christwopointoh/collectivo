@@ -22,3 +22,13 @@ def setup(sender, **kwargs):
         parent="main",
         order=0,
     )
+
+    MenuItem.register(
+        name="admin",
+        label="Dashboard tiles",
+        extension=extension,
+        component="admin",
+        icon_name="pi-th-large",
+        parent="admin",
+        order=80,
+    )

@@ -10,7 +10,7 @@ from collectivo.utils.test import create_testuser
 
 from .models import DashboardTile
 
-TILES_URL = reverse("collectivo:collectivo.dashboard:tile-list")
+TILES_URL = reverse("collectivo:collectivo.dashboard:tile-self")
 EXTENSIONS_URL = reverse("collectivo:collectivo.extensions:extension-list")
 EXTENSION_NAME = "dashboard"
 
@@ -26,7 +26,7 @@ class DashboardSetupTests(TestCase):
     def test_menu_items_exist(self):
         """Test that the menu items are registered."""
         res = MenuItem.objects.filter(extension__name=EXTENSION_NAME)
-        self.assertEqual(len(res), 1)
+        self.assertEqual(len(res), 2)
 
 
 class DashboardPublicAPITests(TestCase):
@@ -59,7 +59,7 @@ class DashboardPrivateAPITests(TestCase):
     def test_post_tile_fails(self):
         """Test users cannot edit tiles."""
         res = self.client.post(TILES_URL)
-        self.assertEqual(res.status_code, 403)
+        self.assertEqual(res.status_code, 405)
 
 
 class DashboardAPITests(TestCase):

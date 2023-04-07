@@ -1,10 +1,27 @@
 """Models of the dashboard extension."""
 from django.contrib.auth.models import Group
 from django.db import models
+from simple_history.models import HistoricalRecords
 
 from collectivo.extensions.models import Extension
 from collectivo.utils import get_instance
 from collectivo.utils.models import RegisterMixin
+
+
+class DashboardTileButton(models.Model):
+    """A button that can be included in a dashboard tile."""
+
+    history = HistoricalRecords()
+
+    label = models.CharField(max_length=255, null=True, blank=True)
+    link = models.CharField(max_length=255, null=True, blank=True)
+    link_type = models.CharField(
+        max_length=255,
+        choices=[
+            ("internal", "Internal link"),
+            ("external", "External link"),
+        ],
+    )
 
 
 class DashboardTile(models.Model, RegisterMixin):
@@ -14,6 +31,8 @@ class DashboardTile(models.Model, RegisterMixin):
         """Meta settings."""
 
         unique_together = ("name", "extension")
+
+    history = HistoricalRecords()
 
     name = models.CharField(max_length=255, unique=True)
     label = models.CharField(max_length=255, null=True, blank=True)
@@ -41,23 +60,16 @@ class DashboardTile(models.Model, RegisterMixin):
             ("component", "Content is defined in a webcomponent."),
         ],
     )
-    component = models.CharField(max_length=255)
+    component = models.CharField(max_length=255, blank=True)
     content = models.TextField(
-        null=True,
         blank=True,
         help_text="HTML content to display inside the tile.",
     )
-    # TODO Enable or remove
-    # show_button = models.BooleanField(default=False)
-    # button_label = models.CharField(max_length=255, null=True, blank=True)
-    # button_link = models.CharField(max_length=255, null=True, blank=True)
-    # button_type = models.CharField(
-    #     max_length=255,
-    #     choices=[
-    #         ("internal", "Internal link"),
-    #         ("external", "External link"),
-    #     ],
-    # )
+    buttons = models.ManyToManyField(
+        DashboardTileButton,
+        blank=True,
+        help_text="Buttons to display inside the tile.",
+    )
 
     def __str__(self):
         """Return string representation of the model."""

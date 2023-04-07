@@ -83,6 +83,7 @@ class DashboardAPITests(TestCase):
         self.tile = {
             "name": "my_tile",
             "extension": self.ext_name,
+            "source": "component",
             "component_name": "test_component",
         }
 

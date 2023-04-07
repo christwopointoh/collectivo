@@ -16,15 +16,48 @@ class DashboardTile(models.Model, RegisterMixin):
         unique_together = ("name", "extension")
 
     name = models.CharField(max_length=255, unique=True)
-    label = models.CharField(max_length=255, null=True)
+    label = models.CharField(max_length=255, null=True, blank=True)
     extension = models.ForeignKey(
-        "extensions.Extension", on_delete=models.CASCADE
+        "extensions.Extension",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
-    component = models.CharField(max_length=255)
+
     order = models.FloatField(default=1)
     requires_group = models.ForeignKey(
-        "auth.Group", on_delete=models.CASCADE, null=True
+        "auth.Group",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        help_text="If set, the object will only be displayed to users with "
+        "this group.",
     )
+
+    source = models.CharField(
+        max_length=255,
+        choices=[
+            ("db", "Content is defined in the content field of this model."),
+            ("component", "Content is defined in a webcomponent."),
+        ],
+    )
+    component = models.CharField(max_length=255)
+    content = models.TextField(
+        null=True,
+        blank=True,
+        help_text="HTML content to display inside the tile.",
+    )
+    # TODO Enable or remove
+    # show_button = models.BooleanField(default=False)
+    # button_label = models.CharField(max_length=255, null=True, blank=True)
+    # button_link = models.CharField(max_length=255, null=True, blank=True)
+    # button_type = models.CharField(
+    #     max_length=255,
+    #     choices=[
+    #         ("internal", "Internal link"),
+    #         ("external", "External link"),
+    #     ],
+    # )
 
     def __str__(self):
         """Return string representation of the model."""

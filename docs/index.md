@@ -23,3 +23,4 @@ please write to [joel.foramitti@mila.wien](mailto:joel.foramitti@mila.wien).
 This site contains the project documentation for Collectivo.
 
 1. [Getting started](getting_started.md)
+2. [Developer guide](developer_guide.md)

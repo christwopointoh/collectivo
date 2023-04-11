@@ -106,3 +106,10 @@ class DashboardAPITests(TestCase):
         res = self.client.get(TILES_URL)
         items = [i["name"] for i in res.data]
         self.assertFalse("my_tile" in items)
+
+    def test_tile_not_active(self):
+        """Test tile should not appear if not active."""
+        DashboardTile.register(**self.tile, active=False)
+        res = self.client.get(TILES_URL)
+        items = [i["name"] for i in res.data]
+        self.assertFalse("my_tile" in items)

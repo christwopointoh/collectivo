@@ -36,6 +36,7 @@ class DashboardTile(models.Model, RegisterMixin):
 
     name = models.CharField(max_length=255, unique=True)
     label = models.CharField(max_length=255, null=True, blank=True)
+    active = models.BooleanField(default=True)
     extension = models.ForeignKey(
         "extensions.Extension",
         on_delete=models.CASCADE,

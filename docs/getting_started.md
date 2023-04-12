@@ -1,40 +1,45 @@
 # Getting started
 
-Collectivo is an open-source framework for participative community platforms.
-It provides a modular structure that makes it is easy to customize for
-the needs of different organisations.
+Collectivo is an open-source membership platform for communities and collectives.
+It is designed with a modular structure that makes it easy to customize
+the platform for the needs of different organisations and integrate
+multiple tools into a single application.
+
+This tutorial shows you how to quickly set up your own instance of Collectivo
+together with an instance of [Keycloak](https://www.keycloak.org/) that we will use to handle authentication.
+
+## Requirements
+
+This tutorial requires Docker. You can install it [here](https://docs.docker.com/get-docker/).
+
+To be able to use Keycloak locally, you further need to add the following line to your hosts file:
+
+```title="etc/hosts"
+127.0.0.1 keycloak collectivo.local
+```
 
 ## Installation
 
-There are two ways to install collectivo:
-
-- You can install collectivo as a complete application using Docker.
-- You can add collectivo as a Python package to an existing Django project.
-
-### Installation using Docker
-
-!!! warning "Work in progress"
-
-    The collectivo-quickstart repository doesn't exist yet.
-
-Install Docker from [here](https://docs.docker.com/get-docker/).
-
-Then, open the terminal inside a folder for your
-project and enter the following:
+Open a terminal inside an empty folder for your project and run the following commands:
 
 ```sh
-git clone https://github.com/MILA-Wien/collectivo-quickstart
-cd collectivo
+git clone https://github.com/MILA-Wien/collectivo-quickstart .
+cp .env.example .env
 docker compose up -d
 ```
 
-### Installation using Django
+This will clone the collectivo-quickstart repository into your folder,
+create a default environment file for your project, and install a local instance of Keycloak and Collectivo.
 
-!!! warning "Work in progress"
+## Try it out
 
-    The collectivo PyPi package does not yet include the latest release.
+You can now go to `collectivo.local:8001` to try out your local instance of Collectivo.
 
-Add `collectivo` to the requirements of an existing Django project.
-Adopt the settings of your Django project based on the default settings of
-collectivo that can be found
-[here](https://github.com/MILA-Wien/collectivo/blob/main/collectivo_app/collectivo_app/settings.py).
+The following example users can be used to log in on your platform:
+
+- `test_superuser@example.com`
+- `test_member_01@example.com`, `test_member_02@example.com`, `test_member_03@example.com`
+- `test_user_not_verified@example.com`
+- `test_user_not_member@example.com`
+
+The password for all users is `Test123!`.

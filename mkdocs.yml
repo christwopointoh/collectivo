@@ -38,6 +38,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - def_list
 
 plugins:
   - search
@@ -46,7 +47,8 @@ plugins:
 nav:
   - Home: "index.md"
   - "getting_started.md"
-  - "developer_guide.md"
+  - "how_to_guides.md"
+  - "reference.md"
 
 repo_name: MILA-Wien/collectivo
 repo_url: https://github.com/MILA-Wien/collectivo

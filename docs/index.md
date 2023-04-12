@@ -1,14 +1,14 @@
 # Welcome to the Documentation of Collectivo
 
-Collectivo is an open-source framework for participative community platforms.
-It provides a modular structure that makes it is easy to customize for
-the needs of different organisations.
+Collectivo is an open-source membership platform for communities and collectives.
+It is designed with a modular structure that makes it easy to customize
+the platform for the needs of different organisations and integrate
+multiple tools into a single application.
 
-Different applications can be added to the platform through extensions.
-Built-in extensions exist to manage
-applications, memberships, payments, emails, shifts, and more.
-It is further possible to add custom extensions that can be written in
-any programming language.
+The functionality of the platform can be composed through extensions.
+At the moment, there are built-in extensions for the management of memberships, emails,
+payments, and shifts. Custom extensions can further be added as both internal apps
+or external microservices.
 
 This project is in an early stage of development. It is a collaboration of the
 the Austrian cooperative [MILA](https://mila.wien/) and the IT collective
@@ -22,5 +22,6 @@ please write to [joel.foramitti@mila.wien](mailto:joel.foramitti@mila.wien).
 
 This site contains the project documentation for Collectivo.
 
-1. [Getting started](getting_started.md)
-2. [Developer guide](developer_guide.md)
+1. [Getting started](getting_started.md) - A quick tutorial that will show you how to set up Collectivo
+2. [How-to guides](how_to_guides.md) - Step-by-step instructions to achieve a specific goal
+3. [Reference](reference.md) - Technical description of Collectivo's API

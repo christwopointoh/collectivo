@@ -1,6 +1,8 @@
-# Developer guide
+# How-to Guides
 
-## Set up the backend
+## How to set up a local development enviroment
+
+### Set up the backend
 
 Docker is required to set up the development environment for the backend.
 
@@ -18,7 +20,7 @@ The development system will be accessible via the following paths:
 - Backend (API docs): `http://collectivo.local:8000/api/docs/`
 - Keycloak (Console): `http://keycloak:8080/admin/master/console/`
 
-## Set up the frontend
+### Set up the frontend
 
 If you want to develop only the backend, you can skip this step
 and access the latest version of the frontend
@@ -34,7 +36,7 @@ To set up a development system of collectivo-ux on your local machine:
 2. In your terminal, run `yarn dev`
 3. The frontend is now available via `collectivo.local:5173`
 
-## Test the local system
+### Test the local system
 
 Open the frontend in your browser (see above) and use one of the following
 test users to explore the development system:

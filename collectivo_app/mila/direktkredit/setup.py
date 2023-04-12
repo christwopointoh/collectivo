@@ -31,7 +31,8 @@ def setup(sender, **kwargs):
         name="direktkredit_tile",
         label="My Directkredits",
         extension=extension,
-        component_name="direktkredit_tile",
+        source="component",
+        component="direktkredit_tile",
         requires_group="collectivo.direktkredit.user",
     )
 

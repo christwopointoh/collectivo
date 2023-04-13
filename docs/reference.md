@@ -29,3 +29,7 @@ The following settings can be set:
 `example_data`
 
 : Populate the instance with example data (boolean).
+
+`api_docs`
+
+: Activate [Swagger UI](https://swagger.io/tools/swagger-ui/) under `/api/docs`

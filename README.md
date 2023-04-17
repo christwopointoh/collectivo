@@ -1,8 +1,9 @@
 # Collectivo
 
-Collectivo is an open-source framework for participative community platforms.
-It provides a modular structure that makes it is easy to customize for
-the needs of different organisations.
+Collectivo is an open-source membership platform for communities and collectives.
+It is designed with a modular structure that makes it easy to customize and extend
+the platform for the needs of different organisations and integrate
+multiple tools into a single application.
 
 ## Overview
 

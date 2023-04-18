@@ -5,14 +5,19 @@ from simple_history.models import HistoricalRecords
 
 from collectivo.extensions.models import Extension
 from collectivo.utils import get_instance
+from collectivo.utils.managers import NameManager
 from collectivo.utils.models import RegisterMixin
 
 
 class DashboardTileButton(models.Model):
     """A button that can be included in a dashboard tile."""
 
+    objects = NameManager()
     history = HistoricalRecords()
 
+    name = models.CharField(
+        max_length=255, unique=True, null=True, default=None
+    )
     label = models.CharField(max_length=255, null=True, blank=True)
     link = models.CharField(max_length=255, null=True, blank=True)
     link_type = models.CharField(
@@ -23,6 +28,10 @@ class DashboardTileButton(models.Model):
         ],
     )
 
+    def __str__(self):
+        """Return string representation of the model."""
+        return self.label
+
 
 class DashboardTile(models.Model, RegisterMixin):
     """A component that can be included in the dashboard."""
@@ -32,6 +41,7 @@ class DashboardTile(models.Model, RegisterMixin):
 
         unique_together = ("name", "extension")
 
+    objects = NameManager()
     history = HistoricalRecords()
 
     name = models.CharField(max_length=255, unique=True)

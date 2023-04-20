@@ -51,7 +51,9 @@ class DashboardTileViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
 
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = serializer_class(page, many=True)
+            serializer = serializer_class(
+                page, many=True, context={"request": request}
+            )
             return self.get_paginated_response(serializer.data)
 
         serializer = serializer_class(

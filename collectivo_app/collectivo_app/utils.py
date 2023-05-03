@@ -55,9 +55,10 @@ def load_collectivo_settings() -> dict:
 
 
 def set_allowed_origins(config: dict):
-    if config.get("ALLOWED_ORIGINS"):
-        return string_to_list(config.get("ALLOWED_ORIGINS"))
+    if config.get("allowed_origins"):
+        return string_to_list(config.get("allowed_origins"))
     else:
+        print("'allowed_origins' not defined in collectivo.yml.")
         return []
 
 

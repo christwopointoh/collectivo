@@ -31,9 +31,8 @@ jobs:
         ports:
           - 5432:5432
         # wait until postgres is ready
-        options: --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
+        options:
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
           --health-retries 5
     strategy:
       # test against these python versions
@@ -75,21 +74,17 @@ jobs:
       - name: Run Tests
         # Step specific environment variables
         env:
-          DJANGO_SECRET_KEY: ${{ env.DJANGO_SECRET_KEY }}
-          # Set the database url to the postgres service container
-          DB_USERNAME: ${{ env.DB_USER }}
-          DB_PASSWORD: ${{ env.DB_PASS }}
-          DB_HOST: ${{ env.DB_HOST }}
-          DB_DATABASE: ${{ env.DB_NAME }}
-          DB_PORT: ${{ env.POSTGRES_PORT }}
-          TEST_DATABASE_PREFIX: ${{ env.DB_NAME }}
-          SECRET_KEY: badkey
-          KEYCLOAK_SERVER_URL: http://keycloak:8080
-          KEYCLOAK_CLIENT_SECRET_KEY: "**********"
-          COLLECTIVO_EXTENSIONS: profiles, memberships, emails, emails.tags, tags, payments, memberships.payments, shifts
-          DEBUG: True
-          DEVELOPMENT: True
-          DIREKTKREDIT_SERVER_URL: "http://direktkredit.local:8020"
+          DB_HOST: collectivo-db
+          DB_NAME: collectivo_db
+          DB_USER: ${{COLLECTIVO_DB_USER}}
+          DB_PASS: ${{COLLECTIVO_DB_PASSWORD}}
+          SECRET_KEY: ${{COLLECTIVO_SECRET_KEY}}
+          ALLOWED_HOSTS: ${{COLLECTIVO_URL}}
+          ALLOWED_ORIGINS: http://${{COLLECTIVO_UX_URL}}
+          KEYCLOAK_URL: http://${{KEYCLOAK_URL}}
+          KEYCLOAK_CLIENT_SECRET: ${{COLLECTIVO_KEYCLOAK_CLIENT_SECRET}}
+          CELERY_BROKER: "redis://:${{REDIS_PASSWORD}}@redis:6379/0"
+          CELERY_BACKEND: "redis://:${{REDIS_PASSWORD}}@redis:6379/0"
         run: |
           cp -a collectivo collectivo_app
           cd collectivo_app

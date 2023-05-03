@@ -7,8 +7,6 @@ services:
     restart: "no"
     build:
       context: .
-    ports:
-      - "8000:8000"
     # Synchronize source code inside and outside the docker container,
     # and place the collectivo package inside the collectivo app.
     volumes:
@@ -18,9 +16,7 @@ services:
     # Wait for database to be ready (this command only works on linux),
     # migrate the database changes and start a development server.
     command: >
-      sh -c "while ! nc -z collectivo-db 5432; do sleep 1; done &&
-             while ! nc -z keycloak 8080; do sleep 1; done &&
-             python manage.py migrate &&
+      sh -c "python manage.py migrate &&
              python manage.py runserver 0.0.0.0:8000"
     environment:
       DB_HOST: collectivo-db
@@ -28,22 +24,12 @@ services:
       DB_USER: ${COLLECTIVO_DB_USER}
       DB_PASS: ${COLLECTIVO_DB_PASSWORD}
       SECRET_KEY: ${COLLECTIVO_SECRET_KEY}
-      KEYCLOAK_CLIENT_ID: collectivo
-      KEYCLOAK_REALM_NAME: collectivo
-      KEYCLOAK_SERVER_URL: ${KEYCLOAK_SERVER_URL}
-      KEYCLOAK_CLIENT_SECRET_KEY: ${KEYCLOAK_CLIENT_SECRET_KEY}
-      COLLECTIVO_EXTENSIONS: profiles, memberships, emails, emails.tags, tags, payments, memberships.payments, shifts
-      DEBUG: 1
-      DEVELOPMENT: 1
-      EMAIL_HOST: ${EMAIL_HOST}
-      EMAIL_PORT: ${EMAIL_PORT}
-      EMAIL_USE_SSL: ${EMAIL_USE_SSL}
-      EMAIL_FROM: ${EMAIL_FROM}
-      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
-      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      ALLOWED_HOSTS: ${COLLECTIVO_URL}
+      ALLOWED_ORIGINS: http://${COLLECTIVO_UX_URL}
+      KEYCLOAK_URL: http://${KEYCLOAK_URL}
+      KEYCLOAK_CLIENT_SECRET: ${COLLECTIVO_KEYCLOAK_CLIENT_SECRET}
       CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
-      DIREKTKREDIT_SERVER_URL: "http://direktkredit.local:8020"
     depends_on:
       collectivo-db:
         condition: service_healthy
@@ -51,6 +37,8 @@ services:
         condition: service_healthy
       keycloak:
         condition: service_healthy
+    ports:
+      - "8000:8000"
 
   # A celery worker that runs in the background.
   celery:
@@ -68,26 +56,19 @@ services:
       DB_USER: ${COLLECTIVO_DB_USER}
       DB_PASS: ${COLLECTIVO_DB_PASSWORD}
       SECRET_KEY: ${COLLECTIVO_SECRET_KEY}
-      KEYCLOAK_CLIENT_ID: collectivo
-      KEYCLOAK_REALM_NAME: collectivo
-      KEYCLOAK_SERVER_URL: ${KEYCLOAK_SERVER_URL}
-      KEYCLOAK_CLIENT_SECRET_KEY: ${KEYCLOAK_CLIENT_SECRET_KEY}
-      COLLECTIVO_EXTENSIONS: profiles, memberships, emails, emails.tags, tags, payments, memberships.payments, shifts
-      DEBUG: 1
-      DEVELOPMENT: 1
-      EMAIL_HOST: ${EMAIL_HOST}
-      EMAIL_PORT: ${EMAIL_PORT}
-      EMAIL_USE_SSL: ${EMAIL_USE_SSL}
-      EMAIL_FROM: ${EMAIL_FROM}
-      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
-      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      ALLOWED_HOSTS: ${COLLECTIVO_URL}
+      ALLOWED_ORIGINS: http://${COLLECTIVO_UX_URL}
+      KEYCLOAK_URL: http://${KEYCLOAK_URL}
+      KEYCLOAK_CLIENT_SECRET: ${COLLECTIVO_KEYCLOAK_CLIENT_SECRET}
       CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
     depends_on:
-      - collectivo
-      - redis
-      - keycloak
-
+      collectivo-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
 
   # Another celery worker for chron jobs.
   celery-beat:
@@ -105,25 +86,19 @@ services:
       DB_USER: ${COLLECTIVO_DB_USER}
       DB_PASS: ${COLLECTIVO_DB_PASSWORD}
       SECRET_KEY: ${COLLECTIVO_SECRET_KEY}
-      KEYCLOAK_CLIENT_ID: collectivo
-      KEYCLOAK_REALM_NAME: collectivo
-      KEYCLOAK_SERVER_URL: ${KEYCLOAK_SERVER_URL}
-      KEYCLOAK_CLIENT_SECRET_KEY: ${KEYCLOAK_CLIENT_SECRET_KEY}
-      COLLECTIVO_EXTENSIONS: profiles, memberships, emails, emails.tags, tags, payments, memberships.payments, shifts
-      DEBUG: 1
-      DEVELOPMENT: 1
-      EMAIL_HOST: ${EMAIL_HOST}
-      EMAIL_PORT: ${EMAIL_PORT}
-      EMAIL_USE_SSL: ${EMAIL_USE_SSL}
-      EMAIL_FROM: ${EMAIL_FROM}
-      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
-      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      ALLOWED_HOSTS: ${COLLECTIVO_URL}
+      ALLOWED_ORIGINS: http://${COLLECTIVO_UX_URL}
+      KEYCLOAK_URL: http://${KEYCLOAK_URL}
+      KEYCLOAK_CLIENT_SECRET: ${COLLECTIVO_KEYCLOAK_CLIENT_SECRET}
       CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
     depends_on:
-      - collectivo
-      - redis
-      - keycloak
+      collectivo-db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
 
   # A communication broker for celery.
   redis:
@@ -132,9 +107,10 @@ services:
     ports:
       - "6379:6379"
     healthcheck:
-     test: ["CMD", "redis-cli","ping"]
+      test: ["CMD", "redis-cli", "ping"]
     command: >
-      --requirepass "${REDIS_PASSWORD}" --appendonly yes --maxmemory 1000mb --maxmemory-policy volatile-lru
+      --requirepass "${REDIS_PASSWORD}" --appendonly yes --maxmemory 1000mb
+      --maxmemory-policy volatile-lru
 
   # A static files server for django.
   collectivo-static:

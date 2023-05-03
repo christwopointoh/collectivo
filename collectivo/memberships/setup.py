@@ -1,5 +1,6 @@
 """Setup function for the memberships extension."""
 from itertools import cycle
+from logging import getLogger
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -9,8 +10,6 @@ from collectivo.menus.models import MenuItem
 from collectivo.utils.dev import DEV_MEMBERS
 
 from . import apps, models
-from logging import getLogger
-
 
 logger = getLogger(__name__)
 
@@ -46,7 +45,7 @@ def setup(sender, **kwargs):
         order=10,
     )
 
-    if settings.COLLECTIVO["dev.create_test_data"] is True:
+    if settings.COLLECTIVO["example_data"] is True:
         # Create membership types
 
         mst1 = models.MembershipType.objects.register(

@@ -1,130 +1,48 @@
-"""
-Default django settings for collectivo_app.
-
-Will not be used if custom settings are defined through
-the COLLECTIVO_SETTINGS environment variable (see manage.py).
-"""
+"""Django settings for collectivo."""
 import logging
 import os
 from pathlib import Path
 
-import yaml
 from corsheaders.defaults import default_headers
 
 from collectivo.version import __version__
 
-from .utils import get_env_bool, string_to_list
+from .utils import get_env_bool, load_collectivo_settings
 
 logger = logging.getLogger(__name__)
 
-# Load configuration of collectivo
-_custom_conf = {}
-try:
-    with open("collectivo.yml", "r") as stream:
-        _custom_conf = yaml.safe_load(stream)
-except FileNotFoundError:
-    logger.info("No collectivo.yml found. Using default settings.")
-except Exception as e:
-    logger.error("Error while loading collectivo.yml: %s", e)
-
+# Collectivo
 COLLECTIVO = {
-    "development": _custom_conf.get("development", False),
-    "example_data": _custom_conf.get("example_data", False),
-    "api_docs": _custom_conf.get("api_docs", False),
-    "extensions": _custom_conf.get("extensions", []),
-    # Special settings for collectivo.auth.keycloak based on env vars
-    "keycloak.server_url": os.environ.get("KEYCLOAK_SERVER_URL"),
-    "keycloak.realm_name": os.environ.get("KEYCLOAK_REALM_NAME", "collectivo"),
-    "keycloak.client_id": os.environ.get("KEYCLOAK_CLIENT_ID", "collectivo"),
-    "keycloak.client_secret_key": os.environ.get("KEYCLOAK_SECRET_KEY"),
-    # Legacy settings to be removed in the future
-    "dev.create_test_data": _custom_conf.get("example_data", False),
+    "development": False,
+    "example_data": False,
+    "api_docs": False,
+    "extensions": [],
+    **load_collectivo_settings(),
 }
 
-if not isinstance(COLLECTIVO["extensions"], list):
-    logger.error("Invalid configuration for 'extensions' in collectivo.yml.")
-    COLLECTIVO["extensions"] = []
-
-del _custom_conf
-
-
-# Standard Django settings
+# Django
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ["SECRET_KEY"]
 DEBUG = COLLECTIVO["development"]  # Enable debug mode in development
-
-
-if os.environ.get("ALLOWED_HOSTS") is not None:
-    ALLOWED_HOSTS = string_to_list(os.environ.get("ALLOWED_HOSTS"))
-elif COLLECTIVO["development"]:
-    ALLOWED_HOSTS = [
-        "*",
-        "0.0.0.0",
-        "127.0.0.1",
-        "localhost",
-        "collectivo.local",
-    ]
-else:
-    logger.warning(
-        "You must set the environment variable "
-        "ALLOWED_HOSTS if DEVELOPMENT is False."
-    )
-
-# Choose built-in collectivo extensions from environment
-_built_in_extensions = [
-    "profiles",
-    "memberships",
-    "memberships.payments",
-    "emails",
-    "emails.tags",
-    "tags",
-    "payments",
-    "shifts",
-    "direktkredit",
-]
-# _chosen_extensions = string_to_list(os.environ.get("COLLECTIVO_EXTENSIONS"))
-# for ext in _chosen_extensions:
-#     if ext not in _built_in_extensions:
-#         _chosen_extensions.remove(ext)
-#         logger.warning(
-#             f"Environment variable '{ext}' in 'COLLECTIVO_EXTENSIONS' has "
-#             f"been ignored. Available extensions are: {_built_in_extensions}."
-#         )
+ALLOWED_HOSTS = COLLECTIVO["allowed_hosts"]
 
 INSTALLED_APPS = [
-    # Django core apps
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    # Third-party apps
     "corsheaders",
     "django_filters",
     "rest_framework",
     "drf_spectacular",
     "simple_history",
-    # Collectivo core apps
     "collectivo",
-    # "collectivo.core",
-    # "collectivo.auth.keycloak",
-    # "collectivo.menus",
-    # "collectivo.extensions",
-    # "collectivo.dashboard",
-    # # Collectivo custom extensions
-    # *[f"collectivo.{ext}" for ext in _chosen_extensions],
-    # # TODO: Move this to MILA Repository
-    # "mila.registration",
-    # "mila.direktkredit",
+    "collectivo.core",
+    *COLLECTIVO["extensions"],
 ]
 
-for ext in COLLECTIVO["extensions"]:
-    if isinstance(ext, str):
-        INSTALLED_APPS.append(ext)
-    elif isinstance(ext, dict):
-        for key, value in ext.items():
-            INSTALLED_APPS.append(key)
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -140,8 +58,6 @@ MIDDLEWARE = [
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
-if COLLECTIVO["development"]:
-    INSTALLED_APPS += ["django_extensions"]
 
 ROOT_URLCONF = "collectivo_app.urls"
 
@@ -164,23 +80,13 @@ TEMPLATES = [
 WSGI_APPLICATION = "collectivo_app.wsgi.application"
 
 
-# CORS Settings
+# CORS
 # https://pypi.org/project/django-cors-headers/
 
-if os.environ.get("CORS_ALLOWED_ORIGINS"):
-    CORS_ALLOWED_ORIGINS = string_to_list(
-        os.environ.get("CORS_ALLOWED_ORIGINS")
-    )
-elif COLLECTIVO["development"]:
-    CORS_ORIGIN_ALLOW_ALL = True
-
-CORS_ALLOW_HEADERS = list(default_headers) + [
-    "X-Request-ID",
-]
-
-CORS_EXPOSE_HEADERS = [
-    "X-Request-ID",
-]
+CORS_ALLOWED_ORIGINS = COLLECTIVO["allowed_origins"]
+CORS_ORIGIN_ALLOW_ALL = COLLECTIVO["development"]
+CORS_ALLOW_HEADERS = list(default_headers) + ["X-Request-ID"]
+CORS_EXPOSE_HEADERS = ["X-Request-ID"]
 
 
 # Database
@@ -197,7 +103,8 @@ DATABASES = {
 }
 
 
-# Celery settings
+# Celery
+
 CELERY_TASK_SERIALIZER = "pickle"
 CELERY_RESULT_SERIALIZER = "pickle"
 CELERY_EVENT_SERIALIZER = "pickle"
@@ -371,7 +278,8 @@ LOGGING = {
 }
 
 
-# Email settings
+# Emails
+# TODO: Move to extension settings
 EMAIL_HOST = os.environ.get("EMAIL_HOST")
 EMAIL_PORT = os.environ.get("EMAIL_PORT", 465)
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")

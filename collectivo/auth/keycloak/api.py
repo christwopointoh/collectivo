@@ -12,19 +12,19 @@ class KeycloakAPI:
 
     def __init__(self):
         """Initialize keycloak admin and openid connection."""
-        config = settings.COLLECTIVO
+        config = settings.COLLECTIVO["extensions"]["collectivo.auth.keycloak"]
         self.admin = KeycloakAdmin(
-            server_url=config["keycloak.server_url"],
-            realm_name=config["keycloak.realm_name"],
-            client_id=config["keycloak.client_id"],
-            client_secret_key=config["keycloak.client_secret_key"],
+            server_url=config.get("server_url"),
+            realm_name=config.get("realm_name"),
+            client_id=config.get("client_id"),
+            client_secret_key=config.get("client_secret"),
             verify=True,
         )
         self.openid = KeycloakOpenID(
-            server_url=config["keycloak.server_url"],
-            realm_name=config["keycloak.realm_name"],
-            client_id=config["keycloak.client_id"],
-            client_secret_key=config["keycloak.client_secret_key"],
+            server_url=config.get("server_url"),
+            realm_name=config.get("realm_name"),
+            client_id=config.get("client_id"),
+            client_secret_key=config.get("client_secret"),
         )
 
     def get_user_fields(self):

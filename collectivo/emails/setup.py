@@ -33,12 +33,14 @@ def setup(sender, **kwargs):
     )
 
     statuses = ["success", "pending", "draft"]
-    if settings.COLLECTIVO["dev.create_test_data"] is True:
+    if settings.COLLECTIVO["example_data"] is True:
         for i in range(3):
             design = EmailDesign.objects.register(
                 name=f"Test design {i+1}",
-                body='<html><body style="margin:0;padding:40px;word-spacing:'
-                'normal;background-color:#fff;">{{content}}</body></html>',
+                body=(
+                    '<html><body style="margin:0;padding:40px;word-spacing:'
+                    'normal;background-color:#fff;">{{content}}</body></html>'
+                ),
             )
             template = EmailTemplate.objects.register(
                 name=f"Test template {i+1}",

@@ -15,8 +15,6 @@ for app in settings.INSTALLED_APPS:
         urlpatterns.append(pattern)
 
 # Add debug patterns
-print(settings.COLLECTIVO["api_docs"])
-print(settings.COLLECTIVO)
 if settings.COLLECTIVO["api_docs"]:
     urlpatterns += [
         # Access static files

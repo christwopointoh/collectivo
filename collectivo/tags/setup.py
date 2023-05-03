@@ -29,7 +29,7 @@ def setup(sender, **kwargs):
         order=2,
     )
 
-    if settings.COLLECTIVO["dev.create_test_data"]:
+    if settings.COLLECTIVO["example_data"]:
         for i in range(5):
             tag = Tag.objects.get_or_create(name=f"Test tag {i}")[0]
             tag.users.set(list(User.objects.all()))

@@ -18,7 +18,7 @@ def setup():
         user.save()
 
     # Activate test users in Keycloak
-    if settings.COLLECTIVO["dev.create_test_data"] is True:
+    if settings.COLLECTIVO["example_data"] is True:
         keycloak = KeycloakAPI()
         for first_name in DEV_USERS:
             user = User.objects.get(email=f"test_{first_name}@example.com")

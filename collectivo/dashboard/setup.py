@@ -38,7 +38,7 @@ def setup(sender, **kwargs):
         order=80,
     )
 
-    if settings.COLLECTIVO["dev.create_test_data"]:
+    if settings.COLLECTIVO["example_data"]:
         DashboardTile.register(
             name="welcome_tile",
             label="Welcome to your platform!",

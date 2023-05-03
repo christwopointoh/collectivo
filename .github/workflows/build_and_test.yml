@@ -76,8 +76,8 @@ jobs:
         env:
           DB_HOST: collectivo-db
           DB_NAME: collectivo_db
-          DB_USER: ${{COLLECTIVO_DB_USER}}
-          DB_PASS: ${{COLLECTIVO_DB_PASSWORD}}
+          DB_USER: ${{DB_USER}}
+          DB_PASS: ${{DB_PASS}}
           SECRET_KEY: ${{COLLECTIVO_SECRET_KEY}}
           ALLOWED_HOSTS: ${{COLLECTIVO_URL}}
           ALLOWED_ORIGINS: http://${{COLLECTIVO_UX_URL}}

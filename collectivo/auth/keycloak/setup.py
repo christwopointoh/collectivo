@@ -9,7 +9,7 @@ from .api import KeycloakAPI
 User = get_user_model()
 
 
-def setup(sender, **kwargs):
+def setup():
     """Initialize extension after database is ready."""
 
     # Create keycloak user for all users

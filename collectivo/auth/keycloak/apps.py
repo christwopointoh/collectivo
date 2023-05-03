@@ -1,6 +1,7 @@
 """Configuration file of the keycloak extension."""
 from django.apps import AppConfig
-from django.db.models.signals import post_migrate
+
+from collectivo.utils.setup import register_setup
 
 
 class KeycloakConfig(AppConfig):
@@ -14,4 +15,4 @@ class KeycloakConfig(AppConfig):
         """Initialize extension after database is ready."""
         from .setup import setup
 
-        post_migrate.connect(setup, sender=self)
+        register_setup(setup, self)

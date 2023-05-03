@@ -8,7 +8,7 @@ app_name = "collectivo.auth.keycloak"
 
 urlpatterns = []
 
-if settings.DEVELOPMENT:
+if settings.COLLECTIVO["development"]:
     urlpatterns += [
         path(
             "api/dev/token/", views.KeycloakTokenView.as_view(), name="token"

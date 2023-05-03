@@ -8,6 +8,7 @@ import logging
 import os
 from pathlib import Path
 
+import yaml
 from corsheaders.defaults import default_headers
 
 from collectivo.version import __version__
@@ -16,15 +17,46 @@ from .utils import get_env_bool, string_to_list
 
 logger = logging.getLogger(__name__)
 
+# Load configuration of collectivo
+_custom_conf = {}
+try:
+    with open("collectivo.yml", "r") as stream:
+        _custom_conf = yaml.safe_load(stream)
+except FileNotFoundError:
+    logger.info("No collectivo.yml found. Using default settings.")
+except Exception as e:
+    logger.error("Error while loading collectivo.yml: %s", e)
 
+COLLECTIVO = {
+    "development": _custom_conf.get("development", False),
+    "example_data": _custom_conf.get("example_data", False),
+    "api_docs": _custom_conf.get("api_docs", False),
+    "extensions": _custom_conf.get("extensions", []),
+    # Special settings for collectivo.auth.keycloak based on env vars
+    "keycloak.server_url": os.environ.get("KEYCLOAK_SERVER_URL"),
+    "keycloak.realm_name": os.environ.get("KEYCLOAK_REALM_NAME", "collectivo"),
+    "keycloak.client_id": os.environ.get("KEYCLOAK_CLIENT_ID", "collectivo"),
+    "keycloak.client_secret_key": os.environ.get("KEYCLOAK_SECRET_KEY"),
+    # Legacy settings to be removed in the future
+    "dev.create_test_data": _custom_conf.get("example_data", False),
+}
+
+if not isinstance(COLLECTIVO["extensions"], list):
+    logger.error("Invalid configuration for 'extensions' in collectivo.yml.")
+    COLLECTIVO["extensions"] = []
+
+del _custom_conf
+
+
+# Standard Django settings
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ["SECRET_KEY"]
-DEBUG = get_env_bool("DEBUG", False)
-DEVELOPMENT = get_env_bool("DEVELOPMENT", False)
+DEBUG = COLLECTIVO["development"]  # Enable debug mode in development
+
 
 if os.environ.get("ALLOWED_HOSTS") is not None:
     ALLOWED_HOSTS = string_to_list(os.environ.get("ALLOWED_HOSTS"))
-elif DEVELOPMENT:
+elif COLLECTIVO["development"]:
     ALLOWED_HOSTS = [
         "*",
         "0.0.0.0",
@@ -50,14 +82,14 @@ _built_in_extensions = [
     "shifts",
     "direktkredit",
 ]
-_chosen_extensions = string_to_list(os.environ.get("COLLECTIVO_EXTENSIONS"))
-for ext in _chosen_extensions:
-    if ext not in _built_in_extensions:
-        _chosen_extensions.remove(ext)
-        logger.warning(
-            f"Environment variable '{ext}' in 'COLLECTIVO_EXTENSIONS' has "
-            f"been ignored. Available extensions are: {_built_in_extensions}."
-        )
+# _chosen_extensions = string_to_list(os.environ.get("COLLECTIVO_EXTENSIONS"))
+# for ext in _chosen_extensions:
+#     if ext not in _built_in_extensions:
+#         _chosen_extensions.remove(ext)
+#         logger.warning(
+#             f"Environment variable '{ext}' in 'COLLECTIVO_EXTENSIONS' has "
+#             f"been ignored. Available extensions are: {_built_in_extensions}."
+#         )
 
 INSTALLED_APPS = [
     # Django core apps
@@ -75,17 +107,24 @@ INSTALLED_APPS = [
     "simple_history",
     # Collectivo core apps
     "collectivo",
-    "collectivo.core",
-    "collectivo.auth.keycloak",
-    "collectivo.menus",
-    "collectivo.extensions",
-    "collectivo.dashboard",
-    # Collectivo custom extensions
-    *[f"collectivo.{ext}" for ext in _chosen_extensions],
-    # TODO: Move this to MILA Repository
-    "mila.registration",
-    "mila.direktkredit",
+    # "collectivo.core",
+    # "collectivo.auth.keycloak",
+    # "collectivo.menus",
+    # "collectivo.extensions",
+    # "collectivo.dashboard",
+    # # Collectivo custom extensions
+    # *[f"collectivo.{ext}" for ext in _chosen_extensions],
+    # # TODO: Move this to MILA Repository
+    # "mila.registration",
+    # "mila.direktkredit",
 ]
+
+for ext in COLLECTIVO["extensions"]:
+    if isinstance(ext, str):
+        INSTALLED_APPS.append(ext)
+    elif isinstance(ext, dict):
+        for key, value in ext.items():
+            INSTALLED_APPS.append(key)
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -101,7 +140,7 @@ MIDDLEWARE = [
     "simple_history.middleware.HistoryRequestMiddleware",
 ]
 
-if DEVELOPMENT:
+if COLLECTIVO["development"]:
     INSTALLED_APPS += ["django_extensions"]
 
 ROOT_URLCONF = "collectivo_app.urls"
@@ -132,7 +171,7 @@ if os.environ.get("CORS_ALLOWED_ORIGINS"):
     CORS_ALLOWED_ORIGINS = string_to_list(
         os.environ.get("CORS_ALLOWED_ORIGINS")
     )
-elif DEVELOPMENT:
+elif COLLECTIVO["development"]:
     CORS_ORIGIN_ALLOW_ALL = True
 
 CORS_ALLOW_HEADERS = list(default_headers) + [
@@ -180,13 +219,19 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation.MinimumLengthValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation.CommonPasswordValidator"
+        ),
     },
     {
-        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
+        "NAME": (
+            "django.contrib.auth.password_validation.NumericPasswordValidator"
+        ),
     },
 ]
 
@@ -220,8 +265,12 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
-    "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.AcceptHeaderVersioning",
+    "DEFAULT_PAGINATION_CLASS": (
+        "rest_framework.pagination.LimitOffsetPagination"
+    ),
+    "DEFAULT_VERSIONING_CLASS": (
+        "rest_framework.versioning.AcceptHeaderVersioning"
+    ),
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ],
@@ -248,7 +297,9 @@ for version in _schema_versions:
 
 SPECTACULAR_SETTINGS = {
     "TITLE": "collectivo",
-    "DESCRIPTION": "A modular framework to build participative community platforms.",
+    "DESCRIPTION": (
+        "A modular framework to build participative community platforms."
+    ),
     "LICENSE": {
         "name": "GNU Affero General Public License v3.0",
         "url": "https://github.com/MILA-Wien/collectivo/blob/main/LICENSE",
@@ -293,7 +344,10 @@ LOGGING = {
     "disable_existing_loggers": True,
     "formatters": {
         "verbose": {
-            "format": "\n\x1b[33;20m[%(levelname)s %(asctime)s %(pathname)s@%(lineno)s]:\x1b[0m %(message)s"
+            "format": (
+                "\n\x1b[33;20m[%(levelname)s %(asctime)s"
+                " %(pathname)s@%(lineno)s]:\x1b[0m %(message)s"
+            )
         },
         "simple": {"format": "[%(levelname)s %(asctime)s]: %(message)s"},
     },
@@ -325,14 +379,3 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = get_env_bool("EMAIL_USE_TLS", False)
 EMAIL_USE_SSL = get_env_bool("EMAIL_USE_SSL", False)
 DEFAULT_FROM_EMAIL = os.environ.get("EMAIL_FROM")
-
-
-# Settings for collectivo
-COLLECTIVO = {
-    "dev.create_test_data": DEVELOPMENT,
-    "keycloak.synchronize": True,
-    "keycloak.server_url": os.environ.get("KEYCLOAK_SERVER_URL"),
-    "keycloak.realm_name": os.environ.get("KEYCLOAK_REALM_NAME", "collectivo"),
-    "keycloak.client_id": os.environ.get("KEYCLOAK_CLIENT_ID", "collectivo"),
-    "keycloak.client_secret_key": os.environ.get("KEYCLOAK_CLIENT_SECRET_KEY"),
-}

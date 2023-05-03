@@ -1,4 +1,5 @@
 """Setup function of the core extension."""
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
@@ -11,9 +12,7 @@ from collectivo.utils.dev import DEV_USERS
 User = get_user_model()
 
 
-def setup(sender, **kwargs):
-    """Initialize extension after database is ready."""
-
+def setup():
     extension = Extension.register(
         name=CoreConfig.name, description=CoreConfig.description, built_in=True
     )
@@ -65,7 +64,7 @@ def setup(sender, **kwargs):
         order=100,
     )
 
-    if settings.COLLECTIVO["dev.create_test_data"] is True:
+    if settings.COLLECTIVO["example_data"] is True:
         for first_name in DEV_USERS:
             email = f"test_{first_name}@example.com"
             try:

@@ -1,10 +1,12 @@
 """Serializers of the core extension."""
 from django.contrib.auth import get_user_model
-from rest_framework import serializers
-from collectivo.profiles.models import UserProfile
-from collectivo.payments.models import PaymentProfile
-from mila.registration.models import SurveyProfile
+
+# from mila.registration.models import SurveyProfile
 from django.db import models
+from rest_framework import serializers
+
+from collectivo.payments.models import PaymentProfile
+from collectivo.profiles.models import UserProfile
 from collectivo.tags.models import Tag
 
 User = get_user_model()
@@ -42,7 +44,7 @@ class UserProfilesSerializer(serializers.ModelSerializer):
     # TODO: Load profiles dynamically
     # TODO: Make fields editable for bulk edit
     # TODO: Foreign key and onetoone fields
-    profiles = [UserProfile, PaymentProfile, SurveyProfile]
+    profiles = [UserProfile, PaymentProfile]  # , SurveyProfile]
     for profile in profiles:
         _related_name = profile._meta.get_field("user")._related_name
         for field in profile._meta.get_fields():

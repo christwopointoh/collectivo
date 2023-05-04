@@ -17,7 +17,6 @@ jobs:
       COLLECTIVO_URL: "collectivo.local:8000"
       COLLECTIVO_UX_URL: "127.0.0.1:8001"
       COLLECTIVO_SECRET_KEY: test-key-not-good
-      COLLECTIVO_KEYCLOAK_CLIENT_SECRET: "**********"
       DB_USER: postgres
       DB_PASS: postgres
       DB_HOST: localhost # default host value for the database
@@ -84,8 +83,8 @@ jobs:
           SECRET_KEY: ${{env.COLLECTIVO_SECRET_KEY}}
           ALLOWED_HOSTS: ${{env.COLLECTIVO_URL}}
           ALLOWED_ORIGINS: http://${{env.COLLECTIVO_UX_URL}}
-          KEYCLOAK_URL: http://${{env.KEYCLOAK_URL}}
-          KEYCLOAK_CLIENT_SECRET: ${{env.COLLECTIVO_KEYCLOAK_CLIENT_SECRET}}
+          KEYCLOAK_URL: http://keycloak:8080
+          KEYCLOAK_CLIENT_SECRET: "**********"
           CELERY_BROKER: "redis://:${{env.REDIS_PASSWORD}}@redis:6379/0"
           CELERY_BACKEND: "redis://:${{env.REDIS_PASSWORD}}@redis:6379/0"
         run: |

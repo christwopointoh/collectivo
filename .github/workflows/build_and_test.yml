@@ -77,8 +77,8 @@ jobs:
       - name: Run Tests
         # Step specific environment variables
         env:
-          DB_HOST: collectivo-db
-          DB_NAME: collectivo_db
+          DB_HOST: ${{env.DB_HOST}}
+          DB_NAME: ${{env.DB_NAME}}
           DB_USER: ${{env.DB_USER}}
           DB_PASS: ${{env.DB_PASS}}
           SECRET_KEY: ${{env.COLLECTIVO_SECRET_KEY}}

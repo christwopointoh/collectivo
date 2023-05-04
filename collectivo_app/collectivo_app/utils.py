@@ -55,6 +55,7 @@ def load_collectivo_settings() -> dict:
 
 
 def set_allowed_origins(config: dict):
+    """Correct configuration of allowed origins from collectivo.yml."""
     if config.get("allowed_origins"):
         return string_to_list(config.get("allowed_origins"))
     else:
@@ -76,7 +77,7 @@ def set_allowed_hosts(config: dict) -> list[str]:
     elif "development" in config and config["development"]:
         return [
             "*",
-            "0.0.0.0",
+            "0.0.0.0",  # noqa: S104
             "127.0.0.1",
             "localhost",
             "collectivo.local",

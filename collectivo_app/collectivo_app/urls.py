@@ -8,9 +8,9 @@ logger = logging.getLogger(__name__)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    # path("", include("collectivo.urls")),
-    # path("", include("mila.registration.urls")),
 ]
+
+# TODO: System to include urls of other apps
 
 try:
     urlpatterns.append(path("", include("collectivo.urls")))

@@ -23,6 +23,10 @@ def setup():
         name="collectivo.core.admin",
     )[0]
 
+    # Refresh users based on potential signals of other extensions
+    for user in User.objects.all():
+        user.save()
+
     # User menu
     Menu.register(name="main", extension=extension)
     MenuItem.register(

@@ -14,12 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     # Add in environment variables for postgres testing
     env:
+      COLLECTIVO_URL: "collectivo.local:8000"
+      COLLECTIVO_UX_URL: "127.0.0.1:8001"
+      COLLECTIVO_SECRET_KEY: test-key-not-good
+      COLLECTIVO_KEYCLOAK_CLIENT_SECRET: "**********"
       DB_USER: postgres
       DB_PASS: postgres
       DB_HOST: localhost # default host value for the database
       DB_NAME: djtesting
       POSTGRES_PORT: 5432
-      DJANGO_SECRET_KEY: test-key-not-good
     services:
       # start a postgres service container
       postgres_main:
@@ -76,15 +79,15 @@ jobs:
         env:
           DB_HOST: collectivo-db
           DB_NAME: collectivo_db
-          DB_USER: ${{DB_USER}}
-          DB_PASS: ${{DB_PASS}}
-          SECRET_KEY: ${{COLLECTIVO_SECRET_KEY}}
-          ALLOWED_HOSTS: ${{COLLECTIVO_URL}}
-          ALLOWED_ORIGINS: http://${{COLLECTIVO_UX_URL}}
-          KEYCLOAK_URL: http://${{KEYCLOAK_URL}}
-          KEYCLOAK_CLIENT_SECRET: ${{COLLECTIVO_KEYCLOAK_CLIENT_SECRET}}
-          CELERY_BROKER: "redis://:${{REDIS_PASSWORD}}@redis:6379/0"
-          CELERY_BACKEND: "redis://:${{REDIS_PASSWORD}}@redis:6379/0"
+          DB_USER: ${{env.DB_USER}}
+          DB_PASS: ${{env.DB_PASS}}
+          SECRET_KEY: ${{env.COLLECTIVO_SECRET_KEY}}
+          ALLOWED_HOSTS: ${{env.COLLECTIVO_URL}}
+          ALLOWED_ORIGINS: http://${{env.COLLECTIVO_UX_URL}}
+          KEYCLOAK_URL: http://${{env.KEYCLOAK_URL}}
+          KEYCLOAK_CLIENT_SECRET: ${{env.COLLECTIVO_KEYCLOAK_CLIENT_SECRET}}
+          CELERY_BROKER: "redis://:${{env.REDIS_PASSWORD}}@redis:6379/0"
+          CELERY_BACKEND: "redis://:${{env.REDIS_PASSWORD}}@redis:6379/0"
         run: |
           cp -a collectivo collectivo_app
           cd collectivo_app

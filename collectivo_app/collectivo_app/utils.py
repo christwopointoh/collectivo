@@ -39,19 +39,19 @@ def get_env_bool(key, default=None):
 
 def load_collectivo_settings() -> dict:
     """Load custom settings from collectivo.yml."""
+    config = {}
     try:
         with open("collectivo.yml", "r") as stream:
             config = yaml.safe_load(stream)
             config = expand_vars(config)
             config["extensions"] = set_extensions(config)
-            config["allowed_hosts"] = set_allowed_hosts(config)
-            config["allowed_origins"] = set_allowed_origins(config)
-            return config
     except FileNotFoundError:
         print("No collectivo.yml found. Using default settings.")
     except Exception as e:
         print("Error while loading collectivo.yml: %s", e)
-    return {}
+    config["allowed_hosts"] = set_allowed_hosts(config)
+    config["allowed_origins"] = set_allowed_origins(config)
+    return config
 
 
 def set_allowed_origins(config: dict):
@@ -62,9 +62,9 @@ def set_allowed_origins(config: dict):
         return []
 
 
-def set_allowed_hosts(config: dict):
+def set_allowed_hosts(config: dict) -> list[str]:
     """Correct configuration of allowed hosts from collectivo.yml."""
-    if config["allowed_hosts"]:
+    if "allowed_hosts" in config:
         allowed_hosts = string_to_list(config["allowed_hosts"])
         for i, host in enumerate(allowed_hosts):
             host = host.replace("https://", "")
@@ -73,7 +73,7 @@ def set_allowed_hosts(config: dict):
             allowed_hosts[i] = host
         return allowed_hosts
 
-    elif config["development"]:
+    elif "development" in config and config["development"]:
         return [
             "*",
             "0.0.0.0",

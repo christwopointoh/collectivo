@@ -42,7 +42,6 @@ else:
 _built_in_extensions = [
     "profiles",
     "memberships",
-    "memberships.payments",
     "emails",
     "emails.tags",
     "tags",
@@ -85,6 +84,7 @@ INSTALLED_APPS = [
     # TODO: Move this to MILA Repository
     "mila.registration",
     "mila.direktkredit",
+    "mila.lotzapp",
 ]
 
 MIDDLEWARE = [

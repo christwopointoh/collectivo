@@ -1,7 +1,9 @@
 """Setup function of the payments extension."""
+from collectivo.core.stores import main_store
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
 
+from . import serializers
 from .apps import PaymentsConfig
 
 
@@ -12,6 +14,10 @@ def setup(sender, **kwargs):
         name=PaymentsConfig.name,
         description=PaymentsConfig.description,
         built_in=True,
+    )
+
+    main_store.user_profiles_admin_serializers.append(
+        serializers.PaymentProfileSerializer
     )
 
     MenuItem.register(

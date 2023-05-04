@@ -1,17 +1,17 @@
 """Serializers of the core extension."""
-from django.contrib.auth import get_user_model
+import logging
 
-# from mila.registration.models import SurveyProfile
+from django.contrib.auth import get_user_model
 from django.db import models
 from rest_framework import serializers
 
-from collectivo.payments.models import PaymentProfile
-from collectivo.profiles.models import UserProfile
+from collectivo.core.stores import main_store
 from collectivo.tags.models import Tag
 
 User = get_user_model()
 Group = User.groups.field.related_model
 serializer_field_mapping = serializers.ModelSerializer.serializer_field_mapping
+logger = logging.getLogger(__name__)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -41,11 +41,13 @@ class UserProfilesSerializer(serializers.ModelSerializer):
         many=True, queryset=Tag.objects.all()
     )
 
-    # TODO: Load profiles dynamically
+    # Define serializer fields based on registered profiles in store
+    # TODO: Get field settings from serializer
     # TODO: Make fields editable for bulk edit
-    # TODO: Foreign key and onetoone fields
-    profiles = [UserProfile, PaymentProfile]  # , SurveyProfile]
-    for profile in profiles:
+    # TODO: Support foreign key and onetoone fields
+    profile_serializers = main_store.user_profiles_admin_serializers
+    for profile_serializer in profile_serializers:
+        profile = profile.Meta.model
         _related_name = profile._meta.get_field("user")._related_name
         for field in profile._meta.get_fields():
             _field_class = serializer_field_mapping.get(field.__class__)
@@ -66,9 +68,13 @@ class UserProfilesSerializer(serializers.ModelSerializer):
                         read_only=True,
                     )
             elif field.__class__ is models.OneToOneField:
-                pass
+                logger.warning(
+                    f"OneToOneField not supported in UserProfilesSerializer."
+                )
             elif field.__class__ is models.ForeignKey:
-                pass
+                logger.warning(
+                    f"ForeignKey not supported in UserProfilesSerializer."
+                )
             elif field.__class__ is models.ManyToManyField:
                 locals()[
                     f"{_related_name}__{field.attname}"

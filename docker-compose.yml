@@ -36,6 +36,18 @@ services:
     ports:
       - "8000:8000"
 
+  # Documentation
+  docs:
+    container_name: docs
+    build:
+      context: .
+      dockerfile: ./docker/mkdocs/Dockerfile
+    restart: "no"
+    volumes:
+      - .:/home/
+    ports:
+      - "8003:8000"
+
   # A celery worker that runs in the background.
   celery:
     container_name: celery

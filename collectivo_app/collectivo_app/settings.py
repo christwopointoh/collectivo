@@ -38,11 +38,10 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     "simple_history",
-    "collectivo",
-    "collectivo.core",
     *COLLECTIVO["extensions"],
 ]
-
+if COLLECTIVO["development"]:
+    INSTALLED_APPS += ["django_extensions"]
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",

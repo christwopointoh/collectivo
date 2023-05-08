@@ -144,8 +144,4 @@ def set_extensions(config: dict):
             print(f"No python module found for extension '{ext}'.")
             del extensions[ext_name]
 
-    # Add dev extensions
-    if config["development"]:
-        extensions["django_extensions"] = {}
-
     return extensions

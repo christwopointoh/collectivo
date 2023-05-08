@@ -9,9 +9,9 @@ from collectivo.utils.test import create_testuser
 
 from .models import Tag
 
-TAGS_URL = reverse("collectivo:collectivo.tags:tag-list")
-TAG_URL_NAME = "collectivo:collectivo.tags:tag-detail"
-TAG_PROFILES_NAME = "collectivo:collectivo.tags:profile-detail"
+TAGS_URL = reverse("collectivo.tags:tag-list")
+TAG_URL_NAME = "collectivo.tags:tag-detail"
+TAG_PROFILES_NAME = "collectivo.tags:profile-detail"
 User = get_user_model()
 
 

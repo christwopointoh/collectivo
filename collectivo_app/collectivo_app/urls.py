@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    # path('api/health-check/', core_views.health_check, name='health-check'),
 ]
 
 # Extensions
@@ -28,7 +29,7 @@ if settings.COLLECTIVO["api_docs"]:
         path("api/schema/", SpectacularAPIView.as_view(), name="api-schema"),
         path(
             "api/docs/",
-            SpectacularSwaggerView.as_view(url_name="collectivo:api-schema"),
+            SpectacularSwaggerView.as_view(url_name="api-schema"),
             name="api-docs",
         ),
     ]

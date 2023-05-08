@@ -197,7 +197,7 @@ _schema_versions = ["0.1.0"]
 _swagger_urls = ""
 for version in _schema_versions:
     _swagger_urls += (
-        f'{{url: "/api/dev/schema/?version={version}", '
+        f'{{url: "/api/schema/?version={version}", '
         f'name: "API Version {version}"}}, '
     )
 

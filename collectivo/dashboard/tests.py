@@ -10,9 +10,9 @@ from collectivo.utils.test import create_testuser
 
 from .models import DashboardTile
 
-TILES_URL = reverse("collectivo:collectivo.dashboard:tile-self")
-TILES_ADMIN_URL_PATH = "collectivo:collectivo.dashboard:tile-detail"
-EXTENSIONS_URL = reverse("collectivo:collectivo.extensions:extension-list")
+TILES_URL = reverse("collectivo.dashboard:tile-self")
+TILES_ADMIN_URL_PATH = "collectivo.dashboard:tile-detail"
+EXTENSIONS_URL = reverse("collectivo.extensions:extension-list")
 EXTENSION_NAME = "dashboard"
 
 

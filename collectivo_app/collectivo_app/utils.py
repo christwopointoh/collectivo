@@ -65,26 +65,24 @@ def set_allowed_origins(config: dict):
 
 def set_allowed_hosts(config: dict) -> list[str]:
     """Correct configuration of allowed hosts from collectivo.yml."""
+    allowed_hosts = []
     if "allowed_hosts" in config:
-        allowed_hosts = string_to_list(config["allowed_hosts"])
-        for i, host in enumerate(allowed_hosts):
+        for host in string_to_list(config["allowed_hosts"]):
             host = host.replace("https://", "")
             host = host.replace("http://", "")
             host = host.split(":")[0]  # Remove port
-            allowed_hosts[i] = host
-        return allowed_hosts
-
-    elif "development" in config and config["development"]:
-        return [
+            allowed_hosts.append(host)
+    if "development" in config and config["development"]:
+        allowed_hosts += [
             "*",
             "0.0.0.0",  # noqa: S104
             "127.0.0.1",
             "localhost",
             "collectivo.local",
         ]
-    else:
-        print("'allowed_hosts' not defined in collectivo.yml.")
-        return []
+    if not allowed_hosts:
+        print("No 'allowed_hosts' have been defined.")
+    return allowed_hosts
 
 
 def expand_vars(input):

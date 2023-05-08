@@ -8,9 +8,9 @@ from collectivo.extensions.models import Extension
 from collectivo.menus.models import Menu, MenuItem
 from collectivo.utils.test import create_testuser
 
-EXTENSIONS_URL = reverse("collectivo:collectivo.extensions:extension-list")
-MENUS_URL = reverse("collectivo:collectivo.menus:menu-list")
-ITEMS_URL = reverse("collectivo:collectivo.menus:menuitem-list")
+EXTENSIONS_URL = reverse("collectivo.extensions:extension-list")
+MENUS_URL = reverse("collectivo.menus:menu-list")
+ITEMS_URL = reverse("collectivo.menus:menuitem-list")
 
 
 class MenusSetupTests(TestCase):
@@ -61,7 +61,7 @@ class MenusAPITests(TestCase):
         )
 
         self.menu_url = reverse(
-            "collectivo:collectivo.menus:menu-detail",
+            "collectivo.menus:menu-detail",
             kwargs={"extension": self.extension.name, "menu": test_menu.name},
         )
 

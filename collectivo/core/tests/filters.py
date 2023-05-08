@@ -12,15 +12,13 @@ from ..profiles.models import MemberProfile, Membership, MembershipType
 
 User = get_user_model()
 
-MEMBERS_URL = reverse("collectivo:collectivo.members:member-list")
-MEMBERS_SCHEMA_URL = reverse("collectivo:collectivo.members:member-schema")
-MEMBERS_DETAIL = "collectivo:collectivo.members:member-detail"
-PROFILE_URL = reverse("collectivo:collectivo.members:profile")
-REGISTER_URL = reverse("collectivo:collectivo.members:register")
-REGISTRATION_SCHEMA_URL = reverse(
-    "collectivo:collectivo.members:register-schema"
-)
-PROFILE_SCHEMA_URL = reverse("collectivo:collectivo.members:profile-schema")
+MEMBERS_URL = reverse("collectivo.members:member-list")
+MEMBERS_SCHEMA_URL = reverse("collectivo.members:member-schema")
+MEMBERS_DETAIL = "collectivo.members:member-detail"
+PROFILE_URL = reverse("collectivo.members:profile")
+REGISTER_URL = reverse("collectivo.members:register")
+REGISTRATION_SCHEMA_URL = reverse("collectivo.members:register-schema")
+PROFILE_SCHEMA_URL = reverse("collectivo.members:profile-schema")
 
 MEMBER = {
     "first_name": "firstname",

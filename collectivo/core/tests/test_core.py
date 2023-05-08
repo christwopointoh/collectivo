@@ -11,7 +11,7 @@ from collectivo.utils.permissions import HasGroup, IsSuperuser
 from collectivo.utils.test import create_testuser
 from collectivo.version import __version__
 
-PROFILES_URL = reverse("collectivo:collectivo.core:users-extended-list")
+PROFILES_URL = reverse("collectivo.core:users-extended-list")
 
 
 class CoreSetupTests(TestCase):
@@ -37,7 +37,7 @@ class UserApiTests(TestCase):
 
     def test_user_endpoint(self):
         """Test the user endpoint."""
-        res = self.client.get(reverse("collectivo:collectivo.core:user-list"))
+        res = self.client.get(reverse("collectivo.core:user-list"))
         self.assertEqual(res.status_code, 200)
 
     def test_users_extended_endpoint(self):
@@ -47,7 +47,7 @@ class UserApiTests(TestCase):
 
     def test_group_endpoint(self):
         """Test the group endpoint."""
-        res = self.client.get(reverse("collectivo:collectivo.core:group-list"))
+        res = self.client.get(reverse("collectivo.core:group-list"))
         self.assertEqual(res.status_code, 200)
 
 
@@ -62,12 +62,12 @@ class CoreApiTests(TestCase):
 
     def test_get_api_docs(self):
         """Test getting the API docs."""
-        res = self.client.get("/api/dev/schema/?version=0.1.0")
+        res = self.client.get("/api/schema/?version=0.1.0")
         self.assertEqual(res.status_code, 200)
 
     def test_get_version(self):
         """Test getting current version is correct."""
-        res = self.client.get(reverse("collectivo:collectivo.core:version"))
+        res = self.client.get(reverse("collectivo.core:version"))
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.data["version"], __version__)
 

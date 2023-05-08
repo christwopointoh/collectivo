@@ -47,7 +47,7 @@ class UserProfilesSerializer(serializers.ModelSerializer):
     # TODO: Support foreign key and onetoone fields
     profile_serializers = main_store.user_profiles_admin_serializers
     for profile_serializer in profile_serializers:
-        profile = profile.Meta.model
+        profile = profile_serializer.Meta.model
         _related_name = profile._meta.get_field("user")._related_name
         for field in profile._meta.get_fields():
             _field_class = serializer_field_mapping.get(field.__class__)
@@ -69,11 +69,11 @@ class UserProfilesSerializer(serializers.ModelSerializer):
                     )
             elif field.__class__ is models.OneToOneField:
                 logger.warning(
-                    f"OneToOneField not supported in UserProfilesSerializer."
+                    "OneToOneField not supported in UserProfilesSerializer."
                 )
             elif field.__class__ is models.ForeignKey:
                 logger.warning(
-                    f"ForeignKey not supported in UserProfilesSerializer."
+                    "ForeignKey not supported in UserProfilesSerializer."
                 )
             elif field.__class__ is models.ManyToManyField:
                 locals()[

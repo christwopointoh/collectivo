@@ -265,15 +265,12 @@ LOGGING = {
         },
     },
     "loggers": {
-        "collectivo": {
+        name: {
             "handlers": ["console"],
             "level": LOGGING_LEVEL,
-            "propagate": True,
-        },
-        "celery": {
-            "handlers": ["console"],
-            "level": "INFO",
-        },
+            "propagate": False,
+        }
+        for name in INSTALLED_APPS
     },
 }
 

@@ -47,11 +47,18 @@ filters = {
 
 
 def get_ordering_fields(serializer: serializers.Serializer) -> list:
-    """Return a list of fields for a serializer for ordering."""
+    """
+    Return a list of fields for a serializer for ordering.
+
+    Write-only and SerializerMethodField cannot be sorted.
+    """
     return [
         name
         for name, instance in serializer().fields.items()
-        if not instance.write_only
+        if (
+            not instance.write_only
+            and not isinstance(instance, serializers.SerializerMethodField)
+        )
     ]
 
 

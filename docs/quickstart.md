@@ -2,8 +2,6 @@
 
 This tutorial will show you how to quickly set up your own instance of Collectivo.
 
-## Installation
-
 Install the following requirements:
 
 - [Docker](https://docs.docker.com/get-docker/) (Version >= 20.10)
@@ -14,15 +12,13 @@ Add the following line to your [hosts file](https://www.howtogeek.com/27350/begi
 127.0.0.1 keycloak
 ```
 
-In your project folder, clone the collectivo quickstart repository and start a local instance of collectivo:
+In your project folder, clone the collectivo quickstart repository and start a local instance:
 
 ```sh
 git clone https://github.com/MILA-Wien/collectivo-quickstart .
 cp .env.example .env
 docker compose up -d
 ```
-
-## Try it out
 
 You can now go to [`127.0.0.1:8001`](http://127.0.0.1:8001) to log in to Collectivo.
 

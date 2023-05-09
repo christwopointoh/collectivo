@@ -1,12 +1,8 @@
 # Keycloak
 
-Enable authentication with [keycloak](https://www.keycloak.org/). When using this extension, keycloak access tokens can be used to authenticate requests and user data is synchronized between collectivo and keycloak.
+Enable authentication with [keycloak](https://www.keycloak.org/) and [python-keycloak](https://github.com/marcospereirampj/python-keycloak). Keycloak access tokens can be used to authenticate requests and user data is synchronized between collectivo and keycloak.
 
 ## Installation
-
-Add the following packages to `requirements.txt`:
-
-- [python-keycloak](https://github.com/marcospereirampj/python-keycloak)
 
 Add the following entries to [`collectivo.yml`](reference.md#settings):
 

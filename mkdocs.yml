@@ -47,11 +47,24 @@ plugins:
 
 nav:
   - Home: index.md
-  - "getting_started.md"
+  - "quickstart.md"
+  - "guide.md"
   - "development.md"
   - "reference.md"
   - Extensions:
-      - "keycloak.md"
+      - Overview: "extensions/overview.md"
+      - Core framework:
+          - "extensions/core.md"
+          - "extensions/menus.md"
+          - "extensions/dashboard.md"
+      - Authentication:
+          - "extensions/keycloak.md"
+      - "extensions/profiles.md"
+      - "extensions/tags.md"
+      - "extensions/memberships.md"
+      - "extensions/emails.md"
+      - "extensions/payments.md"
+      - "extensions/shifts.md"
 
 repo_name: MILA-Wien/collectivo
 repo_url: https://github.com/MILA-Wien/collectivo

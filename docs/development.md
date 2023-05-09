@@ -1,4 +1,4 @@
-# Developer guide
+# Development
 
 ## How to set up a development system
 

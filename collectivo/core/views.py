@@ -17,6 +17,15 @@ User = get_user_model()
 Group = User.groups.field.related_model
 
 
+class HealthView(APIView):
+    """API view for health checks."""
+
+    @extend_schema(responses={200: OpenApiResponse()})
+    def get(self, request):
+        """Return a 200 response."""
+        return Response()
+
+
 class AboutView(APIView):
     """API view for information about the collectivo instance."""
 

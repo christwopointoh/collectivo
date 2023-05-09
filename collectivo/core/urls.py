@@ -14,7 +14,7 @@ router.register(
 router.register("groups", views.GroupViewSet)
 
 urlpatterns = [
-    # Core API views
     path("api/core/about/", views.AboutView.as_view(), name="version"),
+    path("api/core/health/", views.HealthView.as_view(), name="health"),
     path("api/core/", include(router.urls)),
 ]

@@ -1,5 +1,4 @@
 # Configuration file for collectivo
-# Environment variables can be used with ${ENV_VAR_NAME}
 
 db_name: ${DB_NAME}
 db_host: ${DB_HOST}
@@ -30,3 +29,6 @@ extensions:
   - collectivo.emails.tags
   - collectivo.payments
   - collectivo.shifts
+
+authentication:
+  - collectivo.auth.keycloak.authentication.KeycloakAuthentication

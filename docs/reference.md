@@ -1,13 +1,43 @@
 # Reference
 
-## Settings file
+## Settings
 
 Custom installation settings for Collectivo can be set in `collectivo.yml`,
 which should be placed into the root folder of the collectivo app.
+Environment variables can be used with the `${ENV_VAR_NAME}` syntax.
 
 The following settings can be set:
 
-`extensions`
+`db_name` (string)
+
+: Name of the database.
+
+`db_host` (string)
+
+: Hostname of the database.
+
+`db_user` (string)
+
+:  Username of the database.
+
+`db_pass` (string)
+
+: Password of the database.
+
+`secret_key` (string)
+
+: Secret key for the Django app.
+
+`allowed_hosts` (list)
+
+: List of allowed hostnames of collectivo.
+
+`allowed_origins` (list)
+
+: List of allowed URLs that can send requests to collectivo.
+
+
+`extensions` (list)
 
 : Extensions that should be installed (list).
 
@@ -17,19 +47,19 @@ The following settings can be set:
     - Modules placed in the ./extensions directory
     - Packages installed via requirements.txt
 
-`development`
+`development` (boolean)
 
-: Activate development tools and debugging messages (boolean).
+: Activate development tools and debugging messages.
 
     !!! warning "Warning"
 
         Do not activate this setting on a production system, not even temporarily.
         It is possible to extract secrets from the system if this setting is activated.
 
-`example_data`
+`example_data` (boolean)
 
-: Populate the instance with example data (boolean).
+: Populate the instance with example data.
 
-`api_docs`
+`api_docs` (boolean)
 
 : Activate [Swagger UI](https://swagger.io/tools/swagger-ui/) under `/api/docs`

@@ -22,8 +22,7 @@ write to [joel.foramitti@mila.wien](mailto:joel.foramitti@mila.wien).
 
 This site contains the project documentation for Collectivo.
 
-1. [Getting started](getting_started.md) - A quick tutorial that will show you
-   how to set up Collectivo
-2. [How-to guides](how_to_guides.md) - Step-by-step instructions to achieve a
-   specific goal
+1. [Getting started](getting_started.md) - A quick tutorial that will show you how to set up Collectivo
+2. [Developer guide](development.md) - How to set up a development environment
 3. [Reference](reference.md) - Technical description of Collectivo's API
+<!-- - Step-by-step instructions to achieve a specific goal-->

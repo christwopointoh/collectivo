@@ -21,8 +21,8 @@ services:
       DB_PASS: ${COLLECTIVO_DB_PASSWORD}
       SECRET_KEY: ${COLLECTIVO_SECRET_KEY}
       ALLOWED_HOSTS: ${COLLECTIVO_URL}
-      ALLOWED_ORIGINS: http://${COLLECTIVO_UX_URL}
-      KEYCLOAK_URL: http://${KEYCLOAK_URL}
+      ALLOWED_ORIGINS: ${COLLECTIVO_UX_URL}
+      KEYCLOAK_URL: ${KEYCLOAK_URL}
       KEYCLOAK_CLIENT_SECRET: ${COLLECTIVO_KEYCLOAK_CLIENT_SECRET}
       CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
@@ -65,8 +65,8 @@ services:
       DB_PASS: ${COLLECTIVO_DB_PASSWORD}
       SECRET_KEY: ${COLLECTIVO_SECRET_KEY}
       ALLOWED_HOSTS: ${COLLECTIVO_URL}
-      ALLOWED_ORIGINS: http://${COLLECTIVO_UX_URL}
-      KEYCLOAK_URL: http://${KEYCLOAK_URL}
+      ALLOWED_ORIGINS: ${COLLECTIVO_UX_URL}
+      KEYCLOAK_URL: ${KEYCLOAK_URL}
       KEYCLOAK_CLIENT_SECRET: ${COLLECTIVO_KEYCLOAK_CLIENT_SECRET}
       CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
@@ -95,8 +95,8 @@ services:
       DB_PASS: ${COLLECTIVO_DB_PASSWORD}
       SECRET_KEY: ${COLLECTIVO_SECRET_KEY}
       ALLOWED_HOSTS: ${COLLECTIVO_URL}
-      ALLOWED_ORIGINS: http://${COLLECTIVO_UX_URL}
-      KEYCLOAK_URL: http://${KEYCLOAK_URL}
+      ALLOWED_ORIGINS: ${COLLECTIVO_UX_URL}
+      KEYCLOAK_URL: ${KEYCLOAK_URL}
       KEYCLOAK_CLIENT_SECRET: ${COLLECTIVO_KEYCLOAK_CLIENT_SECRET}
       CELERY_BROKER: "redis://:${REDIS_PASSWORD}@redis:6379/0"
       CELERY_BACKEND: "redis://:${REDIS_PASSWORD}@redis:6379/0"
@@ -154,7 +154,7 @@ services:
     image: milawien/collectivo-ux:latest
     restart: always
     environment:
-      VITE_APP_API: http://collectivo.local:8000
+      VITE_APP_API: ${COLLECTIVO_URL}
       VITE_KEYCLOAK_URL: ${KEYCLOAK_URL}
     ports:
       - "8001:80"
@@ -166,11 +166,10 @@ services:
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
-      KEYCLOAK_FRONTEND_URL: ${KEYCLOAK_URL}
       ROOT_LOGLEVEL: ALL
       KEYCLOAK_LOGLEVEL: DEBUG
     healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8080/realms/master"]
+      test: ["CMD", "curl", "--fail", "http://127.0.0.1:8080/realms/master"]
       interval: 5s
       timeout: 2s
       retries: 15

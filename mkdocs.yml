@@ -26,6 +26,7 @@ theme:
 
   features:
     - content.code.copy
+    - navigation.sections
 
 markdown_extensions:
   - admonition
@@ -45,10 +46,12 @@ plugins:
   - mkdocstrings
 
 nav:
-  - Home: "index.md"
+  - Home: index.md
   - "getting_started.md"
-  - "how_to_guides.md"
+  - "development.md"
   - "reference.md"
+  - Extensions:
+      - "keycloak.md"
 
 repo_name: MILA-Wien/collectivo
 repo_url: https://github.com/MILA-Wien/collectivo

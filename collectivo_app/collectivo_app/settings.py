@@ -181,7 +181,7 @@ REST_FRAMEWORK = {
         "rest_framework.renderers.JSONRenderer",
     ],
     "DEFAULT_AUTHENTICATION_CLASSES": [
-        "collectivo.auth.keycloak.authentication.KeycloakAuthentication",
+        *COLLECTIVO["authentication"],
     ],
     "DEFAULT_FILTER_BACKENDS": [
         "django_filters.rest_framework.DjangoFilterBackend",

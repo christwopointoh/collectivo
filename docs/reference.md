@@ -3,7 +3,8 @@
 ## Settings
 
 Custom installation settings for Collectivo can be set in `collectivo.yml`,
-which should be placed into the root folder of the collectivo app.
+in the root folder of the collectivo app.
+
 Environment variables can be used with the `${ENV_VAR_NAME}` syntax.
 
 The following settings can be set:

@@ -4,6 +4,7 @@ The functionality of Collectivo can be composed through different extensions.
 
 - Core framework
     - [Core](core.md)
+    - [Extensions](extensions.md)
     - [Menus](menus.md)
     - [Dashboard](dashboard.md)
 - Authentication methods

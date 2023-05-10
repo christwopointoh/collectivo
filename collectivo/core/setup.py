@@ -3,8 +3,10 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group
+from django.urls import reverse
 
 from collectivo.core.apps import CoreConfig
+from collectivo.core.models import Endpoint, EndpointGroup
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import Menu, MenuItem
 from collectivo.utils.dev import DEV_USERS
@@ -22,6 +24,28 @@ def setup():
     superuser = Group.objects.get_or_create(
         name="collectivo.core.admin",
     )[0]
+
+    # Create core endpoint groups
+    endpoint_groups = {
+        "remote_entries": None,
+        "admin_settings": None,
+        "user_settings": None,
+        "admin_profiles": None,
+        "user_profiles": None,
+    }
+    for name in endpoint_groups:
+        endpoint_groups[name] = EndpointGroup.objects.register(
+            name=name, extension=extension
+        )
+
+    # Add core settings to admin settings group
+    endpoint = Endpoint.objects.register(
+        name="core_settings",
+        path=reverse("collectivo.core:settings"),
+        extension=extension,
+    )
+    endpoint_groups["admin_settings"].endpoints.add(endpoint)
+    endpoint_groups["admin_settings"].save()
 
     # User menu
     Menu.register(name="main", extension=extension)
@@ -43,7 +67,7 @@ def setup():
         order=99,
     )
 
-    # Admin menu
+    # Create admin menu
     Menu.register(name="admin", extension=extension)
     MenuItem.register(
         name="users",

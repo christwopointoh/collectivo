@@ -8,22 +8,93 @@ from rest_framework import serializers
 from collectivo.core.stores import main_store
 from collectivo.tags.models import Tag
 
+from .models import (
+    CoreSettings,
+    Endpoint,
+    EndpointGroup,
+    Permission,
+    PermissionGroup,
+)
+
 User = get_user_model()
 Group = User.groups.field.related_model
 serializer_field_mapping = serializers.ModelSerializer.serializer_field_mapping
 logger = logging.getLogger(__name__)
 
 
+class CoreSettingsSerializer(serializers.ModelSerializer):
+    """Serializer for core settings."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = CoreSettings
+        fields = "__all__"
+
+
+class EndpointSerializer(serializers.ModelSerializer):
+    """Serializer for endpoints."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = Endpoint
+        fields = "__all__"
+
+
+class EndpointGroupSerializer(serializers.ModelSerializer):
+    """Serializer for endpoint groups."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = EndpointGroup
+        fields = "__all__"
+
+
+class PermissionSerializer(serializers.ModelSerializer):
+    """Serializer for permissions."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = Permission
+        fields = "__all__"
+
+
+class PermissionGroupSerializer(serializers.ModelSerializer):
+    """Serializer for permission groups."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = PermissionGroup
+        fields = "__all__"
+
+
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for members to manage their own data."""
+
+    # TODO: Get through groups
+    # permissions = serializers.PrimaryKeyRelatedField(
+    #     many=True, queryset=Permission.objects.all()
+    # )
+    permission_groups = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=PermissionGroup.objects.all()
+    )
 
     class Meta:
         """Serializer settings."""
 
         model = User
-        fields = ["id", "first_name", "last_name", "email", "groups"]
+        fields = [
+            "id",
+            "first_name",
+            "last_name",
+            "email",
+            "permission_groups",
+        ]
         read_only_fields = ["id"]
-        extra_kwargs = {"groups": {"label": "Permissions"}}
 
 
 class UserProfilesSerializer(serializers.ModelSerializer):
@@ -32,9 +103,6 @@ class UserProfilesSerializer(serializers.ModelSerializer):
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     email = serializers.EmailField()
-    groups = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Group.objects.all()
-    )
 
     # TODO: Load through TagProfile
     tags = serializers.PrimaryKeyRelatedField(

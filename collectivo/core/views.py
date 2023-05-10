@@ -9,9 +9,10 @@ from rest_framework.views import APIView
 from collectivo.utils.filters import get_filterset, get_ordering_fields
 from collectivo.utils.mixins import HistoryMixin, SchemaMixin
 from collectivo.utils.permissions import IsSuperuser
+from collectivo.utils.viewsets import CoExtModelViewSet, CoSingleModelViewSet
 from collectivo.version import __version__
 
-from . import serializers
+from . import models, serializers
 
 User = get_user_model()
 Group = User.groups.field.related_model
@@ -38,6 +39,56 @@ class AboutView(APIView):
             "version": __version__,
         }
         return Response(data)
+
+
+class CoreSettingsViewSet(CoSingleModelViewSet):
+    """Viewset for core settings."""
+
+    queryset = models.CoreSettings.objects.all()
+    serializer_class = serializers.CoreSettingsSerializer
+    permission_classes = [IsSuperuser]
+
+
+class EndpointViewSet(CoExtModelViewSet):
+    """Viewset for endpoints."""
+
+    queryset = models.Endpoint.objects.all()
+    serializer_class = serializers.EndpointSerializer
+    permission_classes = [IsSuperuser]
+    filterset_class = get_filterset(serializers.EndpointSerializer)
+    ordering_fields = get_ordering_fields(serializers.EndpointSerializer)
+
+
+class EndpointGroupViewSet(CoExtModelViewSet):
+    """Viewset for endpoints."""
+
+    queryset = models.EndpointGroup.objects.all()
+    serializer_class = serializers.EndpointGroupSerializer
+    permission_classes = [IsSuperuser]
+    filterset_class = get_filterset(serializers.EndpointGroupSerializer)
+    ordering_fields = get_ordering_fields(serializers.EndpointGroupSerializer)
+
+
+class PermissionViewSet(CoExtModelViewSet):
+    """Viewset for endpoints."""
+
+    queryset = models.Permission.objects.all()
+    serializer_class = serializers.PermissionSerializer
+    permission_classes = [IsSuperuser]
+    filterset_class = get_filterset(serializers.PermissionSerializer)
+    ordering_fields = get_ordering_fields(serializers.PermissionSerializer)
+
+
+class PermissionGroupViewSet(CoExtModelViewSet):
+    """Viewset for endpoints."""
+
+    queryset = models.PermissionGroup.objects.all()
+    serializer_class = serializers.PermissionGroupSerializer
+    permission_classes = [IsSuperuser]
+    filterset_class = get_filterset(serializers.PermissionGroupSerializer)
+    ordering_fields = get_ordering_fields(
+        serializers.PermissionGroupSerializer
+    )
 
 
 class UserViewSet(SchemaMixin, HistoryMixin, viewsets.ModelViewSet):

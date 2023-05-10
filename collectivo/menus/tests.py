@@ -62,7 +62,7 @@ class MenusAPITests(TestCase):
 
         self.menu_url = reverse(
             "collectivo.menus:menu-detail",
-            kwargs={"extension": self.extension.name, "menu": test_menu.name},
+            kwargs={"extension": self.extension.name, "name": test_menu.name},
         )
 
     def test_get_menu_succeeds(self):

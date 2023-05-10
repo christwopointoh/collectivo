@@ -45,11 +45,6 @@ class UserApiTests(TestCase):
         res = self.client.get(PROFILES_URL)
         self.assertEqual(res.status_code, 200)
 
-    def test_group_endpoint(self):
-        """Test the group endpoint."""
-        res = self.client.get(reverse("collectivo.core:group-list"))
-        self.assertEqual(res.status_code, 200)
-
 
 class CoreApiTests(TestCase):
     """Test the core API."""

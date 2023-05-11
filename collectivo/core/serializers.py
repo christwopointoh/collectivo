@@ -1,11 +1,12 @@
 """Serializers of the core extension."""
 import logging
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.utils.module_loading import import_string
 from rest_framework import serializers
 
-from collectivo.core.stores import main_store
 from collectivo.tags.models import Tag
 
 from .models import (
@@ -97,6 +98,13 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = ["id"]
 
 
+profile_serializers = [
+    import_string(ext["user_admin_serializer"])
+    for ext in settings.COLLECTIVO["extensions"].values()
+    if "user_admin_serializer" in ext
+]
+
+
 class UserProfilesSerializer(serializers.ModelSerializer):
     """Serializer of user, including the fields of all profiles."""
 
@@ -113,7 +121,7 @@ class UserProfilesSerializer(serializers.ModelSerializer):
     # TODO: Get field settings from serializer
     # TODO: Make fields editable for bulk edit
     # TODO: Support foreign key and onetoone fields
-    profile_serializers = main_store.user_profiles_admin_serializers
+
     for profile_serializer in profile_serializers:
         profile = profile_serializer.Meta.model
         _related_name = profile._meta.get_field("user")._related_name
@@ -165,6 +173,7 @@ class UserProfilesSerializer(serializers.ModelSerializer):
             "user_permissions",
             "last_login",
             "date_joined",
+            "groups",
         ]
         read_only_fields = ["user"]
 

@@ -1,0 +1,2 @@
+authentication_classes:
+  - collectivo.auth.keycloak.authentication.KeycloakAuthentication

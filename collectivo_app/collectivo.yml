@@ -29,6 +29,3 @@ extensions:
   - collectivo.emails.tags
   - collectivo.payments
   - collectivo.shifts
-
-authentication:
-  - collectivo.auth.keycloak.authentication.KeycloakAuthentication

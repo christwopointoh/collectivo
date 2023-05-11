@@ -42,9 +42,10 @@ def load_collectivo_settings() -> dict:
     config = {}
     try:
         with open("collectivo.yml", "r") as stream:
-            config = yaml.safe_load(stream)
+            config = yaml.safe_load(stream) or {}
             config = expand_vars(config)
             config["extensions"] = set_extensions(config)
+            config["authentication_classes"] = get_auth_classes(config)
     except FileNotFoundError:
         print("No collectivo.yml found. Using default settings.")
     except Exception as e:
@@ -107,14 +108,14 @@ def set_extensions(config: dict):
     if not isinstance(extensions_raw, list):
         print("Error reading collectivo.yml.")
         return extensions
-    for ext in extensions_raw:
-        if isinstance(ext, str):
-            extensions[ext] = {}
+    for ext_config in extensions_raw:
+        if isinstance(ext_config, str):
+            extensions[ext_config] = {}
             continue
-        elif not isinstance(ext, dict):
+        elif not isinstance(ext_config, dict):
             print("Error reading collectivo.yml.")
             continue
-        for ext_name, ext_conf in ext.items():
+        for ext_name, ext_conf in ext_config.items():
             if isinstance(ext_conf, str):
                 extensions[ext_name] = {ext_conf: True}
                 continue
@@ -137,9 +138,38 @@ def set_extensions(config: dict):
     # Check if python modules exist for extensions
     for ext_name in extensions.keys():
         try:
-            __import__(ext)
+            __import__(ext_config)
         except ImportError:
-            print(f"No python module found for extension '{ext}'.")
+            print(f"No python module found for extension '{ext_config}'.")
             del extensions[ext_name]
 
+    # Extend extension config based on extension.yml
+    for ext_name, ext_config in extensions.items():
+        try:
+            path = ext_name.replace(".", "/")
+            with open(path + "/extension.yml", "r") as ext_stream:
+                default_ext_config = yaml.safe_load(ext_stream) or {}
+                default_ext_config = expand_vars(default_ext_config)
+                for k, v in default_ext_config.items():
+                    if k not in ext_config:
+                        ext_config[k] = v
+        except FileNotFoundError:
+            pass
+
     return extensions
+
+
+def get_auth_classes(config):
+    """Get authentication classes from the extension configs."""
+    auth_classes = config.get("authentication_classes") or []
+    for ext_name, ext_config in config["extensions"].items():
+        if "authentication_classes" in ext_config:
+            ext_auth_classes = ext_config["authentication_classes"]
+            if isinstance(ext_auth_classes, str):
+                auth_classes.append(ext_auth_classes)
+            elif isinstance(ext_auth_classes, list):
+                for auth_class in ext_auth_classes:
+                    auth_classes.append(auth_class)
+            else:
+                print(f"authentication_classes in {ext_name} invalid")
+    return auth_classes

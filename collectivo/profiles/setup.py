@@ -2,11 +2,10 @@
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-from collectivo.core.stores import main_store
 from collectivo.extensions.models import Extension
 from collectivo.utils.dev import DEV_MEMBERS
 
-from . import models, serializers
+from . import models
 from .apps import ProfilesConfig
 
 
@@ -17,10 +16,6 @@ def setup(sender, **kwargs):
         name=ProfilesConfig.name,
         description=ProfilesConfig.description,
         built_in=True,
-    )
-
-    main_store.user_profiles_admin_serializers.append(
-        serializers.ProfileAdminSerializer
     )
 
     if settings.COLLECTIVO["example_data"] is True:

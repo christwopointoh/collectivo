@@ -64,3 +64,18 @@ The following settings can be set:
 `api_docs` (boolean)
 
 : Activate [Swagger UI](https://swagger.io/tools/swagger-ui/) under `/api/docs`
+
+
+## Extension settings
+
+Each extension can have a file `extensions.yml` in its root folder,
+that will be used as default configuration variables for that extension.
+The following standard extension settings can be used:
+
+`authentication_classes` (list)
+
+: Default [authentication classes](https://www.django-rest-framework.org/api-guide/authentication/#setting-the-authentication-scheme) to be added to the Django REST framework.
+
+`user_admin_serializer` (str)
+
+: A serializer class whose fields will be added to the `core/users` view.

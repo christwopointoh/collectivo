@@ -1,0 +1,1 @@
+user_admin_serializer: collectivo.profiles.serializers.ProfileAdminSerializer

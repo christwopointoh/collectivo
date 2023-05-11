@@ -73,7 +73,7 @@ class MenuItem(models.Model, RegisterMixin):
         name: str,
         parent: "str | tuple | Menu | MenuItem",
         extension: str | Extension,
-        requires_perm: str = None,
+        requires_perm: str | tuple | Permission = None,
         **payload,
     ):
         """Register a new menu item."""

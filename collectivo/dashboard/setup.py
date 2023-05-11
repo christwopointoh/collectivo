@@ -33,7 +33,7 @@ def setup(sender, **kwargs):
         extension=extension,
         component="admin",
         icon_name="pi-th-large",
-        requires_perm="collectivo.core.admin",
+        requires_perm=("admin", "core"),
         parent="admin",
         order=80,
     )

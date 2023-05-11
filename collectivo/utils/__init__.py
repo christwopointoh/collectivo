@@ -5,10 +5,16 @@ from django.conf import settings
 from django.db.models import Model
 
 
-def get_instance(cls: Model, value: str | Model) -> Model:
+def get_instance(cls: Model, value: str | tuple | Model) -> Model:
     """Get an instance of a model based on a string with the instance name."""
     if isinstance(value, str):
         return cls.objects.get_or_create(name=value)[0]
+    elif isinstance(value, tuple):
+        from collectivo.extensions.models import Extension
+
+        name, ext = value
+        ext = get_instance(Extension, ext)
+        return cls.objects.get_or_create(name=name, extension=ext)[0]
     return value
 
 

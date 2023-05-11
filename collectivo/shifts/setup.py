@@ -31,7 +31,7 @@ def setup(sender, **kwargs):
         icon_name="pi-calendar",
         extension=extension,
         component="admin",
-        requires_perm="collectivo.core.admin",
+        requires_perm=("admin", "core"),
         parent="admin",
         order=30,
     )

@@ -21,7 +21,7 @@ def setup(sender, **kwargs):
         icon_name="pi-calendar",
         extension=extension,
         component="shifts_user",
-        requires_group="collectivo.shifts.user",
+        requires_perm="collectivo.shifts.user",
         parent="main",
     )
 
@@ -31,7 +31,7 @@ def setup(sender, **kwargs):
         icon_name="pi-calendar",
         extension=extension,
         component="admin",
-        requires_group="collectivo.core.admin",
+        requires_perm="collectivo.core.admin",
         parent="admin",
         order=30,
     )
@@ -42,5 +42,5 @@ def setup(sender, **kwargs):
         extension=extension,
         source="component",
         component="shifts_user_tile",
-        requires_group="collectivo.shifts.user",
+        requires_perm="collectivo.shifts.user",
     )

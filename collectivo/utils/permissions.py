@@ -1,19 +1,32 @@
 """Core permissions of collectivo."""
 # Thanks to https://stackoverflow.com/a/19429199/14396787
-from django.contrib.auth.models import Group
 from rest_framework import permissions
 from rest_framework.permissions import BasePermission
 
+from collectivo.core.models import Permission
 
-def is_in_group(user, group_name: str) -> bool | None:
-    """Check if user is in group."""
+
+def is_superuser(user):
+    """Check if user is superuser."""
     try:
-        return (
-            Group.objects.get(name=group_name)
-            .user_set.filter(id=user.id)
-            .exists()
-        )
-    except Group.DoesNotExist:
+        return user.permission_groups.filter(
+            name="superuser", extension__name="core"
+        ).exists()
+    except AttributeError:
+        return None
+
+
+def has_permission(user, perm_name: str, ext_name: str = None) -> bool | None:
+    """Check if user has permission."""
+    try:
+        return Permission.objects.filter(
+            name=perm_name,
+            extension__name=ext_name,
+            groups__in=user.permission_groups.all(),
+        ).exists()
+    except Permission.DoesNotExist:
+        return None
+    except AttributeError:
         return None
 
 
@@ -30,7 +43,7 @@ class IsSuperuser(BasePermission):
 
     def has_permission(self, request, view):
         """Check if user is superuser."""
-        return is_in_group(request.user, "collectivo.core.admin")
+        return is_superuser(request.user)
 
 
 class ReadOrIsSuperuser(BasePermission):
@@ -40,33 +53,36 @@ class ReadOrIsSuperuser(BasePermission):
         """Check if permission is given."""
         if request.method in permissions.SAFE_METHODS:
             return request.user and request.user.is_authenticated
-        return is_in_group(request.user, "collectivo.core.admin")
+        return is_superuser(request.user)
 
 
-class HasGroup(BasePermission):
-    """Ensure user is in required groups."""
+class HasPerm(BasePermission):
+    """Ensure user has required permissions."""
 
     def has_permission(self, request, view):
-        """Check if user is in required groups."""
+        """Check if user has required permissions."""
         # Get a mapping of methods -> required group.
-        required_groups = getattr(view, "required_groups", [])
+        required_perms = getattr(view, "required_perms", [])
 
-        if isinstance(required_groups, dict):
+        if isinstance(required_perms, dict):
             # Determine the required groups for this particular request method.
-            required_groups = required_groups.get(request.method, [])
+            required_perms = required_perms.get(request.method, [])
+
+        print("IS SUPER", is_superuser(request.user))
+        print("USER", request.user.permission_groups.all())
 
         # Return True if the user has all the required groups or is superuser.
         return all(
             [
-                is_in_group(request.user, group_name)
-                if group_name != "__all__"
+                has_permission(request.user, perm_name)
+                if perm_name != "__all__"
                 else True
-                for group_name in required_groups
+                for perm_name in required_perms
             ]
-        ) or is_in_group(request.user, "collectivo.core.admin")
+        ) or is_superuser(request.user)
 
 
-class ReadOrHasGroup(HasGroup):
+class ReadOrHasGroup(HasPerm):
     """Ensure user is authenticated to read or is in required group."""
 
     def has_permission(self, request, view):

@@ -3,7 +3,7 @@ from rest_framework import mixins, viewsets
 
 from collectivo.utils.filters import get_filterset, get_ordering_fields
 from collectivo.utils.mixins import HistoryMixin, SchemaMixin, SelfMixin
-from collectivo.utils.permissions import HasGroup, IsAuthenticated
+from collectivo.utils.permissions import HasPerm, IsAuthenticated
 
 from . import models, serializers
 
@@ -13,8 +13,8 @@ class ProfileViewSet(SchemaMixin, viewsets.ModelViewSet):
 
     queryset = models.PaymentProfile.objects.all()
     serializer_class = serializers.PaymentProfileSerializer
-    permission_classes = [HasGroup]
-    required_groups = ["collectivo.payments.admin"]
+    permission_classes = [HasPerm]
+    required_perms = ["collectivo.payments.admin"]
     filterset_class = get_filterset(serializer_class)
     ordering_fields = get_ordering_fields(serializer_class)
 
@@ -39,8 +39,8 @@ class ProfileSelfViewSet(
 class InvoiceViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     """ViewSet for admins to manage subscriptions."""
 
-    permission_classes = [HasGroup]
-    required_groups = ["collectivo.payments.admin"]
+    permission_classes = [HasPerm]
+    required_perms = ["collectivo.payments.admin"]
     serializer_class = serializers.InvoiceSerializer
     queryset = models.Invoice.objects.all()
     filterset_class = get_filterset(serializer_class)
@@ -50,8 +50,8 @@ class InvoiceViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
 class SubscriptionViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     """ViewSet for admins to manage subscriptions."""
 
-    permission_classes = [HasGroup]
-    required_groups = ["collectivo.payments.admin"]
+    permission_classes = [HasPerm]
+    required_perms = ["collectivo.payments.admin"]
     serializer_class = serializers.SubscriptionSerializer
     queryset = models.Subscription.objects.all()
     filterset_class = get_filterset(serializer_class)

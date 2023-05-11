@@ -26,7 +26,7 @@ def setup(sender, **kwargs):
         extension=extension,
         component="admin",
         icon_name="pi-money-bill",
-        requires_group="collectivo.core.admin",
+        requires_perm="collectivo.core.admin",
         parent="admin",
         order=20,
     )

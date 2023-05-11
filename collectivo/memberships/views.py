@@ -1,14 +1,15 @@
 """Views of the memberships extension."""
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework.decorators import action
-from rest_framework.response import Response
 from rest_framework.mixins import ListModelMixin, UpdateModelMixin
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
-from django.contrib.auth import get_user_model
+
 from collectivo.utils.filters import get_filterset, get_ordering_fields
 from collectivo.utils.mixins import HistoryMixin, SchemaMixin
-from collectivo.utils.permissions import HasGroup, IsAuthenticated
+from collectivo.utils.permissions import HasPerm, IsAuthenticated
 
 from . import serializers
 from .models import Membership, MembershipStatus, MembershipType
@@ -21,8 +22,8 @@ class MembershipAdminViewSet(SchemaMixin, HistoryMixin, ModelViewSet):
 
     queryset = Membership.objects.all()
     serializer_class = serializers.MembershipSerializer
-    permission_classes = [HasGroup]
-    required_groups = ["collectivo.memberships.admin"]
+    permission_classes = [HasPerm]
+    required_perms = ["collectivo.memberships.admin"]
     filterset_class = get_filterset(serializer_class)
     ordering_fields = get_ordering_fields(serializer_class)
 
@@ -46,8 +47,8 @@ class MembershipProfileViewSet(SchemaMixin, ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = serializers.MembershipProfileSerializer
-    permission_classes = [HasGroup]
-    required_groups = ["collectivo.memberships.admin"]
+    permission_classes = [HasPerm]
+    required_perms = ["collectivo.memberships.admin"]
     filterset_class = get_filterset(serializers.MembershipProfileSerializer)
     ordering_fields = get_ordering_fields(
         serializers.MembershipProfileSerializer
@@ -75,8 +76,8 @@ class MembershipTypeViewSet(SchemaMixin, HistoryMixin, ModelViewSet):
 
     queryset = MembershipType.objects.all()
     serializer_class = serializers.MembershipTypeSerializer
-    permission_classes = [HasGroup]
-    required_groups = ["collectivo.memberships.admin"]
+    permission_classes = [HasPerm]
+    required_perms = ["collectivo.memberships.admin"]
     filterset_class = get_filterset(serializer_class)
     ordering_fields = get_ordering_fields(serializer_class)
 
@@ -86,7 +87,7 @@ class MembershipStatusViewSet(SchemaMixin, HistoryMixin, ModelViewSet):
 
     queryset = MembershipStatus.objects.all()
     serializer_class = serializers.MembershipStatusSerializer
-    permission_classes = [HasGroup]
-    required_groups = ["collectivo.memberships.admin"]
+    permission_classes = [HasPerm]
+    required_perms = ["collectivo.memberships.admin"]
     filterset_class = get_filterset(serializer_class)
     ordering_fields = get_ordering_fields(serializer_class)

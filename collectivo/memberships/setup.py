@@ -39,7 +39,7 @@ def setup(sender, **kwargs):
         label="Memberships",
         extension=extension,
         component="admin",
-        requires_group="collectivo.core.admin",
+        requires_perm="collectivo.core.admin",
         icon_name="pi-id-card",
         parent="admin",
         order=10,

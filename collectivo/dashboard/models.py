@@ -1,8 +1,8 @@
 """Models of the dashboard extension."""
-from django.contrib.auth.models import Group
 from django.db import models
 from simple_history.models import HistoricalRecords
 
+from collectivo.core.models import Permission
 from collectivo.extensions.models import Extension
 from collectivo.utils import get_instance
 from collectivo.utils.managers import NameManager
@@ -55,13 +55,15 @@ class DashboardTile(models.Model, RegisterMixin):
     )
 
     order = models.FloatField(default=1)
-    requires_group = models.ForeignKey(
-        "auth.Group",
+    requires_perm = models.ForeignKey(
+        "core.Permission",
         on_delete=models.CASCADE,
         null=True,
         blank=True,
-        help_text="If set, the object will only be displayed to users with "
-        "this group.",
+        help_text=(
+            "If set, the object will only be displayed to users with "
+            "this group."
+        ),
     )
 
     source = models.CharField(
@@ -91,10 +93,10 @@ class DashboardTile(models.Model, RegisterMixin):
         cls,
         name: str,
         extension: str | Extension,
-        requires_group: str = None,
+        requires_perm: str = None,
         **payload,
     ):
         """Register a new dashboard tile."""
         payload["extension"] = get_instance(Extension, extension)
-        payload["requires_group"] = get_instance(Group, requires_group)
+        payload["requires_perm"] = get_instance(Permission, requires_perm)
         return super().register(name=name, **payload)

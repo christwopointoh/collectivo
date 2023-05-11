@@ -1,9 +1,9 @@
 """Test the menus extension."""
-from django.contrib.auth.models import Group
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from collectivo.core.models import Permission, PermissionGroup
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import Menu, MenuItem
 from collectivo.utils.test import create_testuser
@@ -49,7 +49,12 @@ class MenusAPITests(TestCase):
                 order=order,
             )
 
-        self.group = Group.objects.get_or_create(name="test_group")[0]
+        self.group = PermissionGroup.objects.get_or_create(name="test_group")[
+            0
+        ]
+        self.perm = Permission.objects.get_or_create(name="test_perm")[0]
+        self.group.permissions.add(self.perm)
+        self.group.save()
 
         MenuItem.register(
             name="test_item_4",
@@ -57,7 +62,7 @@ class MenusAPITests(TestCase):
             extension=self.extension,
             parent=test_menu,
             order=4,
-            requires_group=self.group,
+            requires_perm=self.perm,
         )
 
         self.menu_url = reverse(
@@ -88,12 +93,12 @@ class MenusAPITests(TestCase):
         self.assertEqual(items, [f"test_item_{order}" for order in [1, 2, 3]])
 
     def test_menu_item_correct_group(self):
-        """Test menuitem should appear only if user has required group."""
+        """Test menuitem should appear only if user has required permission."""
         self.client.force_authenticate(user=self.user)
         res = self.client.get(self.menu_url)
         items = [item["name"] for item in res.data["items"]]
         self.assertFalse("test_item_4" in items)
-        self.user.groups.add(self.group)
+        self.user.permission_groups.add(self.group)
         res = self.client.get(self.menu_url)
         items = [item["name"] for item in res.data["items"]]
         self.assertTrue("test_item_4" in items)

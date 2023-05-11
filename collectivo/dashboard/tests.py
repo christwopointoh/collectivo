@@ -1,9 +1,9 @@
 """Tests of the members API."""
-from django.contrib.auth.models import Group
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from collectivo.core.models import Permission, PermissionGroup
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
 from collectivo.utils.test import create_testuser
@@ -71,12 +71,19 @@ class DashboardAPITests(TestCase):
         # Set up client with authenticated user
         self.client = APIClient()
         self.user = create_testuser(
-            groups=["test_group", "test_group2"],
+            perms=["test_perm", "test_perm2"],
             superuser=True,
         )
         self.client.force_authenticate(self.user)
-        self.test_group = Group.objects.get_or_create(name="test_group")[0]
-        self.wrong_group = Group.objects.get_or_create(name="wrong_group")[0]
+        self.test_group = PermissionGroup.objects.get_or_create(
+            name="test_group"
+        )[0]
+        self.perm = Permission.objects.get_or_create(name="test_perm")[0]
+        self.test_group.permissions.add(self.perm)
+        self.test_group.save()
+        self.wrong_perm = Permission.objects.get_or_create(name="wrong_perm")[
+            0
+        ]
         # Register a test extension
         self.ext_name = "my_extension"
         self.client.post(EXTENSIONS_URL, {"name": self.ext_name})
@@ -96,15 +103,15 @@ class DashboardAPITests(TestCase):
         self.assertTrue(tile.exists())
 
     def test_tile_correct_role(self):
-        """Test tile should appear for user with required role."""
-        DashboardTile.register(**self.tile, requires_group=self.test_group)
+        """Test tile should appear for user with required permission."""
+        DashboardTile.register(**self.tile, requires_perm=self.perm)
         res = self.client.get(TILES_URL)
         items = [i["name"] for i in res.data]
         self.assertTrue("my_tile" in items)
 
     def test_tile_wrong_role(self):
         """Test menuitem should not appear for user without required role."""
-        DashboardTile.register(**self.tile, requires_group=self.wrong_group)
+        DashboardTile.register(**self.tile, requires_perm=self.wrong_perm)
         res = self.client.get(TILES_URL)
         items = [i["name"] for i in res.data]
         self.assertFalse("my_tile" in items)

@@ -1,7 +1,8 @@
 """Models of the menus extension."""
-from django.contrib.auth.models import Group
+
 from django.db import models
 
+from collectivo.core.models import Permission
 from collectivo.extensions.models import Extension
 from collectivo.utils import get_instance
 from collectivo.utils.models import RegisterMixin
@@ -38,8 +39,8 @@ class MenuItem(models.Model, RegisterMixin):
 
     label = models.CharField(max_length=255)
     items = models.ManyToManyField("self")
-    requires_group = models.ForeignKey(
-        "auth.Group", on_delete=models.CASCADE, null=True
+    requires_perm = models.ForeignKey(
+        "core.Permission", on_delete=models.CASCADE, null=True
     )
 
     target = models.CharField(
@@ -72,12 +73,12 @@ class MenuItem(models.Model, RegisterMixin):
         name: str,
         parent: "str | tuple | Menu | MenuItem",
         extension: str | Extension,
-        requires_group: str = None,
+        requires_perm: str = None,
         **payload,
     ):
         """Register a new menu item."""
         payload["extension"] = get_instance(Extension, extension)
-        payload["requires_group"] = get_instance(Group, requires_group)
+        payload["requires_perm"] = get_instance(Permission, requires_perm)
         item = super().register(name=name, **payload)
 
         if isinstance(parent, tuple):

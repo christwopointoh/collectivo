@@ -19,7 +19,7 @@ def setup(sender, **kwargs):
         extension=extension,
         parent="admin",
         component="admin",
-        requires_group="collectivo.core.admin",
+        requires_perm="superuser",
         icon_name="pi-box",
         order=90,
     )

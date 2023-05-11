@@ -2,11 +2,10 @@
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from django.urls import reverse
 
 from collectivo.core.apps import CoreConfig
-from collectivo.core.models import Endpoint, EndpointGroup
+from collectivo.core.models import Endpoint, EndpointGroup, PermissionGroup
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import Menu, MenuItem
 from collectivo.utils.dev import DEV_USERS
@@ -21,8 +20,8 @@ def setup():
         name=CoreConfig.name, description=CoreConfig.description, built_in=True
     )
 
-    superuser = Group.objects.get_or_create(
-        name="collectivo.core.admin",
+    superuser = PermissionGroup.objects.get_or_create(
+        name="superuser", extension=extension
     )[0]
 
     # Create core endpoint groups
@@ -76,7 +75,7 @@ def setup():
         parent="admin",
         component="users",
         icon_name="pi-users",
-        requires_group="collectivo.core.admin",
+        requires_perm="collectivo.core.admin",
         order=00,
     )
     MenuItem.register(
@@ -86,7 +85,7 @@ def setup():
         parent="admin",
         component="settings",
         icon_name="pi-cog",
-        requires_group="collectivo.core.admin",
+        requires_perm="collectivo.core.admin",
         order=100,
     )
 
@@ -104,4 +103,4 @@ def setup():
 
             # Give user permissions
             if first_name == "superuser":
-                user.groups.add(superuser)
+                user.permission_groups.add(superuser)

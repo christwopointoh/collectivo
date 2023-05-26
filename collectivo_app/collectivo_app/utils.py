@@ -79,7 +79,6 @@ def set_allowed_hosts(config: dict) -> list[str]:
             "0.0.0.0",  # noqa: S104
             "127.0.0.1",
             "localhost",
-            "collectivo.local",
         ]
     if not allowed_hosts:
         print("No 'allowed_hosts' have been defined.")

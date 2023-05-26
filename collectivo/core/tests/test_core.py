@@ -12,7 +12,6 @@ from collectivo.utils.test import create_testuser
 from collectivo.version import __version__
 
 PROFILES_URL = reverse("collectivo.core:users-extended-list")
-EXTENSION = Extension.objects.get(name="core")
 
 
 class CoreSetupTests(TestCase):
@@ -22,7 +21,9 @@ class CoreSetupTests(TestCase):
         """Test default menus exist."""
         for name in ["main", "admin"]:
             self.assertTrue(
-                Menu.objects.filter(extension=EXTENSION, name=name).exists()
+                Menu.objects.filter(
+                    extension=Extension.objects.get(name="core"), name=name
+                ).exists()
             )
 
 
@@ -88,7 +89,7 @@ class CoreApiTests(TestCase):
         request.user = self.user
         self.assertFalse(IsSuperuser().has_permission(request, None))
         group = PermissionGroup.objects.get(
-            name="superuser", extension=EXTENSION
+            name="superuser", extension=Extension.objects.get(name="core")
         )
         self.user.permission_groups.add(group)
         self.assertTrue(IsSuperuser().has_permission(request, None))

@@ -2,7 +2,6 @@
 from django.db import models
 
 from collectivo.utils.models import RegisterMixin
-from collectivo.utils.texts import EXTENSION_HELP_TEXT
 
 
 class Extension(models.Model, RegisterMixin):

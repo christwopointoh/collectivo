@@ -18,7 +18,7 @@ def setup(sender, **kwargs):
         name="payments_admin",
         label="Payments",
         extension=extension,
-        component="admin",
+        route=extension.name + "/admin",
         icon_name="pi-money-bill",
         requires_perm=("admin", "core"),
         parent="admin",

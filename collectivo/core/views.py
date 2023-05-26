@@ -49,26 +49,6 @@ class CoreSettingsViewSet(CoSingleModelViewSet):
     permission_classes = [IsSuperuser]
 
 
-class EndpointViewSet(CoExtModelViewSet):
-    """Viewset for endpoints."""
-
-    queryset = models.Endpoint.objects.all()
-    serializer_class = serializers.EndpointSerializer
-    permission_classes = [IsSuperuser]
-    filterset_class = get_filterset(serializers.EndpointSerializer)
-    ordering_fields = get_ordering_fields(serializers.EndpointSerializer)
-
-
-class EndpointGroupViewSet(CoExtModelViewSet):
-    """Viewset for endpoints."""
-
-    queryset = models.EndpointGroup.objects.all()
-    serializer_class = serializers.EndpointGroupSerializer
-    permission_classes = [IsSuperuser]
-    filterset_class = get_filterset(serializers.EndpointGroupSerializer)
-    ordering_fields = get_ordering_fields(serializers.EndpointGroupSerializer)
-
-
 class PermissionViewSet(CoExtModelViewSet):
     """Viewset for endpoints."""
 

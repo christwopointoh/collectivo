@@ -14,14 +14,11 @@ router.register(
     "users-extended", views.UserProfilesViewSet, basename="users-extended"
 )
 
-router.register("permission", views.EndpointViewSet, basename="permission")
+router.register("permission", views.PermissionViewSet, basename="permission")
 router.register(
-    "permission_group", views.EndpointViewSet, basename="permission_group"
-)
-
-router.register("endpoint", views.EndpointViewSet, basename="endpoint")
-router.register(
-    "endpoint_group", views.EndpointViewSet, basename="endpoint_group"
+    "permission_group",
+    views.PermissionGroupViewSet,
+    basename="permission_group",
 )
 
 router_dd = DirectDetailRouter()

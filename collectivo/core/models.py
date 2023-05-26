@@ -13,54 +13,17 @@ User = get_user_model()
 register(User, app=__package__)
 
 
-class EndpointGroup(models.Model):
-    """A group of endpoints."""
-
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    endpoints = models.ManyToManyField(
-        "Endpoint", related_name="groups", blank=True
-    )
-    extension = models.ForeignKey(
-        "extensions.Extension",
-        on_delete=models.CASCADE,
-        related_name="endpoint_groups",
-        null=True,
-        blank=True,
-        help_text=EXTENSION_HELP_TEXT,
-    )
+class CoreSettings(SingleInstance, models.Model):
+    """Settings for the core extension."""
 
     history = HistoricalRecords()
-    objects = NameManager()
 
-    class Meta:
-        """Model settings."""
-
-        unique_together = ("name", "extension")
-
-
-class Endpoint(models.Model):
-    """An endpoint that can be registered by an extension."""
-
-    name = models.CharField(max_length=255)
-    description = models.TextField(blank=True)
-    path = models.URLField()
-    extension = models.ForeignKey(
-        "extensions.Extension",
-        on_delete=models.CASCADE,
-        related_name="endpoints",
-        null=True,
-        blank=True,
-        help_text=EXTENSION_HELP_TEXT,
-    )
-
-    history = HistoricalRecords()
-    objects = NameManager()
-
-    class Meta:
-        """Model settings."""
-
-        unique_together = ("name", "extension")
+    project_name = models.CharField(max_length=255, blank=True)
+    project_description = models.TextField(blank=True)
+    # TODO: Needs pillow
+    # project_logo = models.ImageField(
+    #     upload_to="core/logo/", null=True, blank=True
+    # )
 
 
 class Permission(models.Model):
@@ -113,16 +76,3 @@ class PermissionGroup(models.Model):
         """Model settings."""
 
         unique_together = ("name", "extension")
-
-
-class CoreSettings(SingleInstance, models.Model):
-    """Settings for the core extension."""
-
-    history = HistoricalRecords()
-
-    project_name = models.CharField(max_length=255, blank=True)
-    project_description = models.TextField(blank=True)
-    # TODO: Needs pillow
-    # project_logo = models.ImageField(
-    #     upload_to="core/logo/", null=True, blank=True
-    # )

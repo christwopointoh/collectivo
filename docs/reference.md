@@ -1,9 +1,10 @@
 # Reference
 
-## Settings
+## Backend Settings
 
-Custom installation settings for Collectivo can be set in `collectivo.yml`,
-in the root folder of the collectivo app.
+### Core
+
+Custom settings for Collectivo can be set in `collectivo.yml`.
 
 Environment variables can be used with the `${ENV_VAR_NAME}` syntax.
 
@@ -66,10 +67,11 @@ The following settings can be set:
 : Activate [Swagger UI](https://swagger.io/tools/swagger-ui/) under `/api/docs`
 
 
-## Extension settings
+### Extensions
 
 Each extension can have a file `extensions.yml` in its root folder,
 that will be used as default configuration variables for that extension.
+
 The following standard extension settings can be used:
 
 `authentication_classes` (list)
@@ -79,3 +81,35 @@ The following standard extension settings can be used:
 `user_admin_serializer` (str)
 
 : A serializer class whose fields will be added to the `core/users` view.
+
+## Frontend Settings
+
+### Core
+
+Custom settings for the Collectivo frontend can be set in `src/collectivo.json`.
+A new build is necessary for these settings to be applied.
+
+The following settings can be set:
+
+`extensions` (list)
+
+: Name of extensions to be included. The name must match the name of the extension folder in `src/extensions`.
+
+### Extensions
+
+Each frontend extension can have a file `extensions.json` in its root folder,
+that will be used as default configuration variables for that extension.
+
+The following standard extension settings can be used:
+
+`endpoints` (dict)
+
+: Name and path of endpoints to be added to the API and main store.
+
+`profile_admin_endpoints` (list)
+
+: Names of endpoints that should be used for the `/core/users/:id` view.
+
+`profile_user_endpoints` (list)
+
+: Names of endpoints that should be used for the `/core/profile` view.

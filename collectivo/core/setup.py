@@ -2,15 +2,9 @@
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.urls import reverse
 
 from collectivo.core.apps import CoreConfig
-from collectivo.core.models import (
-    Endpoint,
-    EndpointGroup,
-    Permission,
-    PermissionGroup,
-)
+from collectivo.core.models import Permission, PermissionGroup
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import Menu, MenuItem
 from collectivo.utils.dev import DEV_USERS
@@ -31,35 +25,13 @@ def setup():
     coreadmin = Permission.objects.register(name="admin", extension=extension)
     superuser.permissions.add(coreadmin)
 
-    # Create core endpoint groups
-    endpoint_groups = {
-        "remote_entries": None,
-        "admin_settings": None,
-        "user_settings": None,
-        "admin_profiles": None,
-        "user_profiles": None,
-    }
-    for name in endpoint_groups:
-        endpoint_groups[name] = EndpointGroup.objects.register(
-            name=name, extension=extension
-        )
-
-    # Add core settings to admin settings group
-    endpoint = Endpoint.objects.register(
-        name="core_settings",
-        path=reverse("collectivo.core:settings"),
-        extension=extension,
-    )
-    endpoint_groups["admin_settings"].endpoints.add(endpoint)
-    endpoint_groups["admin_settings"].save()
-
     # User menu
     Menu.register(name="main", extension=extension)
     MenuItem.register(
         name="profile",
         label="Profile",
         extension=extension,
-        component="profile",
+        route=extension.name + "/profile",
         icon_name="pi-user",
         parent="main",
     )
@@ -67,7 +39,7 @@ def setup():
         name="logout",
         label="Log out",
         extension=extension,
-        component="logout",
+        route=extension.name + "/logout",
         icon_name="pi-sign-out",
         parent="main",
         order=99,
@@ -80,7 +52,7 @@ def setup():
         label="Users",
         extension=extension,
         parent="admin",
-        component="users",
+        route=extension.name + "/users",
         icon_name="pi-users",
         requires_perm=("admin", "core"),
         order=00,
@@ -90,7 +62,7 @@ def setup():
         label="Settings",
         extension=extension,
         parent="admin",
-        component="settings",
+        route=extension.name + "/settings",
         icon_name="pi-cog",
         requires_perm=("admin", "core"),
         order=100,

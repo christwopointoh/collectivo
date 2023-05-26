@@ -28,7 +28,7 @@ def setup(sender, **kwargs):
         name="memberships_user",
         label="Membership",
         extension=extension,
-        component="profile",
+        route=extension.name + "/profile",
         icon_name="pi-id-card",
         parent="main",
     )
@@ -38,7 +38,7 @@ def setup(sender, **kwargs):
         name="memberships_admin",
         label="Memberships",
         extension=extension,
-        component="admin",
+        route=extension.name + "/admin",
         requires_perm=("admin", "core"),
         icon_name="pi-id-card",
         parent="admin",

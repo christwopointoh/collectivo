@@ -21,6 +21,7 @@ extensions:
       - client_secret: ${KEYCLOAK_CLIENT_SECRET}
   - collectivo.menus
   - collectivo.extensions
+  - collectivo.components
   - collectivo.dashboard
   - collectivo.profiles
   - collectivo.memberships

@@ -22,7 +22,7 @@ def setup(sender, **kwargs):
         name="tags_admin",
         label="Tags",
         extension=extension,
-        component="admin",
+        route=extension.name + "/admin",
         icon_name="pi-tags",
         requires_perm=("admin", "core"),
         parent="admin",

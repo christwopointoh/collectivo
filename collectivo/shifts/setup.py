@@ -20,7 +20,7 @@ def setup(sender, **kwargs):
         label="Shifts",
         icon_name="pi-calendar",
         extension=extension,
-        component="shifts_user",
+        route=extension.name + "/shifts_user",
         requires_perm="collectivo.shifts.user",
         parent="main",
     )
@@ -30,7 +30,7 @@ def setup(sender, **kwargs):
         label="Shift management",
         icon_name="pi-calendar",
         extension=extension,
-        component="admin",
+        route=extension.name + "/admin",
         requires_perm=("admin", "core"),
         parent="admin",
         order=30,
@@ -41,6 +41,6 @@ def setup(sender, **kwargs):
         label="Shifts",
         extension=extension,
         source="component",
-        component="shifts_user_tile",
+        route=extension.name + "/shifts_user_tile",
         requires_perm="collectivo.shifts.user",
     )

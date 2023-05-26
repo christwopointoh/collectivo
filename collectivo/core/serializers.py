@@ -9,13 +9,7 @@ from rest_framework import serializers
 
 from collectivo.tags.models import Tag
 
-from .models import (
-    CoreSettings,
-    Endpoint,
-    EndpointGroup,
-    Permission,
-    PermissionGroup,
-)
+from .models import CoreSettings, Permission, PermissionGroup
 
 User = get_user_model()
 Group = User.groups.field.related_model
@@ -30,26 +24,6 @@ class CoreSettingsSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = CoreSettings
-        fields = "__all__"
-
-
-class EndpointSerializer(serializers.ModelSerializer):
-    """Serializer for endpoints."""
-
-    class Meta:
-        """Serializer settings."""
-
-        model = Endpoint
-        fields = "__all__"
-
-
-class EndpointGroupSerializer(serializers.ModelSerializer):
-    """Serializer for endpoint groups."""
-
-    class Meta:
-        """Serializer settings."""
-
-        model = EndpointGroup
         fields = "__all__"
 
 

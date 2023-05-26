@@ -25,7 +25,7 @@ def setup(sender, **kwargs):
         name="emails",
         label="Emails",
         extension=extension,
-        component="admin",
+        route=extension.name + "/admin",
         icon_name="pi-envelope",
         requires_perm=("admin", "core"),
         parent="admin",

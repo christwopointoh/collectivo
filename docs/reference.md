@@ -93,7 +93,9 @@ The following settings can be set:
 
 `extensions` (list)
 
-: Name of extensions to be included. The name must match the name of the extension folder in `src/extensions`.
+: Name of extensions to be included. The name must match the name of the extension folder in `src/extensions`. If the extension folder contains a file `extension.ts`
+with a default export function, this function will automatically be called before
+the app is started.
 
 ### Extensions
 

@@ -129,8 +129,5 @@ jobs:
       - name: Test
         run: |
           cp .env.example .env
-          docker-compose up -d collectivo-db
-          docker-compose build keycloak
-          docker-compose up -d keycloak
-          docker-compose build collectivo
+          docker-compose up -d
           docker-compose run --rm collectivo sh -c "python manage.py test && flake8"

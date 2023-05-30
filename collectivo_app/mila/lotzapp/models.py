@@ -1,5 +1,6 @@
 """Models of the lotzapp extension."""
 import logging
+from datetime import datetime
 
 import requests
 from celery import chord
@@ -15,20 +16,17 @@ User = get_user_model()
 
 
 def check_response(response):
-    """Check lotzapp response."""
+    """Throw error if lotzapp returns an invalid response."""
     if response.status_code not in (200, 201, 204):
         raise_sync_error(response)
 
 
 def raise_sync_error(response):
     """Raise an exception with the error message from lotzapp."""
-    try:
-        raise APIException(
-            f"Lotzapp address sync failed with {response.status_code}:"
-            f" {response.text}"
-        )
-    except Exception as e:
-        raise APIException("Lotzapp sync failed:", e)
+    raise APIException(
+        f"Lotzapp sync failed with {response.status_code}:"
+        f" {response.text if hasattr(response, 'text') else ''}"
+    )
 
 
 def create_item_name(item):
@@ -54,31 +52,38 @@ class LotzappMixin:
         try:
             res = response.json()
             if "ID" in res and res["ID"]:
-                self.lotzapp_id = response.json()["ID"]
+                self.lotzapp_id = str(response.json()["ID"])
                 self.save()
         except requests.exceptions.JSONDecodeError:
             raise_sync_error(response)
 
-    def update_existing(self, address_endpoint, auth, data):
-        """Update an existing object."""
-        # Check if ID exists
-        get_response = requests.get(
-            address_endpoint + self.lotzapp_id + "/",
+    def get(self, endpoint, auth):
+        """Try to get existing object."""
+        return requests.get(
+            endpoint + str(self.lotzapp_id) + "/",
             auth=auth,
             timeout=10,
         )
+
+    def update_existing(self, endpoint, auth, data):
+        """Update an existing object."""
+        get_response = self.get(endpoint, auth)
         check_response(get_response)
+
+        # If ID exists, update object
         if get_response.status_code != 204:
             put_response = requests.put(
-                address_endpoint + self.lotzapp_id + "/",
+                endpoint + str(self.lotzapp_id) + "/",
                 auth=auth,
                 json=data,
                 timeout=10,
             )
             check_response(put_response)
+
+        # If ID does not exist, create new object
         else:
-            # If ID does not exist, create new object
-            self.create_new(address_endpoint, auth, data)
+            self.create_new(endpoint, auth, data)
+
         return get_response
 
 
@@ -198,12 +203,10 @@ class LotzappInvoice(LotzappMixin, models.Model):
         """Return the lotzapp id."""
         return self.lotzapp_id
 
-    def sync(self):
-        """Sync the invoice with lotzapp."""
+    def prepare_invoice_data(self):
+        """Create payload for invoice."""
 
         settings = LotzappSettings.object(check_valid=True)
-        auth = (settings.lotzapp_user, settings.lotzapp_pass)
-        ar_endpoint = settings.lotzapp_url + "ar/"
 
         # Sync address
         try:
@@ -213,6 +216,7 @@ class LotzappInvoice(LotzappMixin, models.Model):
                 user=self.invoice.payment_from.user
             )
         lotzapp_address.sync()
+        lotzapp_address.refresh_from_db()
 
         # Prepare invoice data for lotzapp
         zahlungsmethode = (
@@ -222,10 +226,16 @@ class LotzappInvoice(LotzappMixin, models.Model):
             else settings.zahlungsmethode_transfer
         )
 
-        data = {
+        # Type conversion
+        zahlungsmethode = int(zahlungsmethode) if zahlungsmethode else None
+        adresse = lotzapp_address.lotzapp_id
+        adresse = int(adresse) if adresse else None
+
+        # Prepare payload
+        return {
             "datum": self.invoice.date.strftime("%Y-%m-%d"),
-            "adresse": lotzapp_address.lotzapp_id,
-            "zahlungsmethode": str(zahlungsmethode),
+            "adresse": int(lotzapp_address.lotzapp_id),
+            "zahlungsmethode": zahlungsmethode,
             "positionen": [
                 {
                     "name": create_item_name(item),
@@ -237,17 +247,35 @@ class LotzappInvoice(LotzappMixin, models.Model):
             ],
         }
 
-        # Create or update invoice in lotzapp
-        if self.lotzapp_id == "":
-            self.create_new(ar_endpoint, auth, data)
-        else:
-            response = self.update_existing(ar_endpoint, auth, data)
+    def sync(self):
+        """Sync the invoice with lotzapp."""
+        settings = LotzappSettings.object(check_valid=True)
+        auth = (settings.lotzapp_user, settings.lotzapp_pass)
+        ar_endpoint = settings.lotzapp_url + "ar/"
 
-            # Check if invoice is paid in lotzapp
-            try:
-                res = response.json()[0]
-                if res.get("bezahlt", "0000-00-00") != "0000-00-00":
-                    self.invoice.status = "paid"
-                    self.invoice.save()
-            except requests.exceptions.JSONDecodeError:
-                logger.warning("Could not decode lotzapp response.")
+        # Create invoice in lotzapp there is no id
+        if self.lotzapp_id == "":
+            data = self.prepare_invoice_data()
+            self.create_new(ar_endpoint, auth, data)
+
+        elif self.invoice.date_paid is None:
+            response = self.get(ar_endpoint, auth)
+
+            # Create invoice in lotzapp if it does not exist
+            if response.status_code == 204:
+                data = self.prepare_invoice_data()
+                self.create_new(ar_endpoint, auth, data)
+
+            # If it exists, check if invoice is paid in lotzapp
+            else:
+                try:
+                    res = response.json()[0]
+                    date_paid = res.get("bezahlt", "0000-00-00")
+                    if date_paid != "0000-00-00":
+                        self.invoice.status = "paid"
+                        self.invoice.date_paid = datetime.strptime(
+                            date_paid, "%Y-%m-%d"
+                        ).date()
+                        self.invoice.save()
+                except requests.exceptions.JSONDecodeError:
+                    logger.warning("Could not decode lotzapp response.")

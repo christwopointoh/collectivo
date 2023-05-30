@@ -45,6 +45,7 @@ input_types = {
     "PhoneField": "phone",
     "CountryField": "country",
     "ListSerializer": "list",
+    "ImageField": "image",
 }
 
 

@@ -20,10 +20,9 @@ class CoreSettings(SingleInstance, models.Model):
 
     project_name = models.CharField(max_length=255, blank=True)
     project_description = models.TextField(blank=True)
-    # TODO: Needs pillow
-    # project_logo = models.ImageField(
-    #     upload_to="core/logo/", null=True, blank=True
-    # )
+    project_logo = models.ImageField(
+        upload_to="core/logo/", null=True, blank=True
+    )
 
 
 class Permission(models.Model):

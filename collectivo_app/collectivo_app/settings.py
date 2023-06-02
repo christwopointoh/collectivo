@@ -78,6 +78,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "collectivo_app.wsgi.application"
 
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media_root")
 
 # CORS
 # https://pypi.org/project/django-cors-headers/

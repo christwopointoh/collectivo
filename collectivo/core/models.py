@@ -23,6 +23,7 @@ class CoreSettings(SingleInstance, models.Model):
     project_logo = models.ImageField(
         upload_to="core/logo/", null=True, blank=True
     )
+    project_logo_url = models.URLField(blank=True)
 
 
 class Permission(models.Model):

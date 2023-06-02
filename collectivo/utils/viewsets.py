@@ -15,19 +15,19 @@ from collectivo.utils.mixins import (
 )
 
 
-class CoViewSet(HistoryMixin, SchemaMixin, GenericViewSet):
+class CollectivoViewSet(HistoryMixin, SchemaMixin, GenericViewSet):
     """GenericViewSet with History and Schema mixins."""
 
     pass
 
 
-class CoModelViewSet(HistoryMixin, SchemaMixin, ModelViewSet):
+class CollectivoModelViewSet(HistoryMixin, SchemaMixin, ModelViewSet):
     """ModelViewSet with History and Schema mixins."""
 
     pass
 
 
-class CoExtModelViewSet(
+class ExtensionModelViewSet(
     GenericViewSet,
     SchemaMixin,
     HistoryMixin,
@@ -42,7 +42,7 @@ class CoExtModelViewSet(
     pass
 
 
-class CoSingleModelViewSet(
+class SingleModelViewSet(
     HistoryMixin,
     SchemaMixin,
     GenericViewSet,

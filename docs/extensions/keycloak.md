@@ -16,3 +16,5 @@ Add the following entries to [`collectivo.yml`](reference.md#settings):
 - authentication:
     - collectivo.auth.keycloak.authentication.KeycloakAuthentication
 ```
+
+When keycloak is not correctly configured, a warning will appear in the logs.

@@ -106,7 +106,7 @@ To set up a development system of collectivo on your local machine:
 - Install docker and docker-compose (Version >= 20.10)
 - Clone the repository with `git clone https://github.com/MILA-Wien/collectivo.git`
 - Copy `.env.example` and rename it to `.env`
-- Add the following line to your `/etc/hosts/` file: `127.0.0.1 keycloak 127.0.0.1`
+- Add the following line to your `/etc/hosts/` file: `127.0.0.1 keycloak`
 - Start a local instance of collectivo with `docker compose up -d`
 - Perform tests and linting with `docker compose run --rm collectivo sh -c "python manage.py test && flake8"`
 

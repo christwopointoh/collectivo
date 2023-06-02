@@ -99,7 +99,18 @@ def expand_vars(input):
 
 
 def set_extensions(config: dict):
-    """Convert a yaml list into a python dict."""
+    """
+    Create a dictionary of extension configs.
+
+    Configurations are taken from the raw yaml input
+    of both collectivo.yml and each extensions' extension.yml.
+
+    Deals with the fact that yaml entries are converted to different data
+    types. Tries to capture common cases to ensure that the resulting
+    extension configs are nested dictionaries.
+
+    Extensions that do not exist as python modules are removed.
+    """
     extensions = {}
     extensions_raw = config.get("extensions")
     if extensions_raw is None:

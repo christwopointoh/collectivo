@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from collectivo.utils.filters import get_filterset, get_ordering_fields
 from collectivo.utils.mixins import HistoryMixin, SchemaMixin
 from collectivo.utils.permissions import IsSuperuser
-from collectivo.utils.viewsets import CoExtModelViewSet, CoSingleModelViewSet
+from collectivo.utils.viewsets import ExtensionModelViewSet, SingleModelViewSet
 from collectivo.version import __version__
 
 from . import models, serializers
@@ -41,7 +41,7 @@ class AboutView(APIView):
         return Response(data)
 
 
-class CoreSettingsViewSet(CoSingleModelViewSet):
+class CoreSettingsViewSet(SingleModelViewSet):
     """Viewset for core settings."""
 
     queryset = models.CoreSettings.objects.all()
@@ -49,7 +49,7 @@ class CoreSettingsViewSet(CoSingleModelViewSet):
     permission_classes = [IsSuperuser]
 
 
-class PermissionViewSet(CoExtModelViewSet):
+class PermissionViewSet(ExtensionModelViewSet):
     """Viewset for endpoints."""
 
     queryset = models.Permission.objects.all()
@@ -59,7 +59,7 @@ class PermissionViewSet(CoExtModelViewSet):
     ordering_fields = get_ordering_fields(serializers.PermissionSerializer)
 
 
-class PermissionGroupViewSet(CoExtModelViewSet):
+class PermissionGroupViewSet(ExtensionModelViewSet):
     """Viewset for endpoints."""
 
     queryset = models.PermissionGroup.objects.all()

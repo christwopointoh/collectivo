@@ -50,7 +50,7 @@ class PermissionGroupSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for members to manage their own data."""
 
-    # TODO: Get through groups
+    # TODO: Display all permissions of the user based on their groups
     # permissions = serializers.PrimaryKeyRelatedField(
     #     many=True, queryset=Permission.objects.all()
     # )

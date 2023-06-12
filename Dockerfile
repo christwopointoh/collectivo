@@ -45,9 +45,6 @@ RUN mkdir -p /collectivo_app/static | true && \
     chown -R django-user:django-user /collectivo_app && \
     chmod -R 755 /collectivo_app/static
 
-# Allow django-user to access the virtual environment
-RUN chown -R django-user:django-user /py
-
 # Switch to the new user
 USER django-user
 

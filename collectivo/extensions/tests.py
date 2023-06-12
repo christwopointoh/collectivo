@@ -7,7 +7,7 @@ from collectivo.utils.test import create_testuser
 
 from .models import Extension
 
-EXTENSIONS_URL = reverse("collectivo:collectivo.extensions:extension-list")
+EXTENSIONS_URL = reverse("collectivo.extensions:extension-list")
 
 
 class ExtensionsTests(TestCase):

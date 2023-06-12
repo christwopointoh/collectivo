@@ -14,12 +14,14 @@ jobs:
     runs-on: ubuntu-latest
     # Add in environment variables for postgres testing
     env:
+      COLLECTIVO_URL: "127.0.0.1:8000"
+      COLLECTIVO_UX_URL: "127.0.0.1:8001"
+      COLLECTIVO_SECRET_KEY: test-key-not-good
       DB_USER: postgres
       DB_PASS: postgres
       DB_HOST: localhost # default host value for the database
       DB_NAME: djtesting
       POSTGRES_PORT: 5432
-      DJANGO_SECRET_KEY: test-key-not-good
     services:
       # start a postgres service container
       postgres_main:
@@ -31,9 +33,8 @@ jobs:
         ports:
           - 5432:5432
         # wait until postgres is ready
-        options: --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
+        options:
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s
           --health-retries 5
     strategy:
       # test against these python versions
@@ -62,7 +63,7 @@ jobs:
           pip install coverage
       - name: Add hosts to /etc/hosts
         run: |
-          sudo echo "127.0.0.1 collectivo.local" | sudo tee -a /etc/hosts
+          sudo echo "127.0.0.1 127.0.0.1" | sudo tee -a /etc/hosts
           sudo echo "127.0.0.1 keycloak" | sudo tee -a /etc/hosts
           cat /etc/hosts
           while ! curl --connect-timeout 5 -v --max-time 10 --retry 5 --retry-connrefused  --retry-delay 0 --retry-max-time 40 http://keycloak:8080
@@ -75,21 +76,17 @@ jobs:
       - name: Run Tests
         # Step specific environment variables
         env:
-          DJANGO_SECRET_KEY: ${{ env.DJANGO_SECRET_KEY }}
-          # Set the database url to the postgres service container
-          DB_USERNAME: ${{ env.DB_USER }}
-          DB_PASSWORD: ${{ env.DB_PASS }}
-          DB_HOST: ${{ env.DB_HOST }}
-          DB_DATABASE: ${{ env.DB_NAME }}
-          DB_PORT: ${{ env.POSTGRES_PORT }}
-          TEST_DATABASE_PREFIX: ${{ env.DB_NAME }}
-          SECRET_KEY: badkey
-          KEYCLOAK_SERVER_URL: http://keycloak:8080
-          KEYCLOAK_CLIENT_SECRET_KEY: "**********"
-          COLLECTIVO_EXTENSIONS: profiles, memberships, emails, emails.tags, tags, payments, shifts
-          DEBUG: True
-          DEVELOPMENT: True
-          DIREKTKREDIT_SERVER_URL: "http://direktkredit.local:8020"
+          DB_HOST: ${{env.DB_HOST}}
+          DB_NAME: ${{env.DB_NAME}}
+          DB_USER: ${{env.DB_USER}}
+          DB_PASS: ${{env.DB_PASS}}
+          SECRET_KEY: ${{env.COLLECTIVO_SECRET_KEY}}
+          ALLOWED_HOSTS: ${{env.COLLECTIVO_URL}}
+          ALLOWED_ORIGINS: http://${{env.COLLECTIVO_UX_URL}}
+          KEYCLOAK_URL: http://keycloak:8080
+          KEYCLOAK_CLIENT_SECRET: "**********"
+          CELERY_BROKER: "redis://:${{env.REDIS_PASSWORD}}@redis:6379/0"
+          CELERY_BACKEND: "redis://:${{env.REDIS_PASSWORD}}@redis:6379/0"
         run: |
           cp -a collectivo collectivo_app
           cd collectivo_app
@@ -117,7 +114,6 @@ jobs:
 
   test-docker:
     name: Test docker environment
-    needs: [test-python]
     runs-on: ubuntu-20.04
     steps:
       - name: Check Credentials
@@ -133,8 +129,5 @@ jobs:
       - name: Test
         run: |
           cp .env.example .env
-          docker-compose up -d collectivo-db
-          docker-compose build keycloak
-          docker-compose up -d keycloak
-          docker-compose build collectivo
+          docker-compose up -d
           docker-compose run --rm collectivo sh -c "python manage.py test && flake8"

@@ -9,12 +9,22 @@ from rest_framework.views import APIView
 from collectivo.utils.filters import get_filterset, get_ordering_fields
 from collectivo.utils.mixins import HistoryMixin, SchemaMixin
 from collectivo.utils.permissions import IsSuperuser
+from collectivo.utils.viewsets import ExtensionModelViewSet, SingleModelViewSet
 from collectivo.version import __version__
 
-from . import serializers
+from . import models, serializers
 
 User = get_user_model()
 Group = User.groups.field.related_model
+
+
+class HealthView(APIView):
+    """API view for health checks."""
+
+    @extend_schema(responses={200: OpenApiResponse()})
+    def get(self, request):
+        """Return a 200 response."""
+        return Response()
 
 
 class AboutView(APIView):
@@ -29,6 +39,36 @@ class AboutView(APIView):
             "version": __version__,
         }
         return Response(data)
+
+
+class CoreSettingsViewSet(SingleModelViewSet):
+    """Viewset for core settings."""
+
+    queryset = models.CoreSettings.objects.all()
+    serializer_class = serializers.CoreSettingsSerializer
+    permission_classes = [IsSuperuser]
+
+
+class PermissionViewSet(ExtensionModelViewSet):
+    """Viewset for endpoints."""
+
+    queryset = models.Permission.objects.all()
+    serializer_class = serializers.PermissionSerializer
+    permission_classes = [IsSuperuser]
+    filterset_class = get_filterset(serializers.PermissionSerializer)
+    ordering_fields = get_ordering_fields(serializers.PermissionSerializer)
+
+
+class PermissionGroupViewSet(ExtensionModelViewSet):
+    """Viewset for endpoints."""
+
+    queryset = models.PermissionGroup.objects.all()
+    serializer_class = serializers.PermissionGroupSerializer
+    permission_classes = [IsSuperuser]
+    filterset_class = get_filterset(serializers.PermissionGroupSerializer)
+    ordering_fields = get_ordering_fields(
+        serializers.PermissionGroupSerializer
+    )
 
 
 class UserViewSet(SchemaMixin, HistoryMixin, viewsets.ModelViewSet):

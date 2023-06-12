@@ -1,5 +1,6 @@
 """Setup function for the memberships extension."""
 from itertools import cycle
+from logging import getLogger
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -9,8 +10,6 @@ from collectivo.menus.models import MenuItem
 from collectivo.utils.dev import DEV_MEMBERS
 
 from . import apps, models
-from logging import getLogger
-
 
 logger = getLogger(__name__)
 
@@ -29,7 +28,7 @@ def setup(sender, **kwargs):
         name="memberships_user",
         label="Membership",
         extension=extension,
-        component="profile",
+        route=extension.name + "/profile",
         icon_name="pi-id-card",
         parent="main",
     )
@@ -39,14 +38,14 @@ def setup(sender, **kwargs):
         name="memberships_admin",
         label="Memberships",
         extension=extension,
-        component="admin",
-        requires_group="collectivo.core.admin",
+        route=extension.name + "/admin",
+        requires_perm=("admin", "core"),
         icon_name="pi-id-card",
         parent="admin",
         order=10,
     )
 
-    if settings.COLLECTIVO["dev.create_test_data"] is True:
+    if settings.COLLECTIVO["example_data"] is True:
         # Create membership types
 
         mst1 = models.MembershipType.objects.register(

@@ -13,9 +13,9 @@ from collectivo.utils.test import create_testuser
 
 from .models import EmailCampaign
 
-TEMPLATES_URL = reverse("collectivo:collectivo.emails:template-list")
-CAMPAIGNS_URL = reverse("collectivo:collectivo.emails:campaign-list")
-DESIGNS_URL = reverse("collectivo:collectivo.emails:design-list")
+TEMPLATES_URL = reverse("collectivo.emails:template-list")
+CAMPAIGNS_URL = reverse("collectivo.emails:campaign-list")
+DESIGNS_URL = reverse("collectivo.emails:design-list")
 
 User = get_user_model()
 

@@ -18,9 +18,9 @@ def setup(sender, **kwargs):
         name="payments_admin",
         label="Payments",
         extension=extension,
-        component="admin",
+        route=extension.name + "/admin",
         icon_name="pi-money-bill",
-        requires_group="collectivo.core.admin",
+        requires_perm=("admin", "core"),
         parent="admin",
         order=20,
     )

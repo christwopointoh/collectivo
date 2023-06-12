@@ -9,7 +9,7 @@ from .api import KeycloakAPI
 User = get_user_model()
 
 
-def setup(sender, **kwargs):
+def setup():
     """Initialize extension after database is ready."""
 
     # Create keycloak user for all users
@@ -18,7 +18,7 @@ def setup(sender, **kwargs):
         user.save()
 
     # Activate test users in Keycloak
-    if settings.COLLECTIVO["dev.create_test_data"] is True:
+    if settings.COLLECTIVO["example_data"] is True:
         keycloak = KeycloakAPI()
         for first_name in DEV_USERS:
             user = User.objects.get(email=f"test_{first_name}@example.com")

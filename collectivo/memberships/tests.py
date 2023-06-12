@@ -14,9 +14,9 @@ from .models import Membership, MembershipType
 User = get_user_model()
 
 CREATE_INVOICES_URL = reverse(
-    "collectivo:collectivo.memberships:membership-create_invoices"
+    "collectivo.memberships:membership-create_invoices"
 )
-MEMBERSHIP_URL_NAME = "collectivo:collectivo.memberships:membership-detail"
+MEMBERSHIP_URL_NAME = "collectivo.memberships:membership-detail"
 
 
 class MembershipsSetupTests(TestCase):
@@ -117,7 +117,7 @@ class MembershipsTests(TestCase):
     def test_update_shares(self):
         """Test that the shares can be updated."""
         url = reverse(
-            "collectivo:collectivo.memberships:membership-self-detail",
+            "collectivo.memberships:membership-self-detail",
             args=[self.membership.id],
         )
         payload = {"shares_signed": 20}
@@ -129,7 +129,7 @@ class MembershipsTests(TestCase):
     def test_update_shares_lower_fails(self):
         """Test that the shares cannot be updated to a lower number."""
         url = reverse(
-            "collectivo:collectivo.memberships:membership-self-detail",
+            "collectivo.memberships:membership-self-detail",
             args=[self.membership.id],
         )
         payload = {"shares_signed": 1}
@@ -139,7 +139,7 @@ class MembershipsTests(TestCase):
     def test_update_fails(self):
         """Test that other fields than shares cannot be updated."""
         url = reverse(
-            "collectivo:collectivo.memberships:membership-self-detail",
+            "collectivo.memberships:membership-self-detail",
             args=[self.membership.id],
         )
         payload = {"number": 20}

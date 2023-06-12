@@ -43,9 +43,10 @@ class MenuSerializer(serializers.ModelSerializer):
 
         request = self.context.get("request", None)
         if request:
+            groups = request.user.permission_groups.all()
             items = items.filter(
-                Q(requires_group__isnull=True)
-                | Q(requires_group__in=request.user.groups.all())
+                Q(requires_perm__isnull=True)
+                | Q(requires_perm__groups__in=groups)
             )
 
         return MenuItemSerializer(items, many=True).data

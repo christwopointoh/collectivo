@@ -12,7 +12,7 @@ from .filters import MEMBER, MEMBERS_URL
 
 User = get_user_model()
 
-HISTORY_URL = "collectivo:collectivo.members:member-history"
+HISTORY_URL = "collectivo.members:member-history"
 
 
 class MembersHistoryTests(TestCase):

@@ -18,7 +18,7 @@ def setup(sender, **kwargs):
         built_in=True,
     )
 
-    if settings.COLLECTIVO["dev.create_test_data"] is True:
+    if settings.COLLECTIVO["example_data"] is True:
         for first_name in DEV_MEMBERS:
             email = f"test_{first_name}@example.com"
             user = get_user_model().objects.get(email=email)

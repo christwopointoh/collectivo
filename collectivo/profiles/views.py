@@ -3,7 +3,7 @@ from rest_framework import mixins, viewsets
 
 from collectivo.utils.filters import get_filterset, get_ordering_fields
 from collectivo.utils.mixins import HistoryMixin, SchemaMixin, SelfMixin
-from collectivo.utils.permissions import HasGroup, IsAuthenticated
+from collectivo.utils.permissions import HasPerm, IsAuthenticated
 
 from . import serializers
 from .models import UserProfile
@@ -36,7 +36,7 @@ class ProfileAdminViewSet(
 
     queryset = UserProfile.objects.all()
     serializer_class = serializers.ProfileAdminSerializer
-    permission_classes = [HasGroup]
-    required_groups = ["collectivo.profiles.admin"]
+    permission_classes = [HasPerm]
+    required_perms = ["collectivo.profiles.admin"]
     filterset_class = get_filterset(serializers.ProfileAdminSerializer)
     ordering_fields = get_ordering_fields(serializers.ProfileAdminSerializer)

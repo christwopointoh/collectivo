@@ -1,6 +1,7 @@
 """Configuration file of the core extension."""
 from django.apps import AppConfig
-from django.db.models.signals import post_migrate
+
+from collectivo.utils.setup import register_setup
 
 
 class CoreConfig(AppConfig):
@@ -20,4 +21,4 @@ class CoreConfig(AppConfig):
         from . import signals  # noqa: F401
         from .setup import setup
 
-        post_migrate.connect(setup, sender=self)
+        register_setup(setup, self)

@@ -1,6 +1,9 @@
-# collectivo
+# Collectivo
 
-A modular framework to build participative community platforms.
+Collectivo is an open-source membership platform for communities and collectives.
+It is designed with a modular structure that makes it easy to customize and extend
+the platform for the needs of different organisations and integrate
+multiple tools into a single application.
 
 ## Overview
 
@@ -103,14 +106,14 @@ To set up a development system of collectivo on your local machine:
 - Install docker and docker-compose (Version >= 20.10)
 - Clone the repository with `git clone https://github.com/MILA-Wien/collectivo.git`
 - Copy `.env.example` and rename it to `.env`
-- Add the following line to your `/etc/hosts/` file: `127.0.0.1 keycloak collectivo.local`
+- Add the following line to your `/etc/hosts/` file: `127.0.0.1 keycloak`
 - Start a local instance of collectivo with `docker compose up -d`
 - Perform tests and linting with `docker compose run --rm collectivo sh -c "python manage.py test && flake8"`
 
 The development system will be accessible via the following paths:
 
-- Frontend: `http://collectivo.local:8001`
-- Backend (API docs): `http://collectivo.local:8000/api/dev/docs/`
+- Frontend: `http://127.0.0.1:8001`
+- Backend (API docs): `http://127.0.0.1:8000/api/dev/docs/`
 - Keycloak (Console): `http://keycloak:8080/admin/master/console/`
 
 The following test users can be used to log in on the development system:

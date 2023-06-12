@@ -40,12 +40,10 @@ class DashboardTileViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
     )
     def display_for_user(self, request):
         """Return filtered tiles for authenticated user."""
+        groups = request.user.permission_groups.all()
         queryset = DashboardTile.objects.filter(
             Q(active=True)
-            & (
-                Q(requires_group=None)
-                | Q(requires_group__in=request.user.groups.all())
-            )
+            & (Q(requires_perm=None) | Q(requires_perm__groups__in=groups))
         ).order_by("order")
         serializer_class = TileDisplaySerializer
 

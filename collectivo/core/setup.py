@@ -1,9 +1,10 @@
 """Setup function of the core extension."""
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 
 from collectivo.core.apps import CoreConfig
+from collectivo.core.models import Permission, PermissionGroup
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import Menu, MenuItem
 from collectivo.utils.dev import DEV_USERS
@@ -11,20 +12,18 @@ from collectivo.utils.dev import DEV_USERS
 User = get_user_model()
 
 
-def setup(sender, **kwargs):
+def setup():
     """Initialize extension after database is ready."""
 
     extension = Extension.register(
         name=CoreConfig.name, description=CoreConfig.description, built_in=True
     )
 
-    superuser = Group.objects.get_or_create(
-        name="collectivo.core.admin",
+    superuser = PermissionGroup.objects.get_or_create(
+        name="superuser", extension=extension
     )[0]
-
-    # Refresh users based on potential signals of other extensions
-    for user in User.objects.all():
-        user.save()
+    coreadmin = Permission.objects.register(name="admin", extension=extension)
+    superuser.permissions.add(coreadmin)
 
     # User menu
     Menu.register(name="main", extension=extension)
@@ -32,7 +31,7 @@ def setup(sender, **kwargs):
         name="profile",
         label="Profile",
         extension=extension,
-        component="profile",
+        route=extension.name + "/profile",
         icon_name="pi-user",
         parent="main",
     )
@@ -40,22 +39,22 @@ def setup(sender, **kwargs):
         name="logout",
         label="Log out",
         extension=extension,
-        component="logout",
+        route=extension.name + "/logout",
         icon_name="pi-sign-out",
         parent="main",
         order=99,
     )
 
-    # Admin menu
+    # Create admin menu
     Menu.register(name="admin", extension=extension)
     MenuItem.register(
         name="users",
         label="Users",
         extension=extension,
         parent="admin",
-        component="users",
+        route=extension.name + "/users",
         icon_name="pi-users",
-        requires_group="collectivo.core.admin",
+        requires_perm=("admin", "core"),
         order=00,
     )
     MenuItem.register(
@@ -63,13 +62,13 @@ def setup(sender, **kwargs):
         label="Settings",
         extension=extension,
         parent="admin",
-        component="settings",
+        route=extension.name + "/settings",
         icon_name="pi-cog",
-        requires_group="collectivo.core.admin",
+        requires_perm=("admin", "core"),
         order=100,
     )
 
-    if settings.COLLECTIVO["dev.create_test_data"] is True:
+    if settings.COLLECTIVO["example_data"] is True:
         for first_name in DEV_USERS:
             email = f"test_{first_name}@example.com"
             try:
@@ -83,4 +82,4 @@ def setup(sender, **kwargs):
 
             # Give user permissions
             if first_name == "superuser":
-                user.groups.add(superuser)
+                user.permission_groups.add(superuser)

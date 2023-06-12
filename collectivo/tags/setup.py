@@ -22,14 +22,14 @@ def setup(sender, **kwargs):
         name="tags_admin",
         label="Tags",
         extension=extension,
-        component="admin",
+        route=extension.name + "/admin",
         icon_name="pi-tags",
-        requires_group="collectivo.core.admin",
+        requires_perm=("admin", "core"),
         parent="admin",
         order=2,
     )
 
-    if settings.COLLECTIVO["dev.create_test_data"]:
+    if settings.COLLECTIVO["example_data"]:
         for i in range(5):
             tag = Tag.objects.get_or_create(name=f"Test tag {i}")[0]
             tag.users.set(list(User.objects.all()))

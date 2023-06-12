@@ -9,12 +9,12 @@ from collectivo.utils.test import create_testuser
 
 User = get_user_model()
 
-SHIFTS_URL = reverse("collectivo:collectivo.shifts:shift-list")
-SHIFTS_SELF_URL = reverse("collectivo:collectivo.shifts:shift-self-list")
-ASSIGNMENT_URL = reverse("collectivo:collectivo.shifts:assignment-list")
-ASSIGNMENT_URL_LABEL = "collectivo:collectivo.shifts:assignment-detail"
+SHIFTS_URL = reverse("collectivo.shifts:shift-list")
+SHIFTS_SELF_URL = reverse("collectivo.shifts:shift-self-list")
+ASSIGNMENT_URL = reverse("collectivo.shifts:assignment-list")
+ASSIGNMENT_URL_LABEL = "collectivo.shifts:assignment-detail"
 
-SHIFT_USERS_URL = reverse("collectivo:collectivo.shifts:shift-user-list")
+SHIFT_USERS_URL = reverse("collectivo.shifts:shift-user-list")
 
 TEST_SHIFT_POST = {
     "shift_title": "first_repeating_monthly_shift",

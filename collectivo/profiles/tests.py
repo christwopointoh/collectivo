@@ -9,11 +9,9 @@ from collectivo.utils.test import create_testuser
 
 from .models import UserProfile
 
-PROFILE_URL = reverse("collectivo:collectivo.profiles:profile-self")
-PROFILES_URL = reverse("collectivo:collectivo.profiles:profile-list")
-PROFILE_SCHEMA_URL = reverse(
-    "collectivo:collectivo.profiles:profile-self-schema"
-)
+PROFILE_URL = reverse("collectivo.profiles:profile-self")
+PROFILES_URL = reverse("collectivo.profiles:profile-list")
+PROFILE_SCHEMA_URL = reverse("collectivo.profiles:profile-self-schema")
 
 TEST_USER = {
     "email": "some_member@example.com",

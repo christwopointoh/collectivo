@@ -21,7 +21,7 @@ def setup(sender, **kwargs):
         name="dashboard",
         label="Dashboard",
         extension=extension,
-        component="dashboard",
+        route=extension.name + "/dashboard",
         icon_name="pi-home",
         parent="main",
         order=0,
@@ -31,14 +31,14 @@ def setup(sender, **kwargs):
         name="admin",
         label="Dashboard",
         extension=extension,
-        component="admin",
+        route=extension.name + "/admin",
         icon_name="pi-th-large",
-        requires_group="collectivo.core.admin",
+        requires_perm=("admin", "core"),
         parent="admin",
         order=80,
     )
 
-    if settings.COLLECTIVO["dev.create_test_data"]:
+    if settings.COLLECTIVO["example_data"]:
         DashboardTile.register(
             name="welcome_tile",
             label="Welcome to your platform!",

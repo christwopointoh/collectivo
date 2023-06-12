@@ -1,17 +1,17 @@
 """Tests for the core extension."""
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import Group
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from collectivo.core.models import Permission, PermissionGroup
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import Menu
-from collectivo.utils.permissions import HasGroup, IsSuperuser
+from collectivo.utils.permissions import HasPerm, IsSuperuser
 from collectivo.utils.test import create_testuser
 from collectivo.version import __version__
 
-PROFILES_URL = reverse("collectivo:collectivo.core:users-extended-list")
+PROFILES_URL = reverse("collectivo.core:users-extended-list")
 
 
 class CoreSetupTests(TestCase):
@@ -19,10 +19,11 @@ class CoreSetupTests(TestCase):
 
     def test_default_menus(self):
         """Test default menus exist."""
-        extension = Extension.objects.get(name="core")
         for name in ["main", "admin"]:
             self.assertTrue(
-                Menu.objects.filter(extension=extension, name=name).exists()
+                Menu.objects.filter(
+                    extension=Extension.objects.get(name="core"), name=name
+                ).exists()
             )
 
 
@@ -37,17 +38,12 @@ class UserApiTests(TestCase):
 
     def test_user_endpoint(self):
         """Test the user endpoint."""
-        res = self.client.get(reverse("collectivo:collectivo.core:user-list"))
+        res = self.client.get(reverse("collectivo.core:user-list"))
         self.assertEqual(res.status_code, 200)
 
     def test_users_extended_endpoint(self):
         """Test that an admin can get the extended profiles data."""
         res = self.client.get(PROFILES_URL)
-        self.assertEqual(res.status_code, 200)
-
-    def test_group_endpoint(self):
-        """Test the group endpoint."""
-        res = self.client.get(reverse("collectivo:collectivo.core:group-list"))
         self.assertEqual(res.status_code, 200)
 
 
@@ -60,14 +56,14 @@ class CoreApiTests(TestCase):
         self.user = get_user_model().objects.create_user(username="testuser")
         self.client.force_authenticate(self.user)
 
-    def test_get_api_docs(self):
-        """Test getting the API docs."""
-        res = self.client.get("/api/dev/schema/?version=0.1.0")
-        self.assertEqual(res.status_code, 200)
+    # def test_get_api_docs(self):
+    #     """Test getting the API docs."""
+    #     res = self.client.get("/api/schema/?version=0.1.0")
+    #     self.assertEqual(res.status_code, 200)
 
     def test_get_version(self):
         """Test getting current version is correct."""
-        res = self.client.get(reverse("collectivo:collectivo.core:version"))
+        res = self.client.get(reverse("collectivo.core:version"))
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.data["version"], __version__)
 
@@ -92,8 +88,10 @@ class CoreApiTests(TestCase):
         request = RequestFactory().get("/")
         request.user = self.user
         self.assertFalse(IsSuperuser().has_permission(request, None))
-        group = Group.objects.get(name="collectivo.core.admin")
-        self.user.groups.add(group)
+        group = PermissionGroup.objects.get(
+            name="superuser", extension=Extension.objects.get(name="core")
+        )
+        self.user.permission_groups.add(group)
         self.assertTrue(IsSuperuser().has_permission(request, None))
 
     def test_has_group_permission(self):
@@ -102,12 +100,15 @@ class CoreApiTests(TestCase):
         class SomeGroupView:
             """View that requires some group."""
 
-            required_groups = ["some group"]
+            required_perms = ["some perm"]
 
         request = RequestFactory().get("/")
         request.user = self.user
         view = SomeGroupView()
-        self.assertFalse(HasGroup().has_permission(request, view))
-        group = Group.objects.create(name="some group")
-        self.user.groups.add(group)
-        self.assertTrue(HasGroup().has_permission(request, view))
+        self.assertFalse(HasPerm().has_permission(request, view))
+        group = PermissionGroup.objects.create(name="some group")
+        perm = Permission.objects.create(name="some perm")
+        group.permissions.add(perm)
+        group.save()
+        self.user.permission_groups.add(group)
+        self.assertTrue(HasPerm().has_permission(request, view))

@@ -23,6 +23,7 @@ class CoreSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         """Serializer settings."""
 
+        label = "Core Settings"
         model = CoreSettings
         fields = "__all__"
 

@@ -132,4 +132,14 @@ def get_model_schema(self):
         # Ensure that read only fields cannot be required
         if field_data.get("read_only") is True:
             field_data["required"] = False
-    return Response(data)
+
+    schema = {
+        "label": serializer.Meta.label
+        if hasattr(serializer.Meta, "label")
+        else serializer.Meta.model.__name__,
+        "description": serializer.Meta.description
+        if hasattr(serializer.Meta, "description")
+        else "",
+        "fields": data,
+    }
+    return Response(schema)

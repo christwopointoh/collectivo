@@ -37,6 +37,7 @@ class ProfileAdminSerializer(ProfileBaseSerializer):
     class Meta:
         """Serializer settings."""
 
+        label = "Profile"
         model = models.UserProfile
         fields = "__all__"
         read_only_fields = ["user"]
@@ -48,5 +49,6 @@ class ProfileUserSerializer(ProfileBaseSerializer):
     class Meta:
         """Serializer settings."""
 
+        label = "Profile"
         model = models.UserProfile
         exclude = ["user", "notes"]

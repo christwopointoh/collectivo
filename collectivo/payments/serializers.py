@@ -12,6 +12,7 @@ class PaymentProfileSerializer(UserIsPk):
     class Meta:
         """Serializer settings."""
 
+        label = "Payment data"
         model = models.PaymentProfile
         fields = "__all__"
         read_only_fields = ["user"]

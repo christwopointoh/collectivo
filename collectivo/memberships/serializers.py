@@ -1,8 +1,9 @@
 """Serializers of the memberships extension."""
+from django.contrib.auth import get_user_model
 from django.db.models import Avg, Max, Sum
 from rest_framework import serializers
+
 from collectivo.extensions.models import Extension
-from django.contrib.auth import get_user_model
 from collectivo.utils.serializers import UserFields
 
 from . import models
@@ -99,6 +100,7 @@ class MembershipProfileSerializer(serializers.ModelSerializer):
     class Meta:
         """Serializer settings."""
 
+        label = "Memberships"
         model = User
         fields = ["id", "memberships"]
         read_only_fields = ["id", "memberships"]

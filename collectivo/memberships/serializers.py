@@ -6,6 +6,7 @@ from rest_framework import serializers
 from collectivo.utils.serializers import UserFields
 
 from . import models
+from .statistics import calculate_statistics
 
 User = get_user_model()
 
@@ -118,22 +119,7 @@ class MembershipTypeSerializer(serializers.ModelSerializer):
 
     def get_statistics(self, obj):
         """Get statistics for this membership type."""
-        try:
-            statistics = {
-                "memberships": obj.memberships.count(),
-                **{
-                    f"with status: {status.name}": obj.memberships.filter(
-                        status=status
-                    ).count()
-                    for status in obj.statuses.all()
-                },
-                **obj.memberships.aggregate(Sum("shares_signed")),
-                **obj.memberships.aggregate(Avg("shares_signed")),
-                **obj.memberships.aggregate(Max("shares_signed")),
-            }
-        except Exception as e:
-            statistics = {"error trying to calculate statistics": str(e)}
-        return statistics
+        return calculate_statistics(obj)
 
 
 class MembershipStatusSerializer(serializers.ModelSerializer):

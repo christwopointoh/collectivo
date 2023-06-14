@@ -25,7 +25,7 @@ class CoreSettingsSerializer(serializers.ModelSerializer):
 
         label = "Core Settings"
         model = CoreSettings
-        fields = "__all__"
+        exclude = ["id"]
 
 
 class PermissionSerializer(serializers.ModelSerializer):

@@ -141,8 +141,10 @@ class Membership(models.Model):
     number = models.IntegerField(verbose_name="Membership number")
 
     date_started = models.DateField(null=True, blank=True, default=date.today)
+    date_accepted = models.DateField(null=True, blank=True)
     date_cancelled = models.DateField(null=True, blank=True)
     date_ended = models.DateField(null=True, blank=True)
+
     type = models.ForeignKey(
         "MembershipType", on_delete=models.PROTECT, related_name="memberships"
     )
@@ -152,6 +154,7 @@ class Membership(models.Model):
 
     # Optional depending on membership type
     shares_signed = models.PositiveIntegerField(default=0)
+    shares_paid = models.PositiveIntegerField(default=0)
     fees_amount = models.DecimalField(
         max_digits=100, decimal_places=2, default=0
     )
@@ -188,10 +191,10 @@ class Membership(models.Model):
         try:
             from collectivo.payments.models import (
                 Invoice,
-                Subscription,
                 ItemEntry,
                 ItemType,
                 ItemTypeCategory,
+                Subscription,
             )
         except ImportError:
             raise ExtensionNotInstalled("collectivo.payments")

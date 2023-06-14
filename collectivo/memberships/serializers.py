@@ -3,7 +3,6 @@ from django.contrib.auth import get_user_model
 from django.db.models import Avg, Max, Sum
 from rest_framework import serializers
 
-from collectivo.extensions.models import Extension
 from collectivo.utils.serializers import UserFields
 
 from . import models
@@ -14,12 +13,27 @@ User = get_user_model()
 class MembershipSerializer(UserFields):
     """Serializer for memberships."""
 
-    user__tags = serializers.PrimaryKeyRelatedField(
-        many=True,
-        source="user.tags",
-        read_only=True,
-        label="Memberships",
-    )
+    try:
+        import collectivo.tags
+
+        user__tags = serializers.PrimaryKeyRelatedField(
+            many=True,
+            source="user.tags",
+            read_only=True,
+            label="Tags",
+        )
+    except ImportError:
+        pass
+    try:
+        import collectivo.profiles
+
+        user__profile__person_type = serializers.CharField(
+            source="user.profile.person_type",
+            read_only=True,
+            label="Person type",
+        )
+    except ImportError:
+        pass
 
     class Meta:
         """Serializer settings."""
@@ -54,6 +68,23 @@ class MembershipSelfSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "You cannot lower the number of shares you signed."
                 )
+            if self.instance.type.shares_number_custom_min is not None:
+                if (
+                    data["shares_signed"]
+                    < self.instance.type.shares_number_custom_min
+                ):
+                    raise serializers.ValidationError(
+                        "The number of shares you signed is too low."
+                    )
+            if self.instance.type.shares_number_custom_max is not None:
+                if (
+                    data["shares_signed"]
+                    > self.instance.type.shares_number_custom_max
+                ):
+                    raise serializers.ValidationError(
+                        "The number of shares you signed is too high."
+                    )
+
         return data
 
 

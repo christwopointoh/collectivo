@@ -1,5 +1,4 @@
 """Signals of the memberships extension."""
-from django.contrib.auth import get_user_model
 from django.db.models import signals
 
 from collectivo.extensions.models import Extension

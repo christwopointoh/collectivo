@@ -133,13 +133,12 @@ class UserProfilesSerializer(serializers.ModelSerializer):
                         source=f"{_related_name}.{field.attname}",
                         read_only=True,
                     )
-            elif field.__class__ is models.OneToOneField:
-                logger.warning(
-                    "OneToOneField not supported in UserProfilesSerializer."
-                )
-            elif field.__class__ is models.ForeignKey:
-                logger.warning(
-                    "ForeignKey not supported in UserProfilesSerializer."
+            elif field.__class__ in (models.ForeignKey, models.OneToOneField):
+                locals()[
+                    f"{_related_name}__{field.attname}"
+                ] = serializers.PrimaryKeyRelatedField(
+                    source=f"{_related_name}.{field.attname}",
+                    read_only=True,
                 )
             elif field.__class__ is models.ManyToManyField:
                 locals()[

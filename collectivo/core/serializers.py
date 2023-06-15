@@ -7,7 +7,6 @@ from django.db import models
 from django.utils.module_loading import import_string
 from rest_framework import serializers
 
-from collectivo.tags.models import Tag
 from collectivo.utils.schema import SchemaCondition
 
 from .models import CoreSettings, Permission, PermissionGroup

@@ -9,6 +9,8 @@ from django.urls import reverse
 from django.urls.exceptions import NoReverseMatch
 from rest_framework.fields import empty
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
+from rest_framework.viewsets import GenericViewSet
 
 # TODO Default does not work yet
 # TODO Special case for user model
@@ -121,10 +123,6 @@ class SchemaCondition:
             "condition": self.condition,
             "value": self.value,
         }
-
-
-from rest_framework.serializers import Serializer
-from rest_framework.viewsets import GenericViewSet
 
 
 def get_model_schema(self: GenericViewSet):

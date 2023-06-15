@@ -1,8 +1,6 @@
 """Signals of the memberships extension."""
 from django.db.models import signals
 
-from .models import Membership
-
 try:
     from collectivo.payments.models import Invoice
 

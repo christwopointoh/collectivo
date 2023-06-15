@@ -138,6 +138,8 @@ class MembershipStatus(models.Model):
 # Memberships --------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
+date_fields = ["date_started", "date_accepted", "date_ended"]
+
 
 class Membership(models.Model):
     """A membership of a user."""
@@ -194,13 +196,50 @@ class Membership(models.Model):
     def save(self, *args, **kwargs):
         """Save membership and create payments."""
         self.create_invoices()
+        old = Membership.objects.filter(pk=self.pk)
+        data = {field: None for field in date_fields}
+
+        if old.exists():
+            for field in date_fields:
+                data[field] = getattr(old.first(), field)
         self.save_basic()
+
+        if not old.exists():
+            self.send_email("date_started")
+            return
+
+        for field in date_fields:
+            if not data[field] and getattr(self, field):
+                self.send_email(field)
 
     def __str__(self):
         """Return string representation."""
         return (
             f"{self.user.first_name} {self.user.last_name} ({self.type.name})"
         )
+
+    def send_email(self, field):
+        """Send automatic email."""
+        self.type.refresh_from_db()
+
+        if field == "date_started":
+            template = self.type.emails.template_started
+        elif field == "date_accepted":
+            template = self.type.emails.template_accepted
+        elif field == "date_ended":
+            template = self.type.emails.template_ended
+        else:
+            raise ValueError("Invalid field.")
+        from collectivo.emails.models import EmailCampaign
+
+        if template is not None:
+            extension = Extension.objects.get(name="memberships")
+            campaign = EmailCampaign.objects.create(
+                template=template, extension=extension
+            )
+            campaign.recipients.set([self.user])
+            campaign.save()
+            campaign.send()
 
     def update_shares_paid(self):
         """Update the number of shares paid for this membership.

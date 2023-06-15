@@ -1,9 +1,14 @@
 """Tests of the memberships extension."""
+from unittest.mock import patch
+
 from django.contrib.auth import get_user_model
+from django.core import mail
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
+from collectivo.emails.models import EmailTemplate
+from collectivo.emails.tests import run_mocked_celery_chain
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
 from collectivo.payments.models import Invoice, ItemEntry
@@ -30,6 +35,72 @@ class MembershipsSetupTests(TestCase):
         """Test that the menu items are registered."""
         res = MenuItem.objects.filter(extension=self.extension)
         self.assertEqual(len(res), 2)
+
+
+class MembershipsEmailsTests(TestCase):
+    """Test the connection between the memberships and emails extension."""
+
+    def setUp(self):
+        """Prepare client and create test user."""
+        self.user = create_testuser()
+        self.user.email = "recipient@example.com"
+        self.user.save()
+        self.admin = create_testadmin()
+        self.client = APIClient()
+        self.client.force_authenticate(self.admin)
+        self.membership_type = MembershipType.objects.create(
+            name="Test Type",
+            has_shares=True,
+            shares_amount_per_share=15,
+        )
+        self.membership_type.emails.template_started = (
+            EmailTemplate.objects.create(
+                name="Test Template Started",
+                subject="Test Subject Started",
+                body="Test Body Started",
+            )
+        )
+        self.membership_type.emails.template_accepted = (
+            EmailTemplate.objects.create(
+                name="Test Template Accepted",
+                subject="Test Subject Accepted",
+                body="Test Body Accepted",
+            )
+        )
+        self.membership_type.emails.template_ended = (
+            EmailTemplate.objects.create(
+                name="Test Template Ended",
+                subject="Test Subject Ended",
+                body="Test Body Ended",
+            )
+        )
+        self.membership_type.emails.save()
+
+    @patch("collectivo.emails.models.chain")
+    def test_automatic_emails(self, chain):
+        """Test that automatic emails are sent."""
+
+        self.membership = Membership.objects.create(
+            user=self.user, type=self.membership_type, shares_signed=10
+        )
+
+        run_mocked_celery_chain(chain)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertEqual(mail.outbox[0].subject, "Test Subject Started")
+
+        self.membership.date_accepted = "2020-01-01"
+        self.membership.save()
+
+        run_mocked_celery_chain(chain)
+        self.assertEqual(len(mail.outbox), 2)
+        self.assertEqual(mail.outbox[1].subject, "Test Subject Accepted")
+
+        self.membership.date_ended = "2020-01-01"
+        self.membership.save()
+
+        run_mocked_celery_chain(chain)
+        self.assertEqual(len(mail.outbox), 3)
+        self.assertEqual(mail.outbox[2].subject, "Test Subject Ended")
 
 
 class MembershipsPaymentsTests(TestCase):

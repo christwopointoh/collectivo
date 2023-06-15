@@ -1,3 +1,4 @@
+"""Statistics for memberships."""
 from django.db.models import Avg, Max, Sum
 
 from .models import MembershipType
@@ -22,11 +23,12 @@ def calculate_statistics(membership_type: MembershipType):
             },
         }
         try:
-            import collectivo.profiles
+            import collectivo.profiles  # noqa
 
+            x = "memberships with person type"
             statistics.update(
                 {
-                    f"memberships with person type: {status}": membership_type.memberships.filter(
+                    f"{x}: {status}": membership_type.memberships.filter(
                         user__profile__person_type=status
                     ).count()
                     for status in ["natural", "legal"]

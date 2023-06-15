@@ -6,8 +6,6 @@ from celery.utils.log import get_task_logger
 from django.contrib.auth import get_user_model
 from django.core import mail
 
-from collectivo.emails.models import EmailCampaign
-
 logger = get_task_logger(__name__)
 User = get_user_model()
 
@@ -45,12 +43,12 @@ def send_mails_async(results, emails):
 def send_mails_async_end(results):
     """Document results of sending emails in the database."""
     campaign = results["campaign"]
-    campaign = EmailCampaign.objects.get(id=campaign.id)  # Refresh from DB
+    campaign.refresh_from_db()
     if results["n_sent"] != campaign.recipients.count():
         campaign.status = "failure"
         campaign.status_message = (
             "Not all emails were sent"
-            f'({results["n_sent"]}/{campaign.recipients.count()})'
+            f"({results['n_sent']}/{campaign.recipients.count()})"
         )
         # TODO Send an email to the admins
     else:

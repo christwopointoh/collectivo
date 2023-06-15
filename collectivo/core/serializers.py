@@ -103,14 +103,11 @@ class UserProfilesSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
 
     # TODO: Load through TagProfile
-    tags = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Tag.objects.all()
-    )
+    tags = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     # Define serializer fields based on registered profiles in store
     # TODO: Get field settings from serializer
     # TODO: Make fields editable for bulk edit
-    # TODO: Support foreign key and onetoone fields
 
     for profile_serializer in profile_serializers:
         profile = profile_serializer.Meta.model

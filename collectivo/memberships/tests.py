@@ -11,7 +11,7 @@ from collectivo.emails.models import EmailTemplate
 from collectivo.emails.tests import run_mocked_celery_chain
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
-from collectivo.payments.models import Invoice, ItemEntry
+from collectivo.payments.models import Invoice, ItemEntry, Subscription
 from collectivo.utils.test import create_testadmin, create_testuser
 
 from .models import Membership, MembershipType
@@ -117,9 +117,27 @@ class MembershipsPaymentsTests(TestCase):
             has_shares=True,
             shares_amount_per_share=15,
         )
+        self.subscription_type = MembershipType.objects.create(
+            name="Test Type Sub", has_fees=True
+        )
         self.membership = Membership.objects.create(
             user=self.user, type=self.membership_type, shares_signed=10
         )
+        self.sub_membership = Membership.objects.create(
+            user=self.user, type=self.subscription_type, fees_amount=11
+        )
+
+    def test_subscription(self):
+        """Test that subscriptions are created correctly."""
+
+        sub = Subscription.objects.get(payment_from=self.user.account)
+        self.assertEqual(sub.items.first().price, 11)
+        self.assertEqual(sub.items.first().amount, 1)
+        self.sub_membership.fees_amount = 12
+        self.sub_membership.save()
+        sub = Subscription.objects.get(payment_from=self.user.account)
+        self.assertEqual(sub.items.first().price, 12)
+        self.assertEqual(sub.items.first().amount, 1)
 
     def test_create_invoices(self):
         """Test that invoices are created correctly."""

@@ -327,17 +327,27 @@ class Membership(models.Model):
                 category=item_category,
                 extension=extension,
             )[0]
-            subscriptions = ItemEntry.objects.filter(
+            entries = ItemEntry.objects.filter(
                 type=item_type,
                 subscription__status="active",
                 subscription__payment_from=self.user.account,
             )
 
-            # Create subscription if needed
-            # TODO: Option to include current year/month in subscription
-            # TODO: Update if exists
-            # TODO: Price is not correct
-            if not subscriptions.exists():
+            # Create or update subscription
+            if entries.exists():
+                entry = entries.first()
+                subscription = entry.subscription
+
+                subscription.status = "active"
+                subscription.repeat_each = self.type.fees_repeat_each
+                subscription.repeat_unit = self.type.fees_repeat_unit
+                subscription.save()
+
+                entry.amount = 1
+                entry.price = self.fees_amount
+                entry.save()
+
+            else:
                 subscription = Subscription.objects.create(
                     payment_from=self.user.account,
                     status="active",
@@ -346,7 +356,7 @@ class Membership(models.Model):
                     repeat_each=self.type.fees_repeat_each,
                     repeat_unit=self.type.fees_repeat_unit,
                 )
-                price = self.type.shares_amount_per_share
+                price = self.fees_amount
                 ItemEntry.objects.create(
                     subscription=subscription,
                     type=item_type,

@@ -6,7 +6,7 @@ from rest_framework.test import APIClient
 
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
-from collectivo.payments.models import ItemEntry
+from collectivo.payments.models import Invoice, ItemEntry
 from collectivo.utils.test import create_testadmin, create_testuser
 
 from .models import Membership, MembershipType
@@ -96,6 +96,25 @@ class MembershipsPaymentsTests(TestCase):
         self.assertEqual(res.status_code, 200)
         self.assertEqual(res.data["shares_paid"], 3)
 
+    def test_update_shares_paid(self):
+        """Test that invoices are synced with the payments extension."""
+
+        self.assertEqual(self.membership.shares_paid, 0)
+        inv = Invoice.objects.get(payment_from__user=self.user)
+        inv.status = "paid"
+        inv.save()
+        self.membership.refresh_from_db()
+        self.assertEqual(self.membership.shares_paid, 10)
+        self.membership.shares_signed = 15
+        self.membership.save()
+        self.assertEqual(self.membership.shares_paid, 10)
+        invs = Invoice.objects.filter(payment_from__user=self.user)
+        for inv in invs:
+            inv.status = "paid"
+            inv.save()
+        self.membership.refresh_from_db()
+        self.assertEqual(self.membership.shares_paid, 15)
+
 
 class MembershipsTests(TestCase):
     """Test the memberships extension."""
@@ -109,6 +128,8 @@ class MembershipsTests(TestCase):
             name="Test Type",
             has_shares=True,
             shares_amount_per_share=15,
+            shares_number_custom_min=20,
+            shares_number_social=10,
         )
         self.membership = Membership.objects.create(
             user=self.user, type=self.membership_type, shares_signed=10
@@ -133,6 +154,16 @@ class MembershipsTests(TestCase):
             args=[self.membership.id],
         )
         payload = {"shares_signed": 1}
+        res = self.client.patch(url, payload)
+        self.assertEqual(res.status_code, 400)
+
+    def test_update_shares_below_min_fails(self):
+        """Test that the shares cannot be updated to a lower number."""
+        url = reverse(
+            "collectivo.memberships:membership-self-detail",
+            args=[self.membership.id],
+        )
+        payload = {"shares_signed": 15}
         res = self.client.patch(url, payload)
         self.assertEqual(res.status_code, 400)
 

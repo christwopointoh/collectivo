@@ -9,6 +9,20 @@ from collectivo.extensions.models import Extension
 from collectivo.utils.exceptions import ExtensionNotInstalled
 from collectivo.utils.managers import NameManager
 
+try:
+    from collectivo.payments.models import (
+        Invoice,
+        ItemEntry,
+        ItemType,
+        ItemTypeCategory,
+        Subscription,
+    )
+
+    payments_installed = True
+except ImportError:
+    payments_installed = False
+
+
 # --------------------------------------------------------------------------- #
 # Membership types ---------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -171,11 +185,16 @@ class Membership(models.Model):
         )
         return 1 if highest_number is None else highest_number.number + 1
 
-    def save(self, *args, **kwargs):
-        """Save membership and create payments."""
+    def save_basic(self, *args, **kwargs):
+        """Save membership and generate membership number."""
         if self.number is None:
             self.number = self.generate_membership_number()
         super().save()
+
+    def save(self, *args, **kwargs):
+        """Save membership and create payments."""
+        self.create_invoices()
+        self.save_basic()
 
     def __str__(self):
         """Return string representation."""
@@ -183,20 +202,45 @@ class Membership(models.Model):
             f"{self.user.first_name} {self.user.last_name} ({self.type.name})"
         )
 
+    def update_shares_paid(self):
+        """Update the number of shares paid for this membership.
+
+        This method depends to the collectivo.payments extension.
+        """
+
+        if not payments_installed:
+            raise ExtensionNotInstalled("collectivo.payments")
+
+        extension = Extension.objects.get(name="memberships")
+        item_category = ItemTypeCategory.objects.get_or_create(
+            name="Shares", extension=extension
+        )[0]
+        item_type = ItemType.objects.get_or_create(
+            name=self.type.name,
+            category=item_category,
+            extension=extension,
+        )[0]
+        entries = ItemEntry.objects.filter(
+            type=item_type,
+            invoice__payment_from=self.user.account,
+            invoice__status="paid",
+        )
+        if entries.exists():
+            shares_paid = (
+                sum([entry.amount * entry.price for entry in entries])
+                / self.type.shares_amount_per_share
+            )
+
+            self.shares_paid = shares_paid
+            self.save_basic()
+
     def create_invoices(self):
         """Create invoices for this membership.
 
         This method depends to the collectivo.payments extension.
         """
-        try:
-            from collectivo.payments.models import (
-                Invoice,
-                ItemEntry,
-                ItemType,
-                ItemTypeCategory,
-                Subscription,
-            )
-        except ImportError:
+
+        if not payments_installed:
             raise ExtensionNotInstalled("collectivo.payments")
 
         # Create invoices for shares

@@ -66,7 +66,9 @@ class EmailCampaign(models.Model):
     )
     status_message = models.CharField(max_length=255, null=True)
     sent = models.DateTimeField(null=True)
-    recipients = models.ManyToManyField(get_user_model())
+    recipients = models.ManyToManyField(
+        get_user_model(), related_name="emails"
+    )
     extension = models.ForeignKey(
         "extensions.Extension",
         on_delete=models.SET_NULL,
@@ -77,9 +79,7 @@ class EmailCampaign(models.Model):
 
     def __str__(self):
         """Return a string representation of the object."""
-        return (
-            f"Email campaign ({self.id}, {self.status}, {self.template.name})"
-        )
+        return f"{self.template.name} ({self.sent})"
 
     def send(self):
         """Send emails to recipients."""

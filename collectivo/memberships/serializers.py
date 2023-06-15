@@ -2,6 +2,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from collectivo.utils.schema import SchemaCondition
 from collectivo.utils.serializers import UserFields
 
 from . import models
@@ -59,6 +60,7 @@ class MembershipSelfSerializer(serializers.ModelSerializer):
         model = models.Membership
         fields = "__all__"
         depth = 1
+        label = "Membership"
 
     def get_fields(self):
         """Set all fields to read only except shares_signed."""
@@ -117,6 +119,9 @@ email_fields = [
     "emails__template_ended",
 ]
 
+if_shares = SchemaCondition(condition="equals", field="has_shares", value=True)
+if_fees = SchemaCondition(condition="equals", field="has_fees", value=True)
+
 
 class MembershipTypeSerializer(serializers.ModelSerializer):
     """Serializer for membership types."""
@@ -129,9 +134,10 @@ class MembershipTypeSerializer(serializers.ModelSerializer):
             queryset=EmailTemplate.objects.all(),
             required=False,
             allow_null=True,
+            label="Automatic email: Membership started",
             help_text=(
-                "The email template to send when a membership of this type is"
-                " started (i.e. when the field date_started is set)."
+                "The email template to send when a membership of this type"
+                " is assigned a starting date."
             ),
         )
         emails__template_accepted = serializers.PrimaryKeyRelatedField(
@@ -139,9 +145,10 @@ class MembershipTypeSerializer(serializers.ModelSerializer):
             queryset=EmailTemplate.objects.all(),
             required=False,
             allow_null=True,
+            label="Automatic email: Membership accepted",
             help_text=(
-                "The email template to send when a membership of this type is"
-                " accepted (i.e. when the field date_accepted is set)."
+                "The email template to send when a membership of this type"
+                " is assigned an acceptance date."
             ),
         )
         emails__template_ended = serializers.PrimaryKeyRelatedField(
@@ -149,9 +156,10 @@ class MembershipTypeSerializer(serializers.ModelSerializer):
             queryset=EmailTemplate.objects.all(),
             required=False,
             allow_null=True,
+            label="Automatic email: Membership ended",
             help_text=(
-                "The email template to send when a membership of this type is"
-                " ended (i.e. when the field date_ended is set)."
+                "The email template to send when a membership of this type"
+                " is assigned a ending date."
             ),
         )
 
@@ -161,6 +169,23 @@ class MembershipTypeSerializer(serializers.ModelSerializer):
         model = models.MembershipType
         fields = "__all__"
         read_only_fields = ["id"]
+        label = "Membership type"
+
+        schema_attrs = {
+            "shares_amount_per_share": {"visible": if_shares},
+            "shares_number_custom": {"visible": if_shares},
+            "shares_number_custom_min": {"visible": if_shares},
+            "shares_number_custom_max": {"visible": if_shares},
+            "shares_number_standard": {"visible": if_shares},
+            "shares_number_social": {"visible": if_shares},
+            "fees_amount_custom": {"visible": if_fees},
+            "fees_amount_custom_min": {"visible": if_fees},
+            "fees_amount_custom_max": {"visible": if_fees},
+            "fees_amount_standard": {"visible": if_fees},
+            "fees_amount_social": {"visible": if_fees},
+            "fees_repeat_each": {"visible": if_fees},
+            "fees_repeat_unit": {"visible": if_fees},
+        }
 
     def get_statistics(self, obj):
         """Get statistics for this membership type."""
@@ -171,9 +196,8 @@ class MembershipTypeSerializer(serializers.ModelSerializer):
         if not emails_installed:
             return super().create(validated_data)
         email_data = {}
-        for field in email_fields:
-            if field in validated_data:
-                email_data[field] = validated_data.pop(field)
+        if "emails" in validated_data:
+            email_data = validated_data.pop("emails")
         obj = super().create(validated_data)
         for field, data in email_data.items():
             setattr(obj.emails, field, data)
@@ -183,12 +207,11 @@ class MembershipTypeSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         """Update an existing membership."""
         if not emails_installed:
-            return super().update(validated_data)
+            return super().update(instance, validated_data)
         email_data = {}
-        for field in email_fields:
-            if field in validated_data:
-                email_data[field] = validated_data.pop(field)
-        obj = super().update(validated_data)
+        if "emails" in validated_data:
+            email_data = validated_data.pop("emails")
+        obj = super().update(instance, validated_data)
         for field, data in email_data.items():
             setattr(obj.emails, field, data)
         obj.emails.save()
@@ -204,3 +227,4 @@ class MembershipStatusSerializer(serializers.ModelSerializer):
         model = models.MembershipStatus
         fields = "__all__"
         read_only_fields = ["id"]
+        label = "Membership status"

@@ -45,6 +45,16 @@ def setup(sender, **kwargs):
         order=10,
     )
 
+    # Create email connectors  for membership types
+    try:
+        from collectivo.memberships.emails.models import MembershipEmails
+
+        no_con = models.MembershipType.objects.filter(emails__isnull=True)
+        for mtype in no_con:
+            MembershipEmails.objects.create(membership_type=mtype)
+    except ImportError:
+        pass
+
     if settings.COLLECTIVO["example_data"] is True:
         # Create membership types
 

@@ -9,6 +9,8 @@ from collectivo.extensions.models import Extension
 from collectivo.menus.models import Menu, MenuItem
 from collectivo.utils.dev import DEV_USERS
 
+from .models import CoreSettings
+
 User = get_user_model()
 
 
@@ -19,10 +21,17 @@ def setup():
         name=CoreConfig.name, description=CoreConfig.description, built_in=True
     )
 
-    superuser = PermissionGroup.objects.get_or_create(
-        name="superuser", extension=extension
-    )[0]
-    coreadmin = Permission.objects.register(name="admin", extension=extension)
+    # Superuser permissions
+    superuser = PermissionGroup.objects.register(
+        name="superuser",
+        description="Admin access to all possible actions.",
+        extension=extension,
+    )
+    coreadmin = Permission.objects.register(
+        name="admin",
+        description="Admin access to all possible actions.",
+        extension=extension,
+    )
     superuser.permissions.add(coreadmin)
 
     # User menu
@@ -69,6 +78,8 @@ def setup():
     )
 
     if settings.COLLECTIVO["example_data"] is True:
+        CoreSettings.object()  # This initializes the default settings
+
         for first_name in DEV_USERS:
             email = f"test_{first_name}@example.com"
             try:

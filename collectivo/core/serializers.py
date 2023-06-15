@@ -8,6 +8,7 @@ from django.utils.module_loading import import_string
 from rest_framework import serializers
 
 from collectivo.tags.models import Tag
+from collectivo.utils.schema import SchemaCondition
 
 from .models import CoreSettings, Permission, PermissionGroup
 
@@ -38,6 +39,12 @@ class PermissionSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+if_extension = SchemaCondition(
+    condition="not_empty",
+    field="extension",
+)
+
+
 class PermissionGroupSerializer(serializers.ModelSerializer):
     """Serializer for permission groups."""
 
@@ -46,6 +53,14 @@ class PermissionGroupSerializer(serializers.ModelSerializer):
 
         model = PermissionGroup
         fields = "__all__"
+        read_only_fields = ["extension"]
+
+        schema_attrs = {
+            "name": {"read_only": if_extension},
+            "extension": {"visible": if_extension},
+            "description": {"read_only": if_extension},
+            "permissions": {"read_only": if_extension},
+        }
 
 
 class UserSerializer(serializers.ModelSerializer):

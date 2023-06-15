@@ -1,5 +1,7 @@
 """Schema mixin for collectivo viewsets."""
 from collections import OrderedDict
+from dataclasses import dataclass
+from typing import Literal
 
 from django.contrib.auth import get_user_model
 from django.db import models
@@ -84,9 +86,50 @@ def get_endpoint(model: models.Model, source: str = None) -> str:
         return None
 
 
-def get_model_schema(self):
+@dataclass
+class SchemaField:
+    """A field of a schema."""
+
+    field_type: str = None
+    input_type: str = None
+    label: str = None
+    help_text: str = None
+    required: bool = None
+    default: any = None
+    max_length: int = None
+    min_length: int = None
+    max_value: int = None
+    min_value: int = None
+    read_only: bool = None
+    write_only: bool = None
+    choices: OrderedDict = None
+    choices_url: str = None
+
+
+@dataclass
+class SchemaCondition:
+    """A condition of a schema field."""
+
+    condition: Literal["equals", "empty", "not_empty"]
+    field: str = None
+    value: any = None
+
+    def to_dict(self):
+        """Return condition as dict."""
+        return {
+            "field": self.field,
+            "condition": self.condition,
+            "value": self.value,
+        }
+
+
+from rest_framework.serializers import Serializer
+from rest_framework.viewsets import GenericViewSet
+
+
+def get_model_schema(self: GenericViewSet):
     """Return model schema."""
-    serializer = self.get_serializer_class()()
+    serializer: Serializer = self.get_serializer_class()()
     data = {}
     for field_name, field_obj in serializer.fields.items():
         field_type = field_obj.__class__.__name__
@@ -123,12 +166,18 @@ def get_model_schema(self):
                     value = getattr(field_obj, attr)
                 if value is not empty and value is not None:
                     data[field_name][attr] = value
+
+        # Add custom schema attributes from serializer
         if (
-            hasattr(serializer, "schema_attrs")
-            and field_name in serializer.schema_attrs
+            hasattr(serializer.Meta, "schema_attrs")
+            and field_name in serializer.Meta.schema_attrs
         ):
-            for key, value in serializer.schema_attrs[field_name].items():
-                data[field_name][key] = value
+            for key, value in serializer.Meta.schema_attrs[field_name].items():
+                data[field_name][key] = (
+                    value.to_dict()
+                    if isinstance(value, SchemaCondition)
+                    else value
+                )
         # Ensure that read only fields cannot be required
         if field_data.get("read_only") is True:
             field_data["required"] = False
@@ -142,4 +191,5 @@ def get_model_schema(self):
         else "",
         "fields": data,
     }
+
     return Response(schema)

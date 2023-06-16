@@ -96,7 +96,7 @@ class ProfileTests(TestCase):
             "legal_type",
         ]:
             self.assertTrue(c in res.data["fields"])
-            self.assertTrue("condition" in res.data["fields"][c])
+            self.assertTrue("visible" in res.data["fields"][c])
         self.assertEqual(
             res.data["fields"]["address_street"]["required"], True
         )

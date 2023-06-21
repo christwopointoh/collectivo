@@ -1,8 +1,8 @@
 """Serializers of the tags extension."""
-from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from . import models
+from rest_framework import serializers
 
+from . import models
 
 User = get_user_model()
 
@@ -28,6 +28,7 @@ class TagProfileSerializer(serializers.ModelSerializer):
     class Meta:
         """Serializer settings."""
 
+        label = "Tags"
         model = User
         fields = ["id", "tags"]
         read_only_fields = ["id"]

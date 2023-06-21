@@ -24,7 +24,7 @@ class EmailTemplateTag(models.Model):
 
 
 def create_email_template_tag_connector(sender, instance, created, **kwargs):
-    """Create user profile when a user is created."""
+    """Create connector when template is created."""
     if created:
         EmailTemplateTag.objects.create(template=instance)
 

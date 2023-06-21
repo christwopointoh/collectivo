@@ -68,9 +68,6 @@ class HasPerm(BasePermission):
             # Determine the required groups for this particular request method.
             required_perms = required_perms.get(request.method, [])
 
-        print("IS SUPER", is_superuser(request.user))
-        print("USER", request.user.permission_groups.all())
-
         # Return True if the user has all the required groups or is superuser.
         return all(
             [

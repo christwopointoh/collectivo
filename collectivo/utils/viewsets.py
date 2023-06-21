@@ -53,4 +53,4 @@ class SingleModelViewSet(
 
     def get_object(self):
         """Return single entry."""
-        return self.queryset.get(pk=1)
+        return self.queryset.last()

@@ -1,6 +1,7 @@
 """Serializers of the emails module."""
 from celery import chain
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
 from django.template import Context, Template
 from django.utils import timezone
@@ -13,6 +14,24 @@ from collectivo.tags.models import Tag
 
 from . import models
 from .tasks import send_mails_async, send_mails_async_end
+
+User = get_user_model()
+
+
+class EmailProfileSerializer(serializers.ModelSerializer):
+    """Serializer for email profiles."""
+
+    emails = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=models.EmailCampaign.objects.all()
+    )
+
+    class Meta:
+        """Serializer settings."""
+
+        label = "Emails"
+        model = User
+        fields = ["id", "emails"]
+        read_only_fields = ["id", "emails"]
 
 
 class EmailDesignSerializer(serializers.ModelSerializer):
@@ -75,8 +94,10 @@ class EmailCampaignSerializer(serializers.ModelSerializer):
     send = serializers.BooleanField(
         write_only=True,
         required=False,
-        help_text="Should the campaign be sent now? "
-        "Otherwise it will be saved as a draft.",
+        help_text=(
+            "Should the campaign be sent now? "
+            "Otherwise it will be saved as a draft."
+        ),
     )
 
     class Meta:

@@ -1,11 +1,19 @@
 """Serializers of the memberships extension."""
-from django.db.models import Avg, Max, Sum
-from rest_framework import serializers
-from collectivo.extensions.models import Extension
 from django.contrib.auth import get_user_model
+from rest_framework import serializers
+
+from collectivo.utils.schema import SchemaCondition
 from collectivo.utils.serializers import UserFields
 
 from . import models
+from .statistics import calculate_statistics
+
+try:
+    from collectivo.emails.models import EmailTemplate
+
+    emails_installed = True
+except ImportError:
+    emails_installed = False
 
 User = get_user_model()
 
@@ -13,13 +21,27 @@ User = get_user_model()
 class MembershipSerializer(UserFields):
     """Serializer for memberships."""
 
-    shares_paid = serializers.SerializerMethodField()
-    user__tags = serializers.PrimaryKeyRelatedField(
-        many=True,
-        source="user.tags",
-        read_only=True,
-        label="Memberships",
-    )
+    try:
+        import collectivo.tags
+
+        user__tags = serializers.PrimaryKeyRelatedField(
+            many=True,
+            source="user.tags",
+            read_only=True,
+            label="Tags",
+        )
+    except ImportError:
+        pass
+    try:
+        import collectivo.profiles
+
+        user__profile__person_type = serializers.CharField(
+            source="user.profile.person_type",
+            read_only=True,
+            label="Person type",
+        )
+    except ImportError:
+        pass
 
     class Meta:
         """Serializer settings."""
@@ -27,38 +49,6 @@ class MembershipSerializer(UserFields):
         model = models.Membership
         fields = "__all__"
         read_only_fields = ["id", "number"]
-
-    def get_shares_paid(self, obj):
-        """Get shares paid for this membership."""
-        if not obj.type.has_shares:
-            return 0
-        try:
-            from collectivo.payments.models import (
-                ItemEntry,
-                ItemType,
-                ItemTypeCategory,
-            )
-        except ImportError:
-            return 0
-
-        extension = Extension.objects.get(name="memberships")
-        item_category = ItemTypeCategory.objects.get_or_create(
-            name="Shares", extension=extension
-        )[0]
-        item_type = ItemType.objects.get_or_create(
-            name=obj.type.name,
-            category=item_category,
-            extension=extension,
-        )[0]
-        entries = ItemEntry.objects.filter(
-            type=item_type,
-            invoice__payment_from=obj.user.account,
-            invoice__status="paid",
-        )
-        return (
-            sum([entry.amount * entry.price for entry in entries])
-            / obj.type.shares_amount_per_share
-        )
 
 
 class MembershipSelfSerializer(serializers.ModelSerializer):
@@ -70,6 +60,7 @@ class MembershipSelfSerializer(serializers.ModelSerializer):
         model = models.Membership
         fields = "__all__"
         depth = 1
+        label = "Membership"
 
     def get_fields(self):
         """Set all fields to read only except shares_signed."""
@@ -86,6 +77,23 @@ class MembershipSelfSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(
                     "You cannot lower the number of shares you signed."
                 )
+            if self.instance.type.shares_number_custom_min is not None:
+                if (
+                    data["shares_signed"]
+                    < self.instance.type.shares_number_custom_min
+                ):
+                    raise serializers.ValidationError(
+                        "The number of shares you signed is too low."
+                    )
+            if self.instance.type.shares_number_custom_max is not None:
+                if (
+                    data["shares_signed"]
+                    > self.instance.type.shares_number_custom_max
+                ):
+                    raise serializers.ValidationError(
+                        "The number of shares you signed is too high."
+                    )
+
         return data
 
 
@@ -99,9 +107,20 @@ class MembershipProfileSerializer(serializers.ModelSerializer):
     class Meta:
         """Serializer settings."""
 
+        label = "Memberships"
         model = User
         fields = ["id", "memberships"]
         read_only_fields = ["id", "memberships"]
+
+
+email_fields = [
+    "emails__template_started",
+    "emails__template_accepted",
+    "emails__template_ended",
+]
+
+if_shares = SchemaCondition(condition="equals", field="has_shares", value=True)
+if_fees = SchemaCondition(condition="equals", field="has_fees", value=True)
 
 
 class MembershipTypeSerializer(serializers.ModelSerializer):
@@ -109,31 +128,94 @@ class MembershipTypeSerializer(serializers.ModelSerializer):
 
     statistics = serializers.SerializerMethodField()
 
+    if emails_installed:
+        emails__template_started = serializers.PrimaryKeyRelatedField(
+            source="emails.template_started",
+            queryset=EmailTemplate.objects.all(),
+            required=False,
+            allow_null=True,
+            label="Automatic email: Membership started",
+            help_text=(
+                "The email template to send when a membership of this type"
+                " is assigned a starting date."
+            ),
+        )
+        emails__template_accepted = serializers.PrimaryKeyRelatedField(
+            source="emails.template_accepted",
+            queryset=EmailTemplate.objects.all(),
+            required=False,
+            allow_null=True,
+            label="Automatic email: Membership accepted",
+            help_text=(
+                "The email template to send when a membership of this type"
+                " is assigned an acceptance date."
+            ),
+        )
+        emails__template_ended = serializers.PrimaryKeyRelatedField(
+            source="emails.template_ended",
+            queryset=EmailTemplate.objects.all(),
+            required=False,
+            allow_null=True,
+            label="Automatic email: Membership ended",
+            help_text=(
+                "The email template to send when a membership of this type"
+                " is assigned a ending date."
+            ),
+        )
+
     class Meta:
         """Serializer settings."""
 
         model = models.MembershipType
         fields = "__all__"
         read_only_fields = ["id"]
+        label = "Membership type"
+
+        schema_attrs = {
+            "shares_amount_per_share": {"visible": if_shares},
+            "shares_number_custom": {"visible": if_shares},
+            "shares_number_custom_min": {"visible": if_shares},
+            "shares_number_custom_max": {"visible": if_shares},
+            "shares_number_standard": {"visible": if_shares},
+            "shares_number_social": {"visible": if_shares},
+            "fees_amount_custom": {"visible": if_fees},
+            "fees_amount_custom_min": {"visible": if_fees},
+            "fees_amount_custom_max": {"visible": if_fees},
+            "fees_amount_standard": {"visible": if_fees},
+            "fees_amount_social": {"visible": if_fees},
+            "fees_repeat_each": {"visible": if_fees},
+            "fees_repeat_unit": {"visible": if_fees},
+        }
 
     def get_statistics(self, obj):
         """Get statistics for this membership type."""
-        try:
-            statistics = {
-                "memberships": obj.memberships.count(),
-                **{
-                    f"with status: {status.name}": obj.memberships.filter(
-                        status=status
-                    ).count()
-                    for status in obj.statuses.all()
-                },
-                **obj.memberships.aggregate(Sum("shares_signed")),
-                **obj.memberships.aggregate(Avg("shares_signed")),
-                **obj.memberships.aggregate(Max("shares_signed")),
-            }
-        except Exception as e:
-            statistics = {"error trying to calculate statistics": str(e)}
-        return statistics
+        return calculate_statistics(obj)
+
+    def create(self, validated_data):
+        """Create a new membership."""
+        if not emails_installed:
+            return super().create(validated_data)
+        email_data = {}
+        if "emails" in validated_data:
+            email_data = validated_data.pop("emails")
+        obj = super().create(validated_data)
+        for field, data in email_data.items():
+            setattr(obj.emails, field, data)
+        obj.emails.save()
+        return obj
+
+    def update(self, instance, validated_data):
+        """Update an existing membership."""
+        if not emails_installed:
+            return super().update(instance, validated_data)
+        email_data = {}
+        if "emails" in validated_data:
+            email_data = validated_data.pop("emails")
+        obj = super().update(instance, validated_data)
+        for field, data in email_data.items():
+            setattr(obj.emails, field, data)
+        obj.emails.save()
+        return obj
 
 
 class MembershipStatusSerializer(serializers.ModelSerializer):
@@ -145,3 +227,4 @@ class MembershipStatusSerializer(serializers.ModelSerializer):
         model = models.MembershipStatus
         fields = "__all__"
         read_only_fields = ["id"]
+        label = "Membership status"

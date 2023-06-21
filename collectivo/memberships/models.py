@@ -9,6 +9,20 @@ from collectivo.extensions.models import Extension
 from collectivo.utils.exceptions import ExtensionNotInstalled
 from collectivo.utils.managers import NameManager
 
+try:
+    from collectivo.payments.models import (
+        Invoice,
+        ItemEntry,
+        ItemType,
+        ItemTypeCategory,
+        Subscription,
+    )
+
+    payments_installed = True
+except ImportError:
+    payments_installed = False
+
+
 # --------------------------------------------------------------------------- #
 # Membership types ---------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
@@ -124,6 +138,8 @@ class MembershipStatus(models.Model):
 # Memberships --------------------------------------------------------------- #
 # --------------------------------------------------------------------------- #
 
+date_fields = ["date_started", "date_accepted", "date_ended"]
+
 
 class Membership(models.Model):
     """A membership of a user."""
@@ -141,8 +157,10 @@ class Membership(models.Model):
     number = models.IntegerField(verbose_name="Membership number")
 
     date_started = models.DateField(null=True, blank=True, default=date.today)
+    date_accepted = models.DateField(null=True, blank=True)
     date_cancelled = models.DateField(null=True, blank=True)
     date_ended = models.DateField(null=True, blank=True)
+
     type = models.ForeignKey(
         "MembershipType", on_delete=models.PROTECT, related_name="memberships"
     )
@@ -152,6 +170,7 @@ class Membership(models.Model):
 
     # Optional depending on membership type
     shares_signed = models.PositiveIntegerField(default=0)
+    shares_paid = models.PositiveIntegerField(default=0)
     fees_amount = models.DecimalField(
         max_digits=100, decimal_places=2, default=0
     )
@@ -168,11 +187,30 @@ class Membership(models.Model):
         )
         return 1 if highest_number is None else highest_number.number + 1
 
-    def save(self, *args, **kwargs):
-        """Save membership and create payments."""
+    def save_basic(self, *args, **kwargs):
+        """Save membership and generate membership number."""
         if self.number is None:
             self.number = self.generate_membership_number()
         super().save()
+
+    def save(self, *args, **kwargs):
+        """Save membership and create payments."""
+        self.create_invoices()
+        old = Membership.objects.filter(pk=self.pk)
+        data = {field: None for field in date_fields}
+
+        if old.exists():
+            for field in date_fields:
+                data[field] = getattr(old.first(), field)
+        self.save_basic()
+
+        if not old.exists():
+            self.send_email("date_started")
+            return
+
+        for field in date_fields:
+            if not data[field] and getattr(self, field):
+                self.send_email(field)
 
     def __str__(self):
         """Return string representation."""
@@ -180,20 +218,68 @@ class Membership(models.Model):
             f"{self.user.first_name} {self.user.last_name} ({self.type.name})"
         )
 
+    def send_email(self, field):
+        """Send automatic email."""
+        self.type.refresh_from_db()
+
+        if field == "date_started":
+            template = self.type.emails.template_started
+        elif field == "date_accepted":
+            template = self.type.emails.template_accepted
+        elif field == "date_ended":
+            template = self.type.emails.template_ended
+        else:
+            raise ValueError("Invalid field.")
+        from collectivo.emails.models import EmailCampaign
+
+        if template is not None:
+            extension = Extension.objects.get(name="memberships")
+            campaign = EmailCampaign.objects.create(
+                template=template, extension=extension
+            )
+            campaign.recipients.set([self.user])
+            campaign.save()
+            campaign.send()
+
+    def update_shares_paid(self):
+        """Update the number of shares paid for this membership.
+
+        This method depends to the collectivo.payments extension.
+        """
+
+        if not payments_installed:
+            raise ExtensionNotInstalled("collectivo.payments")
+
+        extension = Extension.objects.get(name="memberships")
+        item_category = ItemTypeCategory.objects.get_or_create(
+            name="Shares", extension=extension
+        )[0]
+        item_type = ItemType.objects.get_or_create(
+            name=self.type.name,
+            category=item_category,
+            extension=extension,
+        )[0]
+        entries = ItemEntry.objects.filter(
+            type=item_type,
+            invoice__payment_from=self.user.account,
+            invoice__status="paid",
+        )
+        if entries.exists():
+            shares_paid = (
+                sum([entry.amount * entry.price for entry in entries])
+                / self.type.shares_amount_per_share
+            )
+
+            self.shares_paid = shares_paid
+            self.save_basic()
+
     def create_invoices(self):
         """Create invoices for this membership.
 
         This method depends to the collectivo.payments extension.
         """
-        try:
-            from collectivo.payments.models import (
-                Invoice,
-                Subscription,
-                ItemEntry,
-                ItemType,
-                ItemTypeCategory,
-            )
-        except ImportError:
+
+        if not payments_installed:
             raise ExtensionNotInstalled("collectivo.payments")
 
         # Create invoices for shares
@@ -241,17 +327,27 @@ class Membership(models.Model):
                 category=item_category,
                 extension=extension,
             )[0]
-            subscriptions = ItemEntry.objects.filter(
+            entries = ItemEntry.objects.filter(
                 type=item_type,
                 subscription__status="active",
                 subscription__payment_from=self.user.account,
             )
 
-            # Create subscription if needed
-            # TODO: Option to include current year/month in subscription
-            # TODO: Update if exists
-            # TODO: Price is not correct
-            if not subscriptions.exists():
+            # Create or update subscription
+            if entries.exists():
+                entry = entries.first()
+                subscription = entry.subscription
+
+                subscription.status = "active"
+                subscription.repeat_each = self.type.fees_repeat_each
+                subscription.repeat_unit = self.type.fees_repeat_unit
+                subscription.save()
+
+                entry.amount = 1
+                entry.price = self.fees_amount
+                entry.save()
+
+            else:
                 subscription = Subscription.objects.create(
                     payment_from=self.user.account,
                     status="active",
@@ -260,7 +356,7 @@ class Membership(models.Model):
                     repeat_each=self.type.fees_repeat_each,
                     repeat_unit=self.type.fees_repeat_unit,
                 )
-                price = self.type.shares_amount_per_share
+                price = self.fees_amount
                 ItemEntry.objects.create(
                     subscription=subscription,
                     type=item_type,

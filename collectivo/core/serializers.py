@@ -7,7 +7,7 @@ from django.db import models
 from django.utils.module_loading import import_string
 from rest_framework import serializers
 
-from collectivo.tags.models import Tag
+from collectivo.utils.schema import SchemaCondition
 
 from .models import CoreSettings, Permission, PermissionGroup
 
@@ -23,8 +23,9 @@ class CoreSettingsSerializer(serializers.ModelSerializer):
     class Meta:
         """Serializer settings."""
 
+        label = "Core Settings"
         model = CoreSettings
-        fields = "__all__"
+        exclude = ["id"]
 
 
 class PermissionSerializer(serializers.ModelSerializer):
@@ -37,6 +38,12 @@ class PermissionSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+if_extension = SchemaCondition(
+    condition="not_empty",
+    field="extension",
+)
+
+
 class PermissionGroupSerializer(serializers.ModelSerializer):
     """Serializer for permission groups."""
 
@@ -45,6 +52,14 @@ class PermissionGroupSerializer(serializers.ModelSerializer):
 
         model = PermissionGroup
         fields = "__all__"
+        read_only_fields = ["extension"]
+
+        schema_attrs = {
+            "name": {"read_only": if_extension},
+            "extension": {"visible": if_extension},
+            "description": {"read_only": if_extension},
+            "permissions": {"read_only": if_extension},
+        }
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -87,14 +102,11 @@ class UserProfilesSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
 
     # TODO: Load through TagProfile
-    tags = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=Tag.objects.all()
-    )
+    tags = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     # Define serializer fields based on registered profiles in store
     # TODO: Get field settings from serializer
     # TODO: Make fields editable for bulk edit
-    # TODO: Support foreign key and onetoone fields
 
     for profile_serializer in profile_serializers:
         profile = profile_serializer.Meta.model
@@ -117,13 +129,12 @@ class UserProfilesSerializer(serializers.ModelSerializer):
                         source=f"{_related_name}.{field.attname}",
                         read_only=True,
                     )
-            elif field.__class__ is models.OneToOneField:
-                logger.warning(
-                    "OneToOneField not supported in UserProfilesSerializer."
-                )
-            elif field.__class__ is models.ForeignKey:
-                logger.warning(
-                    "ForeignKey not supported in UserProfilesSerializer."
+            elif field.__class__ in (models.ForeignKey, models.OneToOneField):
+                locals()[
+                    f"{_related_name}__{field.attname}"
+                ] = serializers.PrimaryKeyRelatedField(
+                    source=f"{_related_name}.{field.attname}",
+                    read_only=True,
                 )
             elif field.__class__ is models.ManyToManyField:
                 locals()[

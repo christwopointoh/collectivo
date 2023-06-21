@@ -18,12 +18,37 @@ class CoreSettings(SingleInstance, models.Model):
 
     history = HistoricalRecords()
 
-    project_name = models.CharField(max_length=255, blank=True)
-    project_description = models.TextField(blank=True)
-    # TODO: Needs pillow
-    # project_logo = models.ImageField(
-    #     upload_to="core/logo/", null=True, blank=True
-    # )
+    project_name = models.CharField(
+        max_length=255,
+        default="My community plattform",
+        blank=True,
+    )
+    project_description = models.TextField(
+        blank=True,
+    )
+    project_logo = models.ImageField(
+        upload_to="core/logo/",
+        null=True,
+        blank=True,
+        verbose_name="Project logo (File upload)",
+    )
+    project_logo_url = models.URLField(
+        blank=True,
+        verbose_name="Project logo (URL)",
+    )
+
+    display_project_name = models.BooleanField(
+        default=True,
+        verbose_name="Display project name",
+    )
+    display_project_description = models.BooleanField(
+        default=False,
+        verbose_name="Display project description",
+    )
+    display_project_logo = models.BooleanField(
+        default=True,
+        verbose_name="Display project logo",
+    )
 
 
 class Permission(models.Model):
@@ -47,6 +72,10 @@ class Permission(models.Model):
         """Model settings."""
 
         unique_together = ("name", "extension")
+
+    def __str__(self):
+        """Return the string representation."""
+        return f"{self.extension} - {self.name}"
 
 
 class PermissionGroup(models.Model):

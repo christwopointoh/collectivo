@@ -7,7 +7,7 @@ from django.test import TestCase
 from django.urls import reverse
 from rest_framework.test import APIClient
 
-from collectivo.emails.models import EmailTemplate
+from collectivo.emails.models import EmailAutomation
 from collectivo.emails.tests import run_mocked_celery_chain
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
@@ -18,9 +18,6 @@ from .models import Membership, MembershipType
 
 User = get_user_model()
 
-CREATE_INVOICES_URL = reverse(
-    "collectivo.memberships:membership-create_invoices"
-)
 MEMBERSHIP_URL_NAME = "collectivo.memberships:membership-detail"
 
 
@@ -53,28 +50,15 @@ class MembershipsEmailsTests(TestCase):
             has_shares=True,
             shares_amount_per_share=15,
         )
-        self.membership_type.emails.template_started = (
-            EmailTemplate.objects.create(
-                name="Test Template Started",
-                subject="Test Subject Started",
-                body="Test Body Started",
+
+        for stage in ["applied", "accepted", "ended"]:
+            auto_appl = EmailAutomation.objects.get(name=f"Membership {stage}")
+            auto_appl.subject = f"Test Subject {stage}"
+            auto_appl.body = (
+                f"Test Body {stage}" + " {{ membership.type.name }}"
             )
-        )
-        self.membership_type.emails.template_accepted = (
-            EmailTemplate.objects.create(
-                name="Test Template Accepted",
-                subject="Test Subject Accepted",
-                body="Test Body Accepted",
-            )
-        )
-        self.membership_type.emails.template_ended = (
-            EmailTemplate.objects.create(
-                name="Test Template Ended",
-                subject="Test Subject Ended",
-                body="Test Body Ended",
-            )
-        )
-        self.membership_type.emails.save()
+            auto_appl.is_active = True
+            auto_appl.save()
 
     @patch("collectivo.emails.models.chain")
     def test_automatic_emails(self, chain):
@@ -86,21 +70,17 @@ class MembershipsEmailsTests(TestCase):
 
         run_mocked_celery_chain(chain)
         self.assertEqual(len(mail.outbox), 1)
-        self.assertEqual(mail.outbox[0].subject, "Test Subject Started")
+        self.assertEqual(mail.outbox[0].subject, "Test Subject applied")
+        self.assertEqual(
+            mail.outbox[0].body, "Test Body applied Test Type\n\n"
+        )
 
-        self.membership.date_accepted = "2020-01-01"
+        self.membership.stage = "accepted"
         self.membership.save()
 
         run_mocked_celery_chain(chain)
         self.assertEqual(len(mail.outbox), 2)
-        self.assertEqual(mail.outbox[1].subject, "Test Subject Accepted")
-
-        self.membership.date_ended = "2020-01-01"
-        self.membership.save()
-
-        run_mocked_celery_chain(chain)
-        self.assertEqual(len(mail.outbox), 3)
-        self.assertEqual(mail.outbox[2].subject, "Test Subject Ended")
+        self.assertEqual(mail.outbox[1].subject, "Test Subject accepted")
 
 
 class MembershipsPaymentsTests(TestCase):
@@ -143,8 +123,6 @@ class MembershipsPaymentsTests(TestCase):
         """Test that invoices are created correctly."""
 
         # First invoice
-        res = self.client.post(CREATE_INVOICES_URL)
-        self.assertEqual(res.status_code, 200)
         entry = ItemEntry.objects.get(
             type__name=self.membership_type.name,
         )
@@ -154,7 +132,6 @@ class MembershipsPaymentsTests(TestCase):
         self.assertEqual(entry.invoice.status, "open")
 
         # No second invoice if nothing changes
-        res = self.client.post(CREATE_INVOICES_URL)
         entries = ItemEntry.objects.filter(
             type__name=self.membership_type.name,
         )
@@ -163,7 +140,7 @@ class MembershipsPaymentsTests(TestCase):
         # Second invoice if shares change
         self.membership.shares_signed = 10 + 3
         self.membership.save()
-        res = self.client.post(CREATE_INVOICES_URL)
+
         entries = ItemEntry.objects.filter(
             type__name=self.membership_type.name,
         )

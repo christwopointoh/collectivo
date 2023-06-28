@@ -5,14 +5,13 @@ from collectivo.utils.filters import get_filterset, get_ordering_fields
 from collectivo.utils.mixins import HistoryMixin, SchemaMixin, SelfMixin
 from collectivo.utils.permissions import HasPerm, IsAuthenticated
 
-from . import serializers
+from . import models, serializers
 from .models import UserProfile
 
 
 class ProfileUserViewSet(
     SelfMixin,
     SchemaMixin,
-    HistoryMixin,
     viewsets.GenericViewSet,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
@@ -26,7 +25,6 @@ class ProfileUserViewSet(
 
 class ProfileAdminViewSet(
     SchemaMixin,
-    HistoryMixin,
     viewsets.GenericViewSet,
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
@@ -37,6 +35,25 @@ class ProfileAdminViewSet(
     queryset = UserProfile.objects.all()
     serializer_class = serializers.ProfileAdminSerializer
     permission_classes = [HasPerm]
-    required_perms = ["collectivo.profiles.admin"]
+    required_perms = {
+        "GET": [("view_users", "core")],
+        "ALL": [("edit_users", "core")],
+    }
     filterset_class = get_filterset(serializers.ProfileAdminSerializer)
     ordering_fields = get_ordering_fields(serializers.ProfileAdminSerializer)
+
+
+class ProfileHistoryViewSet(
+    SchemaMixin, HistoryMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+):
+    """View history of a Profile."""
+
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_users", "core")],
+        "ALL": [("edit_users", "core")],
+    }
+    serializer_class = serializers.ProfileHistorySerializer
+    queryset = models.UserProfile.history.model.objects.all()
+    filterset_class = get_filterset(serializers.ProfileHistorySerializer)
+    ordering_fields = get_ordering_fields(serializers.ProfileHistorySerializer)

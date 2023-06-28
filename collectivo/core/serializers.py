@@ -38,10 +38,22 @@ class PermissionSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-if_extension = SchemaCondition(
-    condition="not_empty",
-    field="extension",
-)
+if_extension: SchemaCondition = {
+    "condition": "not_empty",
+    "field": "extension",
+}
+
+if_not_users_custom: SchemaCondition = {
+    "condition": "equals",
+    "field": "users_custom",
+    "value": False,
+}
+
+if_not_perms_custom: SchemaCondition = {
+    "condition": "equals",
+    "field": "perms_custom",
+    "value": False,
+}
 
 
 class PermissionGroupSerializer(serializers.ModelSerializer):
@@ -58,17 +70,26 @@ class PermissionGroupSerializer(serializers.ModelSerializer):
             "name": {"read_only": if_extension},
             "extension": {"visible": if_extension},
             "description": {"read_only": if_extension},
-            "permissions": {"read_only": if_extension},
+            "perms_custom": {"visible": False},
+            "permissions": {"read_only": if_not_perms_custom},
+            "users_custom": {"visible": False},
+            "users": {"read_only": if_not_users_custom},
         }
 
 
-class UserSerializer(serializers.ModelSerializer):
-    """Serializer for members to manage their own data."""
+class PermissionGroupHistorySerializer(serializers.ModelSerializer):
+    """Serializer for history of permission groups."""
 
-    # TODO: Display all permissions of the user based on their groups
-    # permissions = serializers.PrimaryKeyRelatedField(
-    #     many=True, queryset=Permission.objects.all()
-    # )
+    class Meta:
+        """Serializer settings."""
+
+        model = PermissionGroup.history.model
+        fields = "__all__"
+
+
+class UserSerializer(serializers.ModelSerializer):
+    """Serializer for users."""
+
     permission_groups = serializers.PrimaryKeyRelatedField(
         many=True, queryset=PermissionGroup.objects.all()
     )
@@ -85,6 +106,52 @@ class UserSerializer(serializers.ModelSerializer):
             "permission_groups",
         ]
         read_only_fields = ["id"]
+
+
+class UserHistorySerializer(serializers.ModelSerializer):
+    """Serializer for history of users."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = User.history.model
+        fields = "__all__"
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """Serializer for members to manage their own data."""
+
+    # TODO: Display all permissions of the user based on their groups
+    # permissions = serializers.PrimaryKeyRelatedField(
+    #     many=True, queryset=Permission.objects.all()
+    # )
+    permissions = serializers.SerializerMethodField()
+
+    def get_permissions(self, obj):
+        """Return permissions of the user."""
+        perms = {}
+        for name, ext in Permission.objects.filter(
+            groups__in=obj.permission_groups.all()
+        ).values_list("name", "extension__name"):
+            if ext in perms:
+                perms[ext].append(name)
+            else:
+                perms[ext] = [name]
+        return perms
+
+    class Meta:
+        """Serializer settings."""
+
+        model = User
+        fields = [
+            "first_name",
+            "last_name",
+            "email",
+            "password",
+            "permissions",
+        ]
+        read_only_fields = ["first_name", "last_name"]
+        extra_kwargs = {"password": {"write_only": True, "required": False}}
 
 
 profile_serializers = [
@@ -161,13 +228,3 @@ class UserProfilesSerializer(serializers.ModelSerializer):
             "groups",
         ]
         read_only_fields = ["user"]
-
-
-class GroupSerializer(serializers.ModelSerializer):
-    """Serializer for members to manage their own data."""
-
-    class Meta:
-        """Serializer settings."""
-
-        model = Group
-        fields = ["name"]

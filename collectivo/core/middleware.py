@@ -30,7 +30,17 @@ class RequestLogMiddleware:
         if hasattr(response, "status_code"):
             log_data["status_code"] = response.status_code
             if str(response.status_code)[0] in "45":
-                log_data["response_body"] = response.content
+                if isinstance(response.content, str):
+                    log_data["response_body"] = (
+                        response.content
+                        if len(response.content) < 1000
+                        else response.content[:1000] + "..."
+                    )
+                elif isinstance(response.content, bytes):
+                    co = response.content.decode("utf-8")
+                    log_data["response_body"] = (
+                        co if len(co) < 1000 else co[:1000] + "..."
+                    )
         if hasattr(request, "userinfo") and hasattr(
             request.userinfo, "user_id"
         ):

@@ -1,35 +1,55 @@
 """Serializers of the memberships extension."""
-from django.contrib.auth import get_user_model
-from rest_framework import serializers
+import logging
+from types import SimpleNamespace
 
-from collectivo.utils.schema import SchemaCondition
+from django.conf import settings
+from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.utils.module_loading import import_string
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
+from collectivo.tags.models import Tag
+from collectivo.utils.schema import Schema, SchemaCondition
 from collectivo.utils.serializers import UserFields
 
 from . import models
 from .statistics import calculate_statistics
 
-try:
-    from collectivo.emails.models import EmailTemplate
-
-    emails_installed = True
-except ImportError:
-    emails_installed = False
-
 User = get_user_model()
+
+logger = logging.getLogger(__name__)
+
+
+class _TagsSerializer(serializers.Serializer):
+    """Serializer for tags.
+
+    TODO: This is a temporary solution as a m2m field with source (below) is
+    not writable.
+    """
+
+    user__tags = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Tag.objects.all(),
+        read_only=False,
+    )
 
 
 class MembershipSerializer(UserFields):
-    """Serializer for memberships."""
+    """Serializer for admins to manage memberships."""
 
     try:
-        import collectivo.tags
+        from collectivo.tags.models import Tag
 
         user__tags = serializers.PrimaryKeyRelatedField(
-            many=True,
             source="user.tags",
-            read_only=True,
+            queryset=Tag.objects.all(),
             label="Tags",
+            many=True,
+            required=False,
+            allow_null=True,
         )
+
     except ImportError:
         pass
     try:
@@ -49,10 +69,33 @@ class MembershipSerializer(UserFields):
         model = models.Membership
         fields = "__all__"
         read_only_fields = ["id", "number"]
+        schema_attrs = {
+            "user__first_name": {"input_type": "text"},
+            "user__last_name": {"input_type": "text"},
+            "user__profile__person_type": {"input_type": "text"},
+        }
+
+    def validate(self, data):
+        """Validate the data."""
+
+        # Check if the date of the current stage is set
+        stage = data.get("stage", None)
+        if stage is not None and data.get(f"date_{stage}", None) is None:
+            raise ValidationError(f"Stage '{stage} requires 'date_{stage}'")
+        return data
+
+    def update(self, instance, validated_data):
+        """Save user tags seperately."""
+        tr = _TagsSerializer(data=self.initial_data)
+        tr.is_valid()
+        if "user_tags" in tr.validated_data:
+            instance.user.tags.set(tr.validated_data["user__tags"])
+
+        return super().update(instance, validated_data)
 
 
 class MembershipSelfSerializer(serializers.ModelSerializer):
-    """Serializer for memberships."""
+    """Serializer for users to manage their own memberships."""
 
     class Meta:
         """Serializer settings."""
@@ -119,49 +162,22 @@ email_fields = [
     "emails__template_ended",
 ]
 
-if_shares = SchemaCondition(condition="equals", field="has_shares", value=True)
-if_fees = SchemaCondition(condition="equals", field="has_fees", value=True)
+if_shares: SchemaCondition = {
+    "condition": "equals",
+    "field": "has_shares",
+    "value": True,
+}
+if_fees: SchemaCondition = {
+    "condition": "equals",
+    "field": "has_fees",
+    "value": True,
+}
 
 
 class MembershipTypeSerializer(serializers.ModelSerializer):
     """Serializer for membership types."""
 
     statistics = serializers.SerializerMethodField()
-
-    if emails_installed:
-        emails__template_started = serializers.PrimaryKeyRelatedField(
-            source="emails.template_started",
-            queryset=EmailTemplate.objects.all(),
-            required=False,
-            allow_null=True,
-            label="Automatic email: Membership started",
-            help_text=(
-                "The email template to send when a membership of this type"
-                " is assigned a starting date."
-            ),
-        )
-        emails__template_accepted = serializers.PrimaryKeyRelatedField(
-            source="emails.template_accepted",
-            queryset=EmailTemplate.objects.all(),
-            required=False,
-            allow_null=True,
-            label="Automatic email: Membership accepted",
-            help_text=(
-                "The email template to send when a membership of this type"
-                " is assigned an acceptance date."
-            ),
-        )
-        emails__template_ended = serializers.PrimaryKeyRelatedField(
-            source="emails.template_ended",
-            queryset=EmailTemplate.objects.all(),
-            required=False,
-            allow_null=True,
-            label="Automatic email: Membership ended",
-            help_text=(
-                "The email template to send when a membership of this type"
-                " is assigned a ending date."
-            ),
-        )
 
     class Meta:
         """Serializer settings."""
@@ -191,32 +207,6 @@ class MembershipTypeSerializer(serializers.ModelSerializer):
         """Get statistics for this membership type."""
         return calculate_statistics(obj)
 
-    def create(self, validated_data):
-        """Create a new membership."""
-        if not emails_installed:
-            return super().create(validated_data)
-        email_data = {}
-        if "emails" in validated_data:
-            email_data = validated_data.pop("emails")
-        obj = super().create(validated_data)
-        for field, data in email_data.items():
-            setattr(obj.emails, field, data)
-        obj.emails.save()
-        return obj
-
-    def update(self, instance, validated_data):
-        """Update an existing membership."""
-        if not emails_installed:
-            return super().update(instance, validated_data)
-        email_data = {}
-        if "emails" in validated_data:
-            email_data = validated_data.pop("emails")
-        obj = super().update(instance, validated_data)
-        for field, data in email_data.items():
-            setattr(obj.emails, field, data)
-        obj.emails.save()
-        return obj
-
 
 class MembershipStatusSerializer(serializers.ModelSerializer):
     """Serializer for membership statuses."""
@@ -228,3 +218,121 @@ class MembershipStatusSerializer(serializers.ModelSerializer):
         fields = "__all__"
         read_only_fields = ["id"]
         label = "Membership status"
+
+
+# TODO Specify membership type automatically
+# TODO Status only of membership type
+# TODO Shares
+# TODO Fees
+class MembershipRegisterSerializer(serializers.ModelSerializer):
+    """Serializer of serializers for membership registration."""
+
+    class Meta:
+        """Serializer settings."""
+
+        label = "Membership"
+        model = models.Membership
+        fields = ["type", "status", "shares_signed"]
+        schema: Schema = {
+            "fields": {"status": {"required": True}},
+            "type": {"visible": False},
+        }
+
+    # Add user id to data before saving
+    def create(self, validated_data):
+        """Add user to registration data."""
+        validated_data["user"] = self.context["request"].user
+        return super().create(validated_data)
+
+
+try:
+    registration_serializers = settings.COLLECTIVO["extensions"][
+        "collectivo.memberships"
+    ].get("registration_serializers", [])
+    for item in registration_serializers:
+        for method, serializer in item.items():
+            item[method] = import_string(serializer)
+except Exception as e:
+    logger.error(e, exc_info=True)
+    registration_serializers = []
+
+
+class MembershipRegisterCombinedSerializer(serializers.Serializer):
+    """Serializer of serializers for membership registration."""
+
+    class Meta:
+        """Serializer settings."""
+
+        label = "Membership registration"
+        model = models.Membership
+        fields = "__all__"
+
+    for item in registration_serializers:
+        for method, serializer in item.items():
+            locals()[serializer.__name__] = serializer()
+
+    @classmethod
+    def initialize(cls, membership_type, user):
+        """Initialize serializer with data from database."""
+        payload = SimpleNamespace()
+
+        for item in registration_serializers:
+            for method, serializer in item.items():
+                name = serializer.__name__
+                model = serializer.Meta.model
+                if method == "update":
+                    obj = model.objects.get(user=user)
+                    setattr(payload, name, obj)
+                else:
+                    setattr(payload, name, None)
+
+        return cls(payload)
+
+    def to_representation(self, instance):
+        """Call all serializers for registration."""
+        if instance:
+            return super().to_representation(instance)
+        else:
+            return {}
+
+    def create(self, validated_data):
+        """Call all serializers for registration."""
+        with transaction.atomic():
+            request = self.context.get("request")
+            for item in registration_serializers:
+                for method, serializer in item.items():
+                    name = serializer.__name__
+                    data = request.data[name]
+                    model = serializer.Meta.model
+                    if method == "create":
+                        seri = serializer(data=data)
+                        seri.context.update({"request": request})
+                        seri.is_valid(raise_exception=True)
+                        seri.create(seri.validated_data)
+                    elif method == "update":
+                        instance = model.objects.get(user=request.user)
+                        seri = serializer(instance, data=data)
+                        seri.is_valid(raise_exception=True)
+                        seri.update(instance, seri.validated_data)
+
+        return {}
+
+
+class MembershipHistorySerializer(serializers.ModelSerializer):
+    """Serializer for membership history."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = models.Membership.history.model
+        fields = "__all__"
+
+
+class MembershipTypeHistorySerializer(serializers.ModelSerializer):
+    """Serializer for membershipType history."""
+
+    class Meta:
+        """Serializer settings."""
+
+        model = models.MembershipType.history.model
+        fields = "__all__"

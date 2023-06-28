@@ -1,12 +1,12 @@
 """Schema mixin for collectivo viewsets."""
 from collections import OrderedDict
-from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, TypedDict
 
 from django.contrib.auth import get_user_model
 from django.db import models
 from django.urls import reverse
 from django.urls.exceptions import NoReverseMatch
+from rest_framework import mixins
 from rest_framework.fields import empty
 from rest_framework.response import Response
 from rest_framework.serializers import Serializer
@@ -17,6 +17,54 @@ from rest_framework.viewsets import GenericViewSet
 # TODO Group fields together?
 # TODO Remove choices from schema if choices_endpoint is set,
 # once implemented in frontend
+
+
+class SchemaCondition(TypedDict):
+    """A condition of a schema field."""
+
+    condition: Literal["equals", "empty", "not_empty"]
+    field: str
+    value: any
+
+
+class SchemaField(TypedDict):
+    """A field of a schema."""
+
+    field_type: str
+    input_type: str
+    label: str
+    help_text: str
+    visible: bool | SchemaCondition
+    required: bool | SchemaCondition
+    default: any
+    max_length: int
+    min_length: int
+    max_value: int
+    min_value: int
+    read_only: bool
+    write_only: bool
+    choices: OrderedDict
+    choices_url: str
+
+
+class SchemaSection(TypedDict):
+    """Structure of schema fields."""
+
+    label: str
+    description: str
+    style: Literal["read_only", "row"]
+    fields: list[str]
+
+
+class Schema(TypedDict):
+    """Schema for a serializer."""
+
+    label: str
+    description: str
+    fields: OrderedDict[str, SchemaField]
+    structure: list[SchemaSection]
+    actions: list[Literal["list", "create", "retrieve", "update", "delete"]]
+
 
 field_attrs = [
     "label",
@@ -88,53 +136,28 @@ def get_endpoint(model: models.Model, source: str = None) -> str:
         return None
 
 
-@dataclass
-class SchemaField:
-    """A field of a schema."""
+def get_serializer_schema(serializer: Serializer):
+    """Get the schema for a serializer."""
+    if hasattr(serializer.Meta, "schema"):
+        settings = serializer.Meta.schema
+    else:
+        settings = {}
 
-    field_type: str = None
-    input_type: str = None
-    label: str = None
-    help_text: str = None
-    required: bool = None
-    default: any = None
-    max_length: int = None
-    min_length: int = None
-    max_value: int = None
-    min_value: int = None
-    read_only: bool = None
-    write_only: bool = None
-    choices: OrderedDict = None
-    choices_url: str = None
-
-
-@dataclass
-class SchemaCondition:
-    """A condition of a schema field."""
-
-    condition: Literal["equals", "empty", "not_empty"]
-    field: str = None
-    value: any = None
-
-    def to_dict(self):
-        """Return condition as dict."""
-        return {
-            "field": self.field,
-            "condition": self.condition,
-            "value": self.value,
-        }
-
-
-def get_model_schema(self: GenericViewSet):
-    """Return model schema."""
-    serializer: Serializer = self.get_serializer_class()()
     data = {}
     for field_name, field_obj in serializer.fields.items():
-        field_type = field_obj.__class__.__name__
-        data[field_name] = field_data = {
-            "field_type": field_type,
-            "input_type": input_types.get(field_type, "text"),
-        }
+        if isinstance(field_obj, Serializer):
+            field_type = "serializer"
+            data[field_name] = field_data = {
+                "field_type": field_type,
+                "input_type": field_type,
+                "schema": get_serializer_schema(field_obj),
+            }
+        else:
+            field_type = field_obj.__class__.__name__
+            data[field_name] = field_data = {
+                "field_type": field_type,
+                "input_type": input_types.get(field_type, "text"),
+            }
 
         # Convert CharField to textarea if no max_length is set (TextField)
         if field_type == "CharField" and field_obj.max_length is None:
@@ -148,14 +171,14 @@ def get_model_schema(self: GenericViewSet):
                     or hasattr(field_obj, "get_queryset")
                 ):
                     choices_url = get_endpoint(
-                        self.get_serializer_class().Meta.model,
+                        serializer.Meta.model,
                         field_obj.source,
                     )
                     data[field_name]["choices_url"] = choices_url
 
                     # TODO: This should be removed once frontend uses url
                     queryset = get_queryset(
-                        self.get_serializer_class().Meta.model,
+                        serializer.Meta.model,
                         field_obj.source,
                     )
                     value = get_choices(queryset)
@@ -165,17 +188,19 @@ def get_model_schema(self: GenericViewSet):
                 if value is not empty and value is not None:
                     data[field_name][attr] = value
 
-        # Add custom schema attributes from serializer
+        # Add custom schema attributes from serializer (legacy version)
         if (
             hasattr(serializer.Meta, "schema_attrs")
             and field_name in serializer.Meta.schema_attrs
         ):
             for key, value in serializer.Meta.schema_attrs[field_name].items():
-                data[field_name][key] = (
-                    value.to_dict()
-                    if isinstance(value, SchemaCondition)
-                    else value
-                )
+                data[field_name][key] = value
+
+        # Add custom schema attributes from serializer (new version)
+        if "fields" in settings and field_name in settings["fields"]:
+            for key, value in settings["fields"][field_name].items():
+                data[field_name][key] = value
+
         # Ensure that read only fields cannot be required
         if field_data.get("read_only") is True:
             field_data["required"] = False
@@ -189,5 +214,34 @@ def get_model_schema(self: GenericViewSet):
         else "",
         "fields": data,
     }
+
+    # Overwrite fields from settings except for "fields"
+    for key, value in settings.items():
+        if key != "fields":
+            schema[key] = value
+
+    return schema
+
+
+def get_model_schema(self: GenericViewSet):
+    """Return model schema."""
+    serializer: Serializer = self.get_serializer_class()()
+    schema = get_serializer_schema(serializer)
+
+    # Add allowed actions based on viewset mixins
+    if "actions" not in schema:
+        schema["actions"] = actions = []
+        if isinstance(self, mixins.CreateModelMixin):
+            actions.append("create")
+        if isinstance(self, mixins.RetrieveModelMixin):
+            actions.append("retrieve")
+        if isinstance(self, mixins.UpdateModelMixin):
+            actions.append("update")
+        if isinstance(self, mixins.DestroyModelMixin):
+            actions.append("delete")
+        if isinstance(self, mixins.ListModelMixin):
+            actions.append("list")
+        if hasattr(self, "bulk_update"):
+            actions.append("update-bulk")
 
     return Response(schema)

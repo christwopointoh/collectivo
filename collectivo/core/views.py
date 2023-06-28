@@ -1,15 +1,23 @@
 """Views of the core extension."""
 from django.contrib.auth import get_user_model
 from drf_spectacular.utils import OpenApiResponse, extend_schema
-from rest_framework import viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from collectivo.utils.filters import get_filterset, get_ordering_fields
-from collectivo.utils.mixins import HistoryMixin, SchemaMixin
-from collectivo.utils.permissions import IsSuperuser
-from collectivo.utils.viewsets import ExtensionModelViewSet, SingleModelViewSet
+from collectivo.utils.mixins import SchemaMixin
+from collectivo.utils.permissions import (
+    HasPerm,
+    IsSuperuser,
+    ReadOrIsSuperuser,
+)
+from collectivo.utils.viewsets import (
+    ExtensionModelViewSet,
+    HistoryViewSet,
+    SingleModelViewSet,
+)
 from collectivo.version import __version__
 
 from . import models, serializers
@@ -46,7 +54,7 @@ class CoreSettingsViewSet(SingleModelViewSet):
 
     queryset = models.CoreSettings.objects.all()
     serializer_class = serializers.CoreSettingsSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [ReadOrIsSuperuser]
 
 
 class PermissionViewSet(ExtensionModelViewSet):
@@ -64,38 +72,100 @@ class PermissionGroupViewSet(ExtensionModelViewSet):
 
     queryset = models.PermissionGroup.objects.all()
     serializer_class = serializers.PermissionGroupSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_groups", "core")],
+        "ALL": [("edit_groups", "core")],
+    }
     filterset_class = get_filterset(serializers.PermissionGroupSerializer)
     ordering_fields = get_ordering_fields(
         serializers.PermissionGroupSerializer
     )
 
+    def destroy(self, request, *args, **kwargs):
+        """Delete a permission group."""
+        instance = self.get_object()
+        if instance.extension:
+            return Response(
+                {"detail": "This object is managed by an extension."},
+                status=400,
+            )
+        return super().destroy(request, *args, **kwargs)
 
-class UserViewSet(SchemaMixin, HistoryMixin, viewsets.ModelViewSet):
+
+class PermissionGroupHistoryViewSet(HistoryViewSet):
+    """Viewset for history of permission groups."""
+
+    queryset = models.PermissionGroup.history.model.objects.all()
+    serializer_class = serializers.PermissionGroupHistorySerializer
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_groups", "core")],
+        "ALL": [("edit_groups", "core")],
+    }
+    filterset_class = get_filterset(
+        serializers.PermissionGroupHistorySerializer
+    )
+    ordering_fields = get_ordering_fields(
+        serializers.PermissionGroupHistorySerializer
+    )
+
+
+class UserViewSet(SchemaMixin, viewsets.ModelViewSet):
     """Viewset for django users."""
 
     queryset = User.objects.all()
     serializer_class = serializers.UserSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_users", "core")],
+        "ALL": [("edit_users", "core")],
+    }
     filterset_class = get_filterset(serializers.UserSerializer)
     ordering_fields = get_ordering_fields(serializers.UserSerializer)
 
 
-class UserProfilesViewSet(SchemaMixin, HistoryMixin, viewsets.ModelViewSet):
+class UserHistoryViewSet(HistoryViewSet):
+    """Viewset for history of users."""
+
+    queryset = User.history.model.objects.all()
+    serializer_class = serializers.UserHistorySerializer
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_users", "core")],
+        "ALL": [("edit_users", "core")],
+    }
+    filterset_class = get_filterset(serializers.UserHistorySerializer)
+    ordering_fields = get_ordering_fields(serializers.UserHistorySerializer)
+
+
+class UserProfileViewSet(
+    SchemaMixin,
+    viewsets.GenericViewSet,
+    mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
+):
+    """Viewset for django users to manage their own data."""
+
+    queryset = User.objects.all()
+    serializer_class = serializers.UserProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        """Return queryset entry with the request's user."""
+        return self.request.user
+
+
+class UserProfilesViewSet(
+    SchemaMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+):
     """Viewset for django users including all their profiles."""
 
     queryset = User.objects.all()
     serializer_class = serializers.UserProfilesSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_users", "core")],
+    }
     filterset_class = get_filterset(serializers.UserProfilesSerializer)
     ordering_fields = get_ordering_fields(serializers.UserProfilesSerializer)
-
-
-class GroupViewSet(SchemaMixin, HistoryMixin, viewsets.ModelViewSet):
-    """Viewset for django groups."""
-
-    queryset = Group.objects.all()
-    serializer_class = serializers.GroupSerializer
-    permission_classes = [IsSuperuser]
-    filterset_class = get_filterset(serializers.GroupSerializer)
-    ordering_fields = get_ordering_fields(serializers.GroupSerializer)

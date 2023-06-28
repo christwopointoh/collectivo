@@ -1,5 +1,7 @@
 """Setup function of the core extension."""
 
+import logging
+
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
@@ -8,16 +10,20 @@ from collectivo.core.models import Permission, PermissionGroup
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import Menu, MenuItem
 from collectivo.utils.dev import DEV_USERS
+from collectivo.version import __version__
 
 from .models import CoreSettings
 
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 
 def setup():
     """Initialize extension after database is ready."""
 
-    extension = Extension.register(
+    logger.info(f"Starting Collectivo v{__version__}")
+
+    extension = Extension.objects.register(
         name=CoreConfig.name, description=CoreConfig.description, built_in=True
     )
 
@@ -34,9 +40,26 @@ def setup():
     )
     superuser.permissions.add(coreadmin)
 
+    # Extension permissions
+    perm_names = [
+        "view_users",
+        "edit_users",
+        "view_groups",
+        "edit_groups",
+        "view_settings",
+        "edit_settings",
+    ]
+    for perm_name in perm_names:
+        perm = Permission.objects.register(
+            name=perm_name,
+            description=f"Can {perm_name.replace('_', ' ')}",
+            extension=extension,
+        )
+        superuser.permissions.add(perm)
+
     # User menu
-    Menu.register(name="main", extension=extension)
-    MenuItem.register(
+    Menu.objects.register(name="main", extension=extension)
+    MenuItem.objects.register(
         name="profile",
         label="Profile",
         extension=extension,
@@ -44,7 +67,7 @@ def setup():
         icon_name="pi-user",
         parent="main",
     )
-    MenuItem.register(
+    MenuItem.objects.register(
         name="logout",
         label="Log out",
         extension=extension,
@@ -55,25 +78,25 @@ def setup():
     )
 
     # Create admin menu
-    Menu.register(name="admin", extension=extension)
-    MenuItem.register(
+    Menu.objects.register(name="admin", extension=extension)
+    MenuItem.objects.register(
         name="users",
         label="Users",
         extension=extension,
         parent="admin",
         route=extension.name + "/users",
         icon_name="pi-users",
-        requires_perm=("admin", "core"),
+        requires_perm=("view_users", "core"),
         order=00,
     )
-    MenuItem.register(
+    MenuItem.objects.register(
         name="settings",
         label="Settings",
         extension=extension,
         parent="admin",
         route=extension.name + "/settings",
         icon_name="pi-cog",
-        requires_perm=("admin", "core"),
+        requires_perm=("view_settings", "core"),
         order=100,
     )
 

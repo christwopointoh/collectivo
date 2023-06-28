@@ -6,17 +6,27 @@ from collectivo.core.models import Permission
 from collectivo.extensions.models import Extension
 from collectivo.utils import get_instance
 from collectivo.utils.managers import NameManager
-from collectivo.utils.models import RegisterMixin
 
 
 class DashboardTileButton(models.Model):
     """A button that can be included in a dashboard tile."""
+
+    class Meta:
+        """Meta settings."""
+
+        unique_together = ("name", "extension")
 
     objects = NameManager()
     history = HistoricalRecords()
 
     name = models.CharField(
         max_length=255, unique=True, null=True, default=None
+    )
+    extension = models.ForeignKey(
+        "extensions.Extension",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
     )
     label = models.CharField(max_length=255, null=True, blank=True)
     link = models.CharField(max_length=255, null=True, blank=True)
@@ -33,7 +43,29 @@ class DashboardTileButton(models.Model):
         return self.label
 
 
-class DashboardTile(models.Model, RegisterMixin):
+class DashboardTileManager(NameManager):
+    """Manager for the model DashboardTile.
+
+    Models must have the fields name, extension,and requires_perm.
+    Requires perm should be a tuple of (perm_name, ext_name).
+    """
+
+    def register(
+        cls,
+        name: str,
+        extension: str | Extension,
+        requires_perm: tuple | Permission = None,
+        **payload,
+    ):
+        """Register a new menu item."""
+        payload["extension"] = get_instance(Extension, extension)
+        payload["requires_perm"] = get_instance(
+            Permission, requires_perm, needs_ext=True
+        )
+        return super().register(name=name, **payload)
+
+
+class DashboardTile(models.Model):
     """A component that can be included in the dashboard."""
 
     class Meta:
@@ -41,7 +73,7 @@ class DashboardTile(models.Model, RegisterMixin):
 
         unique_together = ("name", "extension")
 
-    objects = NameManager()
+    objects = DashboardTileManager()
     history = HistoricalRecords()
 
     name = models.CharField(max_length=255, unique=True)
@@ -60,9 +92,21 @@ class DashboardTile(models.Model, RegisterMixin):
         on_delete=models.CASCADE,
         null=True,
         blank=True,
+        related_name="requires_perm",
         help_text=(
             "If set, the object will only be displayed to users with "
-            "this group."
+            "this permission."
+        ),
+    )
+    requires_not_perm = models.ForeignKey(
+        "core.Permission",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name="requires_not_perm",
+        help_text=(
+            "If set, the object will only be displayed to users without "
+            "this permission."
         ),
     )
 
@@ -87,16 +131,3 @@ class DashboardTile(models.Model, RegisterMixin):
     def __str__(self):
         """Return string representation of the model."""
         return self.name
-
-    @classmethod
-    def register(
-        cls,
-        name: str,
-        extension: str | Extension,
-        requires_perm: str = None,
-        **payload,
-    ):
-        """Register a new dashboard tile."""
-        payload["extension"] = get_instance(Extension, extension)
-        payload["requires_perm"] = get_instance(Permission, requires_perm)
-        return super().register(name=name, **payload)

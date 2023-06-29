@@ -1,6 +1,6 @@
 # Development
 
-## How to set up a development system
+## Set up a development system
 
 ### Backend
 
@@ -75,3 +75,28 @@ If `example_data` is `true` in [collectivo.yml](reference.md#settings), the foll
 - `test_user_not_member@example.com`
 
 The password for all users is `Test123!`.
+
+## Develop extensions
+
+### Background tasks
+
+Collectivo uses [celery](https://docs.celeryq.dev/en/stable/) to run background tasks. To define a new task, create a file `tasks.py` in your extension folder and add a function with the [`@shared_task`](https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html#using-the-shared-task-decorator) decorator.
+To avoid naming conflicts, the name of the task should start with the name of your extension. For example:
+
+```python title="my_extension/tasks.py"
+
+from celery import shared_task
+
+@shared_task(name="my_extension_task")
+def my_extension_task():
+    print("my_extension_task has been called")
+```
+
+To define periodic tasks, create a file `schedules.py` in your extension folder and add a dictionary named `schedules`. The content of this dictionary should follow the syntax of celery's [`app.conf.beat_schedule`](https://docs.celeryq.dev/en/stable/userguide/configuration.html#std-setting-beat_schedule). For example:
+
+```python title="my_extension/schedules.py"
+schedules = {
+    # Execute my_extension_task every 10 seconds
+    "ping-1min": {"task": "my_extension_task", "schedule": 10.0},
+}
+```

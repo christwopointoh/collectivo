@@ -1,6 +1,8 @@
 # Development
 
-## Set up a development system
+## Setting up a development system
+
+The following instructions will help you set up a local system to develop Collectivo. If you only want to create a custom extension, this is not needed (see [developing extensions](#developing-extensions)).
 
 ### Backend
 
@@ -76,11 +78,35 @@ If `example_data` is `true` in [collectivo.yml](reference.md#settings), the foll
 
 The password for all users is `Test123!`.
 
-## Develop extensions
+## Developing extensions
+
+Extensions can be added to the backend of Collectivo as [Django applications](https://docs.djangoproject.com/en/4.2/ref/applications/) and to the frontend as [Vue components](https://vuejs.org/guide/introduction.html). In both cases, the extension code is added to the application through a [Docker volume](https://docs.docker.com/storage/volumes/). An alternative to extensions is to use [external services](extensions/components.md).
+
+### Create a backend extension
+
+Start from a clone of the [quickstart repository](quickstart.md) and create a copy of the extension template:
+
+```shell
+cp -r collectivo/extensions/extension_template collectivo/extensions/my_extension
+```
+
+Adapt the name of the extension in the app configuration:
+
+```python title="collectivo/extensions/my_extension/apps.py"
+class ExtensionConfig(AppConfig):
+    name = "extensions.my_extension"
+```
+
+Add the name of the extension to [`collectivo.yml`](reference.md#settings):
+
+```yaml title="collectivo/collectivo.yml"
+extensions:
+  - extensions.my_extension
+```
 
 ### Background tasks
 
-Collectivo uses [celery](https://docs.celeryq.dev/en/stable/) to run background tasks. To define a new task, create a file `tasks.py` in your extension folder and add a function with the [`@shared_task`](https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html#using-the-shared-task-decorator) decorator.
+Collectivo uses [Celery](https://docs.celeryq.dev/en/stable/) to run background tasks. To define a new task, create a file `tasks.py` in your extension folder and add a function with the [`@shared_task`](https://docs.celeryq.dev/en/stable/django/first-steps-with-django.html#using-the-shared-task-decorator) decorator.
 To avoid naming conflicts, the name of the task should start with the name of your extension. For example:
 
 ```python title="my_extension/tasks.py"

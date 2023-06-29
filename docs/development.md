@@ -87,7 +87,8 @@ Extensions can be added to the backend of Collectivo as [Django applications](ht
 Start from a clone of the [quickstart repository](quickstart.md) and create a copy of the extension template:
 
 ```shell
-cp -r collectivo/extensions/extension_template collectivo/extensions/my_extension
+cd collectivo/extensions/
+cp -r extension_template my_extension
 ```
 
 Adapt the name of the extension in the app configuration:
@@ -123,6 +124,6 @@ To define periodic tasks, create a file `schedules.py` in your extension folder 
 ```python title="my_extension/schedules.py"
 schedules = {
     # Execute my_extension_task every 10 seconds
-    "ping-1min": {"task": "my_extension_task", "schedule": 10.0},
+    "my_extension_task-10sec": {"task": "my_extension_task", "schedule": 10.0},
 }
 ```

@@ -30,11 +30,13 @@ def setup(sender, **kwargs):
     # Superuser permissions
     superuser = PermissionGroup.objects.register(
         name="superuser",
+        label="Superuser",
         description="Admin access to all possible actions.",
         extension=extension,
     )
     coreadmin = Permission.objects.register(
         name="admin",
+        label="Admin",
         description="Admin access to all possible actions.",
         extension=extension,
     )
@@ -52,6 +54,7 @@ def setup(sender, **kwargs):
     for perm_name in perm_names:
         perm = Permission.objects.register(
             name=perm_name,
+            label=perm_name.replace("_", " ").capitalize(),
             description=f"Can {perm_name.replace('_', ' ')}",
             extension=extension,
         )

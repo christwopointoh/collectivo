@@ -138,6 +138,11 @@ class MembershipType(models.Model):
             else:
                 self.delete_registration_form()
 
+    @property
+    def short_name(self):
+        """Return a short name to identify the membership programmatically."""
+        return f"membership_type_{self.id}"
+
     def delete(self, *args, **kwargs):
         """Delete the model and remove registration."""
         self.delete_group()
@@ -148,11 +153,13 @@ class MembershipType(models.Model):
         """Handle the group for this membership type."""
         extension = Extension.objects.get(name="memberships")
         permission = Permission.objects.register(
-            name=self.name,
+            name=self.short_name,
+            label=self.name,
             extension=extension,
         )
         group = PermissionGroup.objects.register(
-            name=self.name,
+            name=self.short_name,
+            label=self.name,
             description=(
                 "Members of this group have a membership of the type '{}'."
                 .format(self.name)
@@ -169,14 +176,14 @@ class MembershipType(models.Model):
         extension = Extension.objects.get(name="memberships")
         try:
             Permission.objects.get(
-                name=self.name, extension=extension
+                name=self.short_name, extension=extension
             ).delete()
         except Permission.DoesNotExist:
             pass
 
         try:
             PermissionGroup.objects.get(
-                name=self.name, extension=extension
+                name=self.short_name, extension=extension
             ).delete()
         except PermissionGroup.DoesNotExist:
             pass
@@ -187,11 +194,11 @@ class MembershipType(models.Model):
         extension = Extension.objects.get(name="memberships")
 
         permission = Permission.objects.get(
-            name=self.name, extension=extension
+            name=self.short_name, extension=extension
         )
 
         tile = DashboardTile.objects.register(
-            name=self.name,
+            name=self.short_name,
             label="Membership application",
             extension=extension,
             source="db",
@@ -202,7 +209,7 @@ class MembershipType(models.Model):
         )
 
         button = DashboardTileButton.objects.register(
-            name=self.name,
+            name=self.short_name,
             label="Register",
             extension=Extension.objects.get(name="memberships"),
             link_type="internal",
@@ -217,14 +224,14 @@ class MembershipType(models.Model):
 
         try:
             DashboardTile.objects.get(
-                name=self.name, extension=extension
+                name=self.short_name, extension=extension
             ).delete()
         except DashboardTile.DoesNotExist:
             pass
 
         try:
             DashboardTileButton.objects.get(
-                name=self.name, extension=extension
+                name=self.short_name, extension=extension
             ).delete()
         except DashboardTileButton.DoesNotExist:
             pass
@@ -359,7 +366,7 @@ class Membership(models.Model):
         """Assign the user to the group of the membership type."""
         extension = Extension.objects.get(name="memberships")
         group = PermissionGroup.objects.get(
-            name=self.type.name,
+            name=self.type.short_name,
             extension=extension,
         )
         if remove:
@@ -395,7 +402,7 @@ class Membership(models.Model):
             name="Shares", extension=extension
         )[0]
         item_type = ItemType.objects.get_or_create(
-            name=self.type.name,
+            name=self.type.short_name,
             category=item_category,
             extension=extension,
         )[0]
@@ -429,7 +436,7 @@ class Membership(models.Model):
                 name="Shares", extension=extension
             )[0]
             item_type = ItemType.objects.get_or_create(
-                name=self.type.name,
+                name=self.type.short_name,
                 category=item_category,
                 extension=extension,
             )[0]
@@ -463,7 +470,7 @@ class Membership(models.Model):
                 name="Fees", extension=extension
             )[0]
             item_type = ItemType.objects.get_or_create(
-                name=self.type.name,
+                name=self.type.short_name,
                 category=item_category,
                 extension=extension,
             )[0]

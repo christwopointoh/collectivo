@@ -52,7 +52,7 @@ class MembershipsEmailsTests(TestCase):
         )
 
         for stage in ["applied", "accepted", "ended"]:
-            auto_appl = EmailAutomation.objects.get(name=f"Membership {stage}")
+            auto_appl = EmailAutomation.objects.get(name=f"membership_{stage}")
             auto_appl.subject = f"Test Subject {stage}"
             auto_appl.body = (
                 f"Test Body {stage}" + " {{ membership.type.name }}"

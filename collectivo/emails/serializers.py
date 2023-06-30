@@ -59,7 +59,7 @@ class EmailAutomationSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = models.EmailAutomation
-        fields = "__all__"
+        exclude = ["name"]
         read_only_fields = ["extension", "description", "name"]
         schema_attrs = {
             "admin_body": {"input_type": "html"},
@@ -72,7 +72,7 @@ class EmailAutomationSerializer(serializers.ModelSerializer):
             "actions": ["list", "retrieve", "update"],
             "structure": [
                 {
-                    "fields": ["name", "extension", "description"],
+                    "fields": ["label", "extension", "description"],
                     "style": "read_only",
                 },
                 {

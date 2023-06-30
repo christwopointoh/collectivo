@@ -56,7 +56,8 @@ def setup(sender, **kwargs):
     ]
     for automation in automations:
         EmailAutomation.objects.register(
-            name=automation,
+            name=automation.replace(" ", "_").lower(),
+            label=automation,
             description=(
                 "Membership data can be accessed via {{ membership }}."
             ),

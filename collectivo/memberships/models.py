@@ -339,17 +339,17 @@ class Membership(models.Model):
 
         # Trigger automation if membership stage has changed
         if data["stage"] != self.stage:
-            self.send_email(f"Membership {self.stage}")
+            self.send_email(f"membership_{self.stage}")
 
         # Trigger automation for changes in shares
         if (self.shares_paid or 0) > (data["shares_paid"] or 0):
-            self.send_email("Paid shares increased")
+            self.send_email("paid_shares_increased")
         elif (self.shares_paid or 0) < (data["shares_paid"] or 0):
-            self.send_email("Paid shares decreased")
+            self.send_email("paid_shares_decreased")
         if (self.shares_paid or 0) > (data["shares_signed"] or 0):
-            self.send_email("Signed shares increased")
+            self.send_email("signed_shares_increased")
         elif (self.shares_signed or 0) < (data["shares_signed"] or 0):
-            self.send_email("Signed shares decreased")
+            self.send_email("signed_shares_decreased")
 
     def delete(self, *args, **kwargs):
         """Delete the model and remove registration."""

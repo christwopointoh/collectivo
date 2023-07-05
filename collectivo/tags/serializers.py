@@ -19,7 +19,9 @@ class TagSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "extension")
 
 
-def create_history_serializer(models):
+def create_history_serializer(origin_model):
+    """Create a serializer for the history of a model."""
+
     class HistorySerializer(serializers.ModelSerializer):
         """Serializer for tag history."""
 
@@ -29,7 +31,7 @@ def create_history_serializer(models):
         class Meta:
             """Serializer settings."""
 
-            model = models.history.model
+            model = origin_model.history.model
             fields = "__all__"
             schema = {
                 "fields": {
@@ -65,6 +67,8 @@ def create_history_serializer(models):
                     )
                 return format_html(fields)
             return None
+
+    return HistorySerializer
 
 
 class TagProfileSerializer(serializers.ModelSerializer):

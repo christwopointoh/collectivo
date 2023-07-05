@@ -55,6 +55,7 @@ class Permission(models.Model):
     """A permission that can be assigned to a group."""
 
     name = models.CharField(max_length=255)
+    label = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     extension = models.ForeignKey(
         "extensions.Extension",
@@ -75,15 +76,25 @@ class Permission(models.Model):
 
     def __str__(self):
         """Return the string representation."""
+        name = self.label if self.label else self.name
         if self.extension:
-            return f"{self.extension}: {self.name}"
-        return self.name
+            return f"{self.extension.label}: {name}"
+        return name
+
+    def save(self, *args, **kwargs):
+        """Set name to be the same as label if no name is given."""
+        if not self.name:
+            self.name = self.label.replace(" ", "_").lower()
+        if not self.label:
+            self.label = self.name.replace("_", " ").capitalize()
+        super().save(*args, **kwargs)
 
 
 class PermissionGroup(models.Model):
     """A group of permissions that can be assigned to users."""
 
     name = models.CharField(max_length=255)
+    label = models.CharField(max_length=255, blank=True)
     description = models.TextField(blank=True)
     permissions = models.ManyToManyField(
         "Permission", related_name="groups", blank=True
@@ -121,6 +132,15 @@ class PermissionGroup(models.Model):
 
     def __str__(self):
         """Return the string representation."""
+        name = self.label if self.label else self.name
         if self.extension:
-            return f"{self.extension}: {self.name}"
-        return self.name
+            return f"{self.extension.label}: {name}"
+        return name
+
+    def save(self, *args, **kwargs):
+        """Set name to be the same as label if no name is given."""
+        if not self.name:
+            self.name = self.label.replace(" ", "_").lower()
+        if not self.label:
+            self.label = self.name.replace("_", " ").capitalize()
+        super().save(*args, **kwargs)

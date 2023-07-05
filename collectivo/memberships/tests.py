@@ -52,7 +52,7 @@ class MembershipsEmailsTests(TestCase):
         )
 
         for stage in ["applied", "accepted", "ended"]:
-            auto_appl = EmailAutomation.objects.get(name=f"Membership {stage}")
+            auto_appl = EmailAutomation.objects.get(name=f"membership_{stage}")
             auto_appl.subject = f"Test Subject {stage}"
             auto_appl.body = (
                 f"Test Body {stage}" + " {{ membership.type.name }}"
@@ -124,7 +124,7 @@ class MembershipsPaymentsTests(TestCase):
 
         # First invoice
         entry = ItemEntry.objects.get(
-            type__name=self.membership_type.name,
+            type__name=self.membership_type.short_name,
         )
         self.assertEqual(entry.amount, 10)
         self.assertEqual(entry.price, 15)
@@ -133,7 +133,7 @@ class MembershipsPaymentsTests(TestCase):
 
         # No second invoice if nothing changes
         entries = ItemEntry.objects.filter(
-            type__name=self.membership_type.name,
+            type__name=self.membership_type.short_name,
         )
         self.assertEqual(len(entries), 1)
 
@@ -142,7 +142,7 @@ class MembershipsPaymentsTests(TestCase):
         self.membership.save()
 
         entries = ItemEntry.objects.filter(
-            type__name=self.membership_type.name,
+            type__name=self.membership_type.short_name,
         )
         self.assertEqual(len(entries), 2)
         entry = entries.last()

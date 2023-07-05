@@ -17,10 +17,16 @@ from .tasks import send_mails_async, send_mails_async_end
 class EmailAutomation(models.Model):
     """An automation that sends emails to users."""
 
+    class Meta:
+        """Model settings."""
+
+        unique_together = ("name", "extension")
+
     objects = NameManager()
     history = HistoricalRecords()
 
-    name = models.CharField(max_length=255, unique="True")
+    name = models.CharField(max_length=255)
+    label = models.CharField(max_length=255)
     is_active = models.BooleanField(
         default=False,
         verbose_name="Active",

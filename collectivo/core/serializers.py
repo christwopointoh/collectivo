@@ -35,7 +35,7 @@ class PermissionSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = Permission
-        fields = "__all__"
+        exclude = ["name"]
 
 
 if_extension: SchemaCondition = {
@@ -63,11 +63,11 @@ class PermissionGroupSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = PermissionGroup
-        fields = "__all__"
+        exclude = ["name"]
         read_only_fields = ["extension"]
 
         schema_attrs = {
-            "name": {"read_only": if_extension},
+            "label": {"read_only": if_extension},
             "extension": {"visible": if_extension},
             "description": {"read_only": if_extension},
             "perms_custom": {"visible": False},

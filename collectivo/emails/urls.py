@@ -14,6 +14,26 @@ router.register("profiles", views.EmailProfileViewSet, basename="profile")
 router.register(
     "automations", views.EmailAutomationViewSet, basename="automation"
 )
+router.register(
+    "templates-history",
+    views.EmailTemplateHistoryViewSet,
+    basename="templates-history",
+)
+router.register(
+    "campaigns-history",
+    views.EmailCampaignHistoryViewSet,
+    basename="campaign-history",
+)
+router.register(
+    "designs-history",
+    views.EmailDesignHistoryViewSet,
+    basename="design-history",
+)
+router.register(
+    "automations-history",
+    views.EmailAutomationHistoryViewSet,
+    basename="automation-history",
+)
 
 urlpatterns = [
     path("api/emails/", include(router.urls)),

@@ -34,6 +34,5 @@ def setup(sender, **kwargs):
             tag = Tag.objects.get_or_create(name=f"Test tag {i}")[0]
             tag.users.set(list(User.objects.all()))
 
-        tag.name = "Test tag renamed"
         tag.description = "This tag has been renamed"
         tag.save()

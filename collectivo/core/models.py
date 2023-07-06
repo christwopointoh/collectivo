@@ -38,7 +38,7 @@ class CoreSettings(SingleInstance, models.Model):
     )
 
     display_project_name = models.BooleanField(
-        default=True,
+        default=False,
         verbose_name="Display project name",
     )
     display_project_description = models.BooleanField(

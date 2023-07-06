@@ -1,6 +1,7 @@
 """Setup function of the emails extension."""
 from django.contrib.auth import get_user_model
 
+from collectivo.core.models import Permission, PermissionGroup
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
 
@@ -31,6 +32,20 @@ def setup(sender, **kwargs):
         parent="admin",
         order=10,
     )
+
+    perm_names = [
+        "view_emails",
+        "edit_emails",
+    ]
+    superuser = PermissionGroup.objects.get(name="superuser")
+    for perm_name in perm_names:
+        perm = Permission.objects.register(
+            name=perm_name,
+            label=perm_name.replace("_", " ").capitalize(),
+            description=f"Can {perm_name.replace('_', ' ')}",
+            extension=extension,
+        )
+        superuser.permissions.add(perm)
 
     statuses = ["success", "pending", "draft"]
     if settings.COLLECTIVO["example_data"] is True:

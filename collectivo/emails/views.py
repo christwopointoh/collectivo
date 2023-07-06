@@ -4,7 +4,7 @@ from rest_framework import mixins, viewsets
 
 from collectivo.utils.filters import get_filterset, get_ordering_fields
 from collectivo.utils.mixins import SchemaMixin
-from collectivo.utils.permissions import IsSuperuser
+from collectivo.utils.permissions import HasPerm
 
 from . import models, serializers
 
@@ -16,7 +16,11 @@ class EmailProfileViewSet(SchemaMixin, viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = serializers.EmailProfileSerializer
-    permission_classes = [IsSuperuser]
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_emails", "core")],
+        "ALL": [("edit_emails", "core")],
+    }
     filterset_class = get_filterset(serializers.EmailProfileSerializer)
     ordering_fields = get_ordering_fields(serializers.EmailProfileSerializer)
 
@@ -24,7 +28,11 @@ class EmailProfileViewSet(SchemaMixin, viewsets.ModelViewSet):
 class EmailDesignViewSet(SchemaMixin, viewsets.ModelViewSet):
     """Manage email designs."""
 
-    permission_classes = [IsSuperuser]
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_emails", "emails")],
+        "ALL": [("edit_emails", "emails")],
+    }
     serializer_class = serializers.EmailDesignSerializer
     filterset_class = get_filterset(serializers.EmailDesignSerializer)
     ordering_fields = get_ordering_fields(serializers.EmailDesignSerializer)
@@ -34,7 +42,11 @@ class EmailDesignViewSet(SchemaMixin, viewsets.ModelViewSet):
 class EmailTemplateViewSet(SchemaMixin, viewsets.ModelViewSet):
     """Manage email templates."""
 
-    permission_classes = [IsSuperuser]
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_emails", "emails")],
+        "ALL": [("edit_emails", "emails")],
+    }
     serializer_class = serializers.EmailTemplateSerializer
     filterset_class = get_filterset(serializers.EmailTemplateSerializer)
     ordering_fields = get_ordering_fields(serializers.EmailTemplateSerializer)
@@ -44,7 +56,11 @@ class EmailTemplateViewSet(SchemaMixin, viewsets.ModelViewSet):
 class EmailCampaignViewSet(SchemaMixin, viewsets.ModelViewSet):
     """Manage email campaigns (mass email orders)."""
 
-    permission_classes = [IsSuperuser]
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_emails", "emails")],
+        "ALL": [("edit_emails", "emails")],
+    }
     serializer_class = serializers.EmailCampaignSerializer
     filterset_class = get_filterset(serializers.EmailCampaignSerializer)
     ordering_fields = get_ordering_fields(serializers.EmailCampaignSerializer)
@@ -60,7 +76,11 @@ class EmailAutomationViewSet(
 ):
     """Manage email automations (mass email orders)."""
 
-    permission_classes = [IsSuperuser]
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_emails", "emails")],
+        "ALL": [("edit_emails", "emails")],
+    }
     serializer_class = serializers.EmailAutomationSerializer
     filterset_class = get_filterset(serializers.EmailAutomationSerializer)
     ordering_fields = get_ordering_fields(

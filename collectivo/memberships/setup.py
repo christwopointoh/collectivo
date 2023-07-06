@@ -5,6 +5,7 @@ from logging import getLogger
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
+from collectivo.core.models import Permission, PermissionGroup
 from collectivo.emails.models import EmailAutomation
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
@@ -24,6 +25,21 @@ def setup(sender, **kwargs):
         built_in=True,
     )
 
+    # Set up permissions
+    perm_names = [
+        "view_memberships",
+        "edit_memberships",
+    ]
+    superuser = PermissionGroup.objects.get(name="superuser")
+    for perm_name in perm_names:
+        perm = Permission.objects.register(
+            name=perm_name,
+            label=perm_name.replace("_", " ").capitalize(),
+            description=f"Can {perm_name.replace('_', ' ')}",
+            extension=extension,
+        )
+        superuser.permissions.add(perm)
+
     # User objects
     MenuItem.objects.register(
         name="memberships_user",
@@ -40,7 +56,7 @@ def setup(sender, **kwargs):
         label="Memberships",
         extension=extension,
         route=extension.name + "/admin",
-        requires_perm=("admin", "core"),
+        requires_perm=("view_memberships", "memberships"),
         icon_name="pi-id-card",
         parent="admin",
         order=10,

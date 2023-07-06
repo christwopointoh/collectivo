@@ -43,14 +43,18 @@ class DashboardTileViewSet(HistoryMixin, SchemaMixin, viewsets.ModelViewSet):
 
         groups = request.user.permission_groups.all()
 
-        queryset = DashboardTile.objects.filter(
-            Q(active=True),
-            (
-                Q(requires_not_perm=None)
-                | ~Q(requires_not_perm__groups__in=groups)
-            ),
-            (Q(requires_perm=None) | Q(requires_perm__groups__in=groups)),
-        ).order_by("order")
+        queryset = (
+            DashboardTile.objects.filter(
+                Q(active=True),
+                (
+                    Q(requires_not_perm=None)
+                    | ~Q(requires_not_perm__groups__in=groups)
+                ),
+                (Q(requires_perm=None) | Q(requires_perm__groups__in=groups)),
+            )
+            .order_by("order")
+            .distinct()
+        )
 
         serializer_class = TileDisplaySerializer
 

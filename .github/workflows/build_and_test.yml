@@ -87,8 +87,8 @@ jobs:
           KEYCLOAK_CLIENT_SECRET: "**********"
           CELERY_BROKER: "redis://:${{env.REDIS_PASSWORD}}@redis:6379/0"
           CELERY_BACKEND: "redis://:${{env.REDIS_PASSWORD}}@redis:6379/0"
-          COLLECTIVO_ADMIN_USER: 'admin@example.com'
-          COLLECTIVO_ADMIN_PASS: 'admin'
+          ADMIN_USER: 'admin@example.com'
+          ADMIN_PASS: 'admin'
         run: |
           cp -a collectivo collectivo_app
           cd collectivo_app

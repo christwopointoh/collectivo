@@ -2,13 +2,15 @@
 
 Collectivo is a participatory membership platform and database for community projects. Through modular extensions, it can be customized and extended for the needs of different organizations.
 
-Collectivo provides built-in extensions for the management of memberships,
-emails, payments, and shifts. Further functionalities can be added through the integration of external services and the development of custom extensions.
+The platform can be used for the management of memberships,
+emails, payments, and shifts. Further functionalities can be added through the integration of external services as well as the development of custom extensions.
 
 This project is in an early stage of development. It is a collaboration of
 the Austrian cooperative [MILA Mitmach-Supermarkt](https://mila.wien/) and the IT collective
 [convive\*](http://convive.io/) - funded by the
 [AK Wien Digifonds](https://wien.arbeiterkammer.at/digifonds).
+
+## Contact
 
 If you are interested to use this software or contribute to development, please write to [info@collectivo.io](mailto:info@collectivo.io).
 

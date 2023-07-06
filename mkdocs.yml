@@ -1,7 +1,9 @@
-site_name: Collectivo
+site_name: Collectivo Docs
 
 theme:
   name: "material"
+  logo: "assets/collectivo_rgb_icon_white.png"
+  favicon: "assets/favicon.ico"
   icon:
     repo: fontawesome/brands/github
 

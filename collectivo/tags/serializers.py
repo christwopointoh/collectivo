@@ -71,6 +71,9 @@ def create_history_serializer(origin_model):
     return HistorySerializer
 
 
+TagHistorySerializer = create_history_serializer(models.Tag)
+
+
 class TagProfileSerializer(serializers.ModelSerializer):
     """Serializer for tag profiles."""
 

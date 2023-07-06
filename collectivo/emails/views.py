@@ -106,7 +106,7 @@ class EmailAutomationHistoryViewSet(
     ordering_fields = get_ordering_fields(
         serializers.EmailAutomationHistorySerializer
     )
-    queryset = models.EmailAutomation.objects.all()
+    queryset = models.EmailAutomation.history.model.objects.all()
 
 
 class EmailDesignHistoryViewSet(
@@ -124,7 +124,7 @@ class EmailDesignHistoryViewSet(
     ordering_fields = get_ordering_fields(
         serializers.EmailDesignHistorySerializer
     )
-    queryset = models.EmailDesign.objects.all()
+    queryset = models.EmailDesign.history.model.objects.all()
 
 
 class EmailCampaignHistoryViewSet(
@@ -142,7 +142,7 @@ class EmailCampaignHistoryViewSet(
     ordering_fields = get_ordering_fields(
         serializers.EmailCampaignHistorySerializer
     )
-    queryset = models.EmailCampaign.objects.all()
+    queryset = models.EmailCampaign.history.model.objects.all()
 
 
 class EmailTemplateHistoryViewSet(
@@ -160,4 +160,4 @@ class EmailTemplateHistoryViewSet(
     ordering_fields = get_ordering_fields(
         serializers.EmailTemplateHistorySerializer
     )
-    queryset = models.EmailTemplate.objects.all()
+    queryset = models.EmailTemplate.history.model.objects.all()

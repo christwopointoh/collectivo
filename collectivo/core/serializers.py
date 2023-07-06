@@ -59,6 +59,9 @@ if_not_perms_custom: SchemaCondition = {
 class PermissionGroupSerializer(serializers.ModelSerializer):
     """Serializer for permission groups."""
 
+    users_custom = serializers.BooleanField(default=True, required=False)
+    perms_custom = serializers.BooleanField(default=True, required=False)
+
     class Meta:
         """Serializer settings."""
 

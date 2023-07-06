@@ -12,7 +12,7 @@ class MenuManager(NameManager):
     """Manager for the models Menu and MenuItem.
 
     Models must have the fields name, extension,and requires_perm.
-    Requires perm should be a tuple of (perm_name, ext_name).
+    Requires perm should be a permission or tuple of (perm_name, ext_name).
     """
 
     def register(

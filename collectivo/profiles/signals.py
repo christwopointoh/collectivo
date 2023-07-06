@@ -7,8 +7,7 @@ from .models import UserProfile
 
 def create_user_profile(sender, instance, created, **kwargs):
     """Create user profile when a user is created."""
-    if created:
-        UserProfile.objects.create(user=instance)
+    UserProfile.objects.get_or_create(user=instance)
 
 
 signals.post_save.connect(

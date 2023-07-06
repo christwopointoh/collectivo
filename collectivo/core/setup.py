@@ -1,7 +1,6 @@
 """Setup function of the core extension."""
 
 import logging
-import os
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -27,6 +26,8 @@ def setup(sender, **kwargs):
     extension = Extension.objects.register(
         name=CoreConfig.name, description=CoreConfig.description, built_in=True
     )
+
+    CoreSettings.object()  # This initializes the default settings
 
     # Superuser permissions
     superuser = PermissionGroup.objects.register(
@@ -104,9 +105,9 @@ def setup(sender, **kwargs):
         order=100,
     )
 
-    # Get admin user from env vars
-    admin_user = os.environ.get("ADMIN_USER", None)
-    admin_pass = os.environ.get("ADMIN_PASS", None)
+    # Get admin user from settings
+    admin_user = settings.COLLECTIVO.get("admin_user", None)
+    admin_pass = settings.COLLECTIVO.get("admin_pass", None)
     if admin_user and admin_pass:
         try:
             admin = User.objects.get(username=admin_user)
@@ -115,13 +116,13 @@ def setup(sender, **kwargs):
             admin.username = admin_user
             admin.first_name = admin_user
             admin.last_name = admin_user
+            admin.password = admin_pass
             admin.save()
             admin.permission_groups.add(superuser)
             logger.info(f"Created admin user {admin_user}")
 
+    # Set up example data
     if settings.COLLECTIVO["example_data"] is True:
-        CoreSettings.object()  # This initializes the default settings
-
         for first_name in DEV_USERS:
             email = f"test_{first_name}@example.com"
             try:
@@ -132,7 +133,5 @@ def setup(sender, **kwargs):
             user.first_name = first_name[0].upper() + first_name[1:]
             user.last_name = "Example"
             user.save()
-
-            # Give user permissions
             if first_name == "superuser":
                 user.permission_groups.add(superuser)

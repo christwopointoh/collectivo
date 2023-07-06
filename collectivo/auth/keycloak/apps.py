@@ -13,6 +13,7 @@ class KeycloakConfig(AppConfig):
 
     def ready(self):
         """Initialize extension after database is ready."""
+        from . import signals  # noqa: F401
         from .setup import setup
 
         register_setup(setup, self)

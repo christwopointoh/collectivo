@@ -15,8 +15,8 @@ class ProfileViewSet(SchemaMixin, viewsets.ModelViewSet):
     serializer_class = serializers.PaymentProfileSerializer
     permission_classes = [HasPerm]
     required_perms = {
-        "GET": [("view_profiles", "payments")],
-        "ALL": [("edit_profiles", "payments")],
+        "GET": [("view_users", "core")],
+        "ALL": [("edit_users", "core")],
     }
     filterset_class = get_filterset(serializer_class)
     ordering_fields = get_ordering_fields(serializer_class)

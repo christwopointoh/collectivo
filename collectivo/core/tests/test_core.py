@@ -71,11 +71,11 @@ class CoreApiTests(TestCase):
 
     def test_update_username(self):
         """Test the username is updated when email is changed."""
-        user = get_user_model().objects.create(email="123")
-        self.assertEqual(user.username, "123")
-        user.email = "456"
+        user = get_user_model().objects.create(email="123@example.com")
+        self.assertEqual(user.username, "123@example.com")
+        user.email = "456@example.com"
         user.save()
-        self.assertEqual(user.username, "456")
+        self.assertEqual(user.username, "456@example.com")
 
     def test_capitalize_names(self):
         """Test the first letter of names is capitalized."""

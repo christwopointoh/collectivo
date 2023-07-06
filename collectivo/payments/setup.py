@@ -1,8 +1,13 @@
 """Setup function of the payments extension."""
+from django.contrib.auth import get_user_model
+
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import MenuItem
 
 from .apps import PaymentsConfig
+from .models import Account, PaymentProfile
+
+User = get_user_model()
 
 
 def setup(sender, **kwargs):
@@ -24,3 +29,10 @@ def setup(sender, **kwargs):
         parent="admin",
         order=20,
     )
+    # Create payment profiles and accounts
+    users = User.objects.filter(payment_profile__isnull=True)
+    for user in users:
+        PaymentProfile.objects.get_or_create(user=user)
+    users = User.objects.filter(account__isnull=True)
+    for user in users:
+        Account.objects.get_or_create(user=user)

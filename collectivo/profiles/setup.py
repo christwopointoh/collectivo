@@ -5,8 +5,10 @@ from django.contrib.auth import get_user_model
 from collectivo.extensions.models import Extension
 from collectivo.utils.dev import DEV_MEMBERS
 
-from . import models
 from .apps import ProfilesConfig
+from .models import UserProfile
+
+User = get_user_model()
 
 
 def setup(sender, **kwargs):
@@ -18,8 +20,13 @@ def setup(sender, **kwargs):
         built_in=True,
     )
 
+    # Create missing profiles
+    users = User.objects.filter(profile__isnull=True)
+    for user in users:
+        UserProfile.objects.get_or_create(user=user)
+
     if settings.COLLECTIVO["example_data"] is True:
         for first_name in DEV_MEMBERS:
             email = f"test_{first_name}@example.com"
             user = get_user_model().objects.get(email=email)
-            models.UserProfile.objects.get_or_create(user=user)
+            UserProfile.objects.get_or_create(user=user)

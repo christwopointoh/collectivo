@@ -1,7 +1,6 @@
 """Models of the keycloak auth extension."""
 from django.contrib.auth import get_user_model
 from django.db import models
-from django.db.models import signals
 from keycloak.exceptions import KeycloakGetError
 
 from collectivo.auth.keycloak.api import KeycloakAPI
@@ -22,7 +21,7 @@ class KeycloakUser(models.Model):
 
         Get and update keycloak user if email exists.
         """
-        self.uuid = self.get_keycloak_user()
+        self.uuid = self.get_keycloak_user(create=True)
         if self.uuid is not None:
             self.update_keycloak_user()
         super().save(*args, **kwargs)
@@ -47,7 +46,7 @@ class KeycloakUser(models.Model):
         uuid = keycloak.get_user_id(self.user.email)
 
         # Optional: If user doesn't exist on keycloak, create new keycloak user
-        if uuid is None and create:
+        if uuid is None and self.user.email and create:
             uuid = keycloak.create_user(
                 self.user.first_name, self.user.last_name, self.user.email
             )
@@ -77,19 +76,3 @@ class KeycloakUser(models.Model):
             keycloak.set_user_password(self.uuid, self.user.password, False)
             self.user.password = ""  # noqa: S105
             self.user.save()
-
-
-def update_keycloak_user(sender, instance, created, **kwargs):
-    """Create or update related keycloak user when a django user is changed."""
-    try:
-        instance.keycloak.save()
-    except KeycloakUser.DoesNotExist:
-        KeycloakUser.objects.create(user=instance)
-
-
-signals.post_save.connect(
-    update_keycloak_user,
-    sender=get_user_model(),
-    dispatch_uid="update_keycloak_user",
-    weak=False,
-)

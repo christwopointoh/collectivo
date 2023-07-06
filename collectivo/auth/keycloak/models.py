@@ -1,9 +1,13 @@
 """Models of the keycloak auth extension."""
+import logging
+
 from django.contrib.auth import get_user_model
 from django.db import models
-from keycloak.exceptions import KeycloakGetError
+from keycloak.exceptions import KeycloakGetError, KeycloakPostError
 
 from collectivo.auth.keycloak.api import KeycloakAPI
+
+logger = logging.getLogger(__name__)
 
 
 class KeycloakUser(models.Model):
@@ -47,9 +51,13 @@ class KeycloakUser(models.Model):
 
         # Optional: If user doesn't exist on keycloak, create new keycloak user
         if uuid is None and self.user.email and create:
-            uuid = keycloak.create_user(
-                self.user.first_name, self.user.last_name, self.user.email
-            )
+            try:
+                uuid = keycloak.create_user(
+                    self.user.first_name, self.user.last_name, self.user.email
+                )
+            except KeycloakPostError as e:
+                logger.info(f"Could not create keycloak user: {self.user}")
+                logger.error(e)
 
         return uuid
 

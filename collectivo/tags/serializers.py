@@ -1,4 +1,6 @@
 """Serializers of the tags extension."""
+from html import escape
+
 from django.contrib.auth import get_user_model
 from django.utils.html import format_html
 from rest_framework import serializers
@@ -27,6 +29,7 @@ def create_history_serializer(origin_model):
 
         history_changed_fields = serializers.SerializerMethodField()
         history_changes = serializers.SerializerMethodField()
+        history_is_latest = serializers.SerializerMethodField()
 
         class Meta:
             """Serializer settings."""
@@ -42,6 +45,12 @@ def create_history_serializer(origin_model):
             }
 
         # Methods from https://stackoverflow.com/a/72187314/14396787
+        def get_history_is_latest(self, obj):
+            """Get boolean on whether this object is the latest."""
+
+            if obj.next_record:
+                return False
+            return True
 
         def get_history_changed_fields(self, obj):
             """Get changed fields."""
@@ -63,7 +72,11 @@ def create_history_serializer(origin_model):
                         "<strong>{}</strong> changed from <span"
                         " style='background-color:#ffb5ad'>{}</span> to <span"
                         " style='background-color:#b3f7ab'>{}</span> . <br/>"
-                        .format(change.field, change.old, change.new)
+                        .format(
+                            escape(change.field),
+                            escape(change.old),
+                            escape(change.new),
+                        )
                     )
                 return format_html(fields)
             return None

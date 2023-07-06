@@ -56,8 +56,7 @@ class KeycloakUser(models.Model):
                     self.user.first_name, self.user.last_name, self.user.email
                 )
             except KeycloakPostError as e:
-                logger.info(f"Could not create keycloak user: {self.user}")
-                logger.error(e)
+                raise Exception(f"Could not create keycloak user: {self.user}")
 
         return uuid
 

@@ -47,6 +47,6 @@ class MenuSerializer(serializers.ModelSerializer):
             items = items.filter(
                 Q(requires_perm__isnull=True)
                 | Q(requires_perm__groups__in=groups)
-            )
+            ).distinct()
 
         return MenuItemSerializer(items, many=True).data

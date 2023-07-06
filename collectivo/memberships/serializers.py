@@ -11,7 +11,7 @@ from rest_framework.exceptions import ValidationError
 
 from collectivo.tags.models import Tag
 from collectivo.utils.schema import Schema, SchemaCondition
-from collectivo.utils.serializers import UserFields
+from collectivo.utils.serializers import UserFields, create_history_serializer
 
 from . import models
 from .statistics import calculate_statistics
@@ -318,21 +318,7 @@ class MembershipRegisterCombinedSerializer(serializers.Serializer):
         return {}
 
 
-class MembershipHistorySerializer(serializers.ModelSerializer):
-    """Serializer for membership history."""
-
-    class Meta:
-        """Serializer settings."""
-
-        model = models.Membership.history.model
-        fields = "__all__"
-
-
-class MembershipTypeHistorySerializer(serializers.ModelSerializer):
-    """Serializer for membershipType history."""
-
-    class Meta:
-        """Serializer settings."""
-
-        model = models.MembershipType.history.model
-        fields = "__all__"
+MembershipHistorySerializer = create_history_serializer(models.Membership)
+MembershipTypeHistorySerializer = create_history_serializer(
+    models.MembershipType
+)

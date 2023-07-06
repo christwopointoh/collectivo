@@ -26,13 +26,13 @@ def setup(sender, **kwargs):
     )
 
     # Set up permissions
-    perm_names = [
-        "view_memberships",
-        "edit_memberships",
-    ]
+    perms = {
+        "view_memberships": None,
+        "edit_memberships": None,
+    }
     superuser = PermissionGroup.objects.get(name="superuser")
-    for perm_name in perm_names:
-        perm = Permission.objects.register(
+    for perm_name in perms:
+        perms[perm_name] = perm = Permission.objects.register(
             name=perm_name,
             label=perm_name.replace("_", " ").capitalize(),
             description=f"Can {perm_name.replace('_', ' ')}",
@@ -56,7 +56,7 @@ def setup(sender, **kwargs):
         label="Memberships",
         extension=extension,
         route=extension.name + "/admin",
-        requires_perm=("view_memberships", "memberships"),
+        requires_perm=perms["view_memberships"],
         icon_name="pi-id-card",
         parent="admin",
         order=10,

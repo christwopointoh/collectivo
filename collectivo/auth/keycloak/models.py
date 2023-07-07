@@ -55,8 +55,13 @@ class KeycloakUser(models.Model):
                 uuid = keycloak.create_user(
                     self.user.first_name, self.user.last_name, self.user.email
                 )
-            except KeycloakPostError:
-                raise Exception(f"Could not create keycloak user: {self.user}")
+            except KeycloakPostError as e:
+                # In case the user was created in parallel
+                uuid = keycloak.get_user_id(self.user.email)
+                if uuid is None:
+                    raise KeycloakPostError(
+                        f"Could not create keycloak user {self.user}: {e}"
+                    )
 
         return uuid
 

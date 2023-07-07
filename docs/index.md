@@ -1,4 +1,4 @@
-# Welcome to the Documentation of Collectivo
+# Collectivo Documentation
 
 Collectivo is a participatory membership platform and database for community projects. Through modular extensions, it can be customized and extended for the needs of different organizations.
 

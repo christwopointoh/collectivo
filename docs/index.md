@@ -1,5 +1,7 @@
 # Collectivo Documentation
 
+![Collectivo Logo](assets/collectivo_rgb_header.png)
+
 Collectivo is an open-source membership platform for communities and collectives. Through modular extensions, it can be customized and extended for the needs of different organizations.
 
 The features of Collectivo include management of memberships,

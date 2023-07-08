@@ -1,5 +1,9 @@
 # Reference
 
+This section providefs a technical description of Collectivo's models and functions.
+Further references can be found in the section of each extension.
+An automated API documentation of your own instance can be found under the `<your-backend-url>/api/docs`.
+
 ## Backend Settings
 
 ### Core

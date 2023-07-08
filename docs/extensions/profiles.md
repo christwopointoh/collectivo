@@ -1,5 +1,13 @@
 # Profiles
 
-!!! warning "Under construction"
+Create a user profile that users can manage by themselves.
 
-    We are still working on this part of the documentation.
+## Installation
+
+Add `collectivo.profiles` to `extensions` in [`collectivo.yml`](reference.md#settings).
+
+## Reference
+
+:::collectivo.profiles.models.UserProfile
+    options:
+        members: None

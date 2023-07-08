@@ -21,3 +21,17 @@ Add the following entry to [`collectivo.yml`](reference.md#settings):
 ```
 
 The setting `registration_serializers` defines the serializers used to create a membership application. Entries can be `create` or `update` and must define a path to a serializer class. The default serializer is `collectivo.memberships.serializers.MembershipRegisterSerializer`.
+
+## Reference
+
+:::collectivo.memberships.models.Membership
+    options:
+        members: None
+
+:::collectivo.memberships.models.MembershipType
+    options:
+        members: None
+
+:::collectivo.memberships.models.MembershipStatus
+    options:
+        members: None

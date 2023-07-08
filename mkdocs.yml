@@ -45,7 +45,15 @@ markdown_extensions:
 
 plugins:
   - search
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            show_bases: false
+            show_root_heading: True
+            show_root_full_path: False
+            show_root_toc_entry: False
+            heading_level: 3
 
 nav:
   - Home: index.md
@@ -53,16 +61,19 @@ nav:
   - "guide.md"
   - "development.md"
   - "reference.md"
-  - Extensions:
+
+  - Core extensions:
       - "extensions/core.md"
+      - "extensions/keycloak.md"
       - "extensions/extensions.md"
+      - "extensions/components.md"
       - "extensions/menus.md"
       - "extensions/dashboard.md"
-      - "extensions/keycloak.md"
+  - Feature extensions:
       - "extensions/profiles.md"
       - "extensions/tags.md"
-      - "extensions/memberships.md"
       - "extensions/emails.md"
+      - "extensions/memberships.md"
       - "extensions/payments.md"
       - "extensions/shifts.md"
 

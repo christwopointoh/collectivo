@@ -1,5 +1,13 @@
 # Tags
 
-!!! warning "Under construction"
+Add tags to users.
 
-    We are still working on this part of the documentation.
+## Installation
+
+Add `collectivo.tags` to `extensions` in [`collectivo.yml`](reference.md#settings).
+
+## Reference
+
+:::collectivo.tags.models.Tag
+    options:
+        members: None

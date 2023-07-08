@@ -2,4 +2,4 @@
 
 !!! warning "Under construction"
 
-    We are still working on this part of the documentation.
+    This extension is still under construction and is not yet ready for production.

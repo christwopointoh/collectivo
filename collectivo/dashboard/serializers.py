@@ -2,6 +2,8 @@
 from django.template import Context, Template
 from rest_framework import serializers
 
+from collectivo.utils.schema import Schema
+
 from .models import DashboardTile, DashboardTileButton
 
 
@@ -12,7 +14,15 @@ class TileButtonSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = DashboardTileButton
-        fields = "__all__"
+        exclude = ["name"]
+        schema = {
+            "fields": {
+                "extension": {
+                    "visible": False,
+                },
+                "link": {"required": True},
+            }
+        }
 
 
 class TileSerializer(serializers.ModelSerializer):
@@ -22,9 +32,47 @@ class TileSerializer(serializers.ModelSerializer):
         """Serializer settings."""
 
         model = DashboardTile
-        fields = "__all__"
+        exclude = ["name"]
         extra_kwargs = {
             "extension": {"read_only": True},
+        }
+        schema: Schema = {
+            "fields": {
+                "extension": {
+                    "visible": False,
+                },
+            },
+            "structure": [
+                {"fields": ["label"]},
+                {
+                    "fields": [
+                        "active",
+                        "order",
+                        "requires_perm",
+                        "requires_not_perm",
+                    ]
+                },
+                {"fields": ["source"]},
+                {
+                    "fields": [
+                        "component",
+                    ],
+                    "visible": {
+                        "field": "source",
+                        "condition": "equals",
+                        "value": "component",
+                    },
+                },
+                {
+                    "fields": ["content", "buttons"],
+                    "visible": {
+                        "field": "source",
+                        "condition": "equals",
+                        "value": "db",
+                    },
+                    "style": "col",
+                },
+            ],
         }
 
 

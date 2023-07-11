@@ -3,8 +3,10 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.test import RequestFactory, TestCase
 from django.urls import reverse
+from keycloak.exceptions import KeycloakDeleteError
 from rest_framework.test import APIClient
 
+from collectivo.auth.keycloak.api import KeycloakAPI
 from collectivo.core.models import Permission, PermissionGroup
 from collectivo.extensions.models import Extension
 from collectivo.menus.models import Menu
@@ -71,6 +73,12 @@ class CoreApiTests(TestCase):
 
     def test_update_username(self):
         """Test the username is updated when email is changed."""
+
+        try:
+            keycloak = KeycloakAPI()
+            keycloak.delete_user_by_email("456@example.com")
+        except KeycloakDeleteError:
+            pass
         user = get_user_model().objects.create(email="123@example.com")
         self.assertEqual(user.username, "123@example.com")
         user.email = "456@example.com"

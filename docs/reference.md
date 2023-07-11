@@ -1,5 +1,9 @@
 # Reference
 
+This section provides a technical description of Collectivo's models and functions.
+Further references can be found in the section of each extension.
+When the `api_docs` setting is enabled, an automated API documentation of your own instance can be found under `<your-backend-url>/api/docs`.
+
 ## Backend Settings
 
 ### Core
@@ -38,7 +42,6 @@ The following settings can be set:
 
 : List of allowed URLs that can send requests to collectivo.
 
-
 `extensions` (list)
 
 : Extensions that should be installed (list).
@@ -51,12 +54,7 @@ The following settings can be set:
 
 `development` (boolean)
 
-: Activate development tools and debugging messages.
-
-    !!! warning "Warning"
-
-        Do not activate this setting on a production system, not even temporarily.
-        It is possible to extract secrets from the system if this setting is activated.
+: Activate development tools and debugging messages. Warning: Do not activate this setting on a production system, not even temporarily. It is possible to extract secrets from the system if this setting is active.
 
 `example_data` (boolean)
 
@@ -66,6 +64,13 @@ The following settings can be set:
 
 : Activate [Swagger UI](https://swagger.io/tools/swagger-ui/) under `/api/docs`
 
+`admin_user` (string)
+
+: Username of the admin user. Must be a valid email address.
+
+`admin_pass` (string)
+
+: Password of the admin user.
 
 ### Extensions
 

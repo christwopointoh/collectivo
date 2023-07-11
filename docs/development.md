@@ -1,8 +1,8 @@
 # Development
 
-## Setting up a development system
+## Set up a development environment
 
-The following instructions will help you set up a local system to develop Collectivo. If you only want to create a custom extension, this is not needed (see [developing extensions](#developing-extensions)).
+The following instructions will help you set up a local system for the development of Collectivo. If you want to work on custom extensions, this is not needed (see [develop custom extensions](#develop-custom-extensions)).
 
 ### Backend
 
@@ -78,11 +78,11 @@ If `example_data` is `true` in [collectivo.yml](reference.md#settings), the foll
 
 The password for all users is `Test123!`.
 
-## Developing extensions
+## Develop custom extensions
 
 Extensions can be added to the backend of Collectivo as [Django applications](https://docs.djangoproject.com/en/4.2/ref/applications/) and to the frontend as [Vue components](https://vuejs.org/guide/introduction.html). In both cases, the extension code is added to the application through a [Docker volume](https://docs.docker.com/storage/volumes/). An alternative to extensions is to use [external services](extensions/components.md).
 
-### Create a backend extension
+### Backend extensions
 
 Start from a clone of the [quickstart repository](quickstart.md) and create a copy of the extension template:
 
@@ -104,6 +104,13 @@ Add the name of the extension to [`collectivo.yml`](reference.md#settings):
 extensions:
   - extensions.my_extension
 ```
+
+### Frontend components
+
+!!! warning "Under construction"
+
+    This part of the documentation is still missing.
+
 
 ### Background tasks
 

@@ -1,5 +1,13 @@
 # Tags
 
-!!! warning "Under construction"
+Add tags to users. Tags can be used for any kind of clustering, filtering, or automation and can be used to describe internal processes of your organisation.
 
-    We are still working on this part of the documentation.
+## Installation
+
+Add `collectivo.tags` to `extensions` in [`collectivo.yml`](reference.md#settings).
+
+## Reference
+
+:::collectivo.tags.models.Tag
+    options:
+        members: None

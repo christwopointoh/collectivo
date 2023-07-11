@@ -12,6 +12,7 @@ from rest_framework.exceptions import ValidationError
 from collectivo.extensions.models import Extension
 from collectivo.tags.models import Tag
 from collectivo.utils.schema import Schema
+from collectivo.utils.serializers import create_history_serializer
 
 from . import models
 from .tasks import send_mails_async, send_mails_async_end
@@ -262,3 +263,15 @@ class EmailCampaignSerializer(serializers.ModelSerializer):
             campaign.status_message = str(e)
             campaign.save()
             raise e
+
+
+EmailCampaignHistorySerializer = create_history_serializer(
+    models.EmailCampaign
+)
+EmailTemplateHistorySerializer = create_history_serializer(
+    models.EmailTemplate
+)
+EmailAutomationHistorySerializer = create_history_serializer(
+    models.EmailAutomation
+)
+EmailDesignHistorySerializer = create_history_serializer(models.EmailDesign)

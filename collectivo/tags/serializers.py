@@ -2,6 +2,8 @@
 from django.contrib.auth import get_user_model
 from rest_framework import serializers
 
+from collectivo.utils.serializers import create_history_serializer
+
 from . import models
 
 User = get_user_model()
@@ -18,14 +20,7 @@ class TagSerializer(serializers.ModelSerializer):
         read_only_fields = ("id", "extension")
 
 
-class TagHistorySerializer(serializers.ModelSerializer):
-    """Serializer for tag history."""
-
-    class Meta:
-        """Serializer settings."""
-
-        model = models.Tag.history.model
-        fields = "__all__"
+TagHistorySerializer = create_history_serializer(models.Tag)
 
 
 class TagProfileSerializer(serializers.ModelSerializer):

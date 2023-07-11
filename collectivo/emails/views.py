@@ -3,7 +3,7 @@ from django.contrib.auth import get_user_model
 from rest_framework import mixins, viewsets
 
 from collectivo.utils.filters import get_filterset, get_ordering_fields
-from collectivo.utils.mixins import SchemaMixin
+from collectivo.utils.mixins import HistoryMixin, SchemaMixin
 from collectivo.utils.permissions import HasPerm
 
 from . import models, serializers
@@ -87,3 +87,77 @@ class EmailAutomationViewSet(
         serializers.EmailAutomationSerializer
     )
     queryset = models.EmailAutomation.objects.all()
+
+
+class EmailAutomationHistoryViewSet(
+    SchemaMixin, HistoryMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+):
+    """View EmailAutomation history."""
+
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_emails", "emails")],
+        "ALL": [("edit_emails", "emails")],
+    }
+    serializer_class = serializers.EmailAutomationHistorySerializer
+    filterset_class = get_filterset(
+        serializers.EmailAutomationHistorySerializer
+    )
+    ordering_fields = get_ordering_fields(
+        serializers.EmailAutomationHistorySerializer
+    )
+    queryset = models.EmailAutomation.history.model.objects.all()
+
+
+class EmailDesignHistoryViewSet(
+    SchemaMixin, HistoryMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+):
+    """View EmailDesign history."""
+
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_emails", "emails")],
+        "ALL": [("edit_emails", "emails")],
+    }
+    serializer_class = serializers.EmailDesignHistorySerializer
+    filterset_class = get_filterset(serializers.EmailDesignHistorySerializer)
+    ordering_fields = get_ordering_fields(
+        serializers.EmailDesignHistorySerializer
+    )
+    queryset = models.EmailDesign.history.model.objects.all()
+
+
+class EmailCampaignHistoryViewSet(
+    SchemaMixin, HistoryMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+):
+    """View EmailCampaign history."""
+
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_emails", "emails")],
+        "ALL": [("edit_emails", "emails")],
+    }
+    serializer_class = serializers.EmailCampaignHistorySerializer
+    filterset_class = get_filterset(serializers.EmailCampaignHistorySerializer)
+    ordering_fields = get_ordering_fields(
+        serializers.EmailCampaignHistorySerializer
+    )
+    queryset = models.EmailCampaign.history.model.objects.all()
+
+
+class EmailTemplateHistoryViewSet(
+    SchemaMixin, HistoryMixin, mixins.ListModelMixin, viewsets.GenericViewSet
+):
+    """View EmailTemplate history."""
+
+    permission_classes = [HasPerm]
+    required_perms = {
+        "GET": [("view_emails", "emails")],
+        "ALL": [("edit_emails", "emails")],
+    }
+    serializer_class = serializers.EmailTemplateHistorySerializer
+    filterset_class = get_filterset(serializers.EmailTemplateHistorySerializer)
+    ordering_fields = get_ordering_fields(
+        serializers.EmailTemplateHistorySerializer
+    )
+    queryset = models.EmailTemplate.history.model.objects.all()

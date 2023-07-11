@@ -6,9 +6,10 @@ from collectivo.core.models import Permission
 from collectivo.extensions.models import Extension
 from collectivo.utils import get_instance
 from collectivo.utils.managers import NameManager
+from collectivo.utils.models import NameLabelModel
 
 
-class DashboardTileButton(models.Model):
+class DashboardTileButton(NameLabelModel, models.Model):
     """A button that can be included in a dashboard tile."""
 
     class Meta:
@@ -38,10 +39,6 @@ class DashboardTileButton(models.Model):
         ],
     )
 
-    def __str__(self):
-        """Return string representation of the model."""
-        return self.label
-
 
 class DashboardTileManager(NameManager):
     """Manager for the model DashboardTile.
@@ -65,7 +62,7 @@ class DashboardTileManager(NameManager):
         return super().register(name=name, **payload)
 
 
-class DashboardTile(models.Model):
+class DashboardTile(NameLabelModel, models.Model):
     """A component that can be included in the dashboard."""
 
     class Meta:

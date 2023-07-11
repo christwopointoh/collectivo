@@ -37,3 +37,22 @@ class SingleInstance:
         if self.pk is None and self.__class__.objects.exists():
             raise Exception("Only one instance of this model allowed.")
         super().save(*args, **kwargs)
+
+
+class NameLabelModel:
+    """Mixin for models with name and label fields."""
+
+    def __str__(self):
+        """Return the string representation."""
+        name = self.label if self.label else self.name
+        if self.extension:
+            return f"{self.extension.label}: {name}"
+        return name
+
+    def save(self, *args, **kwargs):
+        """Set name to be the same as label if no name is given."""
+        if not self.name:
+            self.name = self.label.replace(" ", "_").lower()
+        if not self.label:
+            self.label = self.name.replace("_", " ").capitalize()
+        super().save(*args, **kwargs)

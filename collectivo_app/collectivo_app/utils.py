@@ -85,11 +85,20 @@ def set_allowed_hosts(config: dict) -> list[str]:
     return allowed_hosts
 
 
+BOOLEANS = {
+    "false": False,
+    "False": False,
+    "true": True,
+    "True": True,
+}
+
+
 def expand_vars(input):
     """Expand environment variables recursively for the whole object."""
     match input:
         case str():
-            return os.path.expandvars(input)
+            var = os.path.expandvars(input)
+            return BOOLEANS.get(var, var)
         case list():
             return [expand_vars(item) for item in input]
         case dict():

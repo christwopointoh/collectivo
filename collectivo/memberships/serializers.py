@@ -239,10 +239,21 @@ class MembershipRegisterSerializer(serializers.ModelSerializer):
                 "type": {"visible": False},
                 "shares_signed": {
                     "required": True,
+                    "default": 0,
+                    "label": "Number of shares",
                     "validators": {
                         "min": "type__shares_number_custom_min",
                         "max": "type__shares_number_custom_max",
                     },
+                },
+                "shares_calc": {
+                    "label": "Amount to pay",
+                    "input_type": "currency",
+                    "default": 0,
+                    "read_only": True,
+                    "calculate": (
+                        "{shares_signed} * {type__shares_amount_per_share}"
+                    ),
                 },
             },
             "structure": [
@@ -250,13 +261,12 @@ class MembershipRegisterSerializer(serializers.ModelSerializer):
                     "fields": ["status"],
                 },
                 {
-                    "label": "Shares",
                     "visible": {
                         "field": "type__has_shares",
                         "condition": "equals",
                         "value": True,
                     },
-                    "fields": ["shares_signed"],
+                    "fields": ["shares_signed", "shares_calc"],
                 },
             ],
         }

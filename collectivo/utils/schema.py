@@ -8,13 +8,11 @@ from django.urls import reverse
 from django.urls.exceptions import NoReverseMatch
 from rest_framework import mixins
 from rest_framework.fields import empty
-from rest_framework.response import Response
 from rest_framework.serializers import Serializer
 from rest_framework.viewsets import GenericViewSet
 
 # TODO Default does not work yet
 # TODO Special case for user model
-# TODO Group fields together?
 # TODO Remove choices from schema if choices_endpoint is set,
 # once implemented in frontend
 
@@ -196,14 +194,20 @@ def get_serializer_schema(serializer: Serializer):
             for key, value in serializer.Meta.schema_attrs[field_name].items():
                 data[field_name][key] = value
 
-        # Add custom schema attributes from serializer (new version)
-        if "fields" in settings and field_name in settings["fields"]:
-            for key, value in settings["fields"][field_name].items():
-                data[field_name][key] = value
-
         # Ensure that read only fields cannot be required
         if field_data.get("read_only") is True:
             field_data["required"] = False
+
+    # Add custom schema attributes from serializer (new version)
+    for field_name, field_obj in settings.get("fields", {}).items():
+        if field_name not in data:
+            data[field_name] = {
+                "label": field_name,
+                "field_type": "Custom",
+                "input_type": "Custom",
+            }
+        for key, value in settings["fields"][field_name].items():
+            data[field_name][key] = value
 
     schema = {
         "label": serializer.Meta.label

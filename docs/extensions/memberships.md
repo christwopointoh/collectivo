@@ -4,10 +4,15 @@ Manage memberships and membership applications.
 
 Key features:
 
-- Multiple types of membership can be defined with different possible membership statuses. For example, there can be a membership type `Member of Organisation 1` with the status options `active` and `passive` and a membership type `Member of Organisation 2` with the status options `active`, `passive`, and `honorary`.
+- Multiple types of membership can be defined with different possible status options. For example, there can be a type `Member of Organisation 1` with the options `active` and `passive` and a type `Member of Organisation 2` with the options `active`, `passive`, and `honorary`.
 - Users can apply for a membership through the platform. Each membership type can have its own application form. This form can be customized and combined with other extensions (see [custom registration form](#custom-registration-form)).
+- The life cycle of a membership is captured with the variable `stage`, which can be set to `applied`, `accepted`, `resigned`, `excluded`, and `ended`.
+- If the [emails](emails.md) extension is installed, automatic emails can be configrued to send a message to the user when a membership is started or changed.
 - Memberships can require shares that have to be payed once to join the organization, with the possibility to sign additional shares later on. They can also require regular fees that have to be payed periodically. For both cases, automatic invoices are generated if the [payments](payments.md) extension is installed.
 
+Limitations:
+
+- The current application form only supports choosing a free number of custom shares. This can be extended with a [custom registration form](#custom-registration-form).
 
 ## Installation
 
@@ -32,7 +37,7 @@ In the following example, the registration form will consist of two pages to upd
 
 - Each serializer must have a unique field `user` that will automatically be set to the currently authenticated user. When `update` is used, the model instance to be updated is selected based on the user.
 
-- The schema for [`Membership`](#collectivo.memberships.models.Membership) will be overridden to automatically select the membership type and status options of the current form. E.g. if the user is applying for a membership type with the status options `active` and `passive`, then this type will automatically be selected when submitting the form and the schema for the `status` field will be overridden to only allow `active` and `passive` as values.
+- The schema for [`Membership`](#collectivo.memberships.models.Membership) will be overridden to include the status options and other data of the membership type. E.g. if the user is applying for a membership type with the status options `active` and `passive`, then this type will automatically be selected when submitting the form and the schema for the `status` field will be overridden to only allow `active` and `passive` as values.
 
 ## Reference
 

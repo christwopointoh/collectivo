@@ -80,6 +80,7 @@ class MembershipRegisterViewset(
                 and field_obj.Meta.model == Membership
             ):
                 fields = schema["fields"][field_name]["schema"]["fields"]
+                fields["type"] = {"value": mtype.id}
                 fields["status"]["choices"] = get_choices(mtype.statuses.all())
 
                 # Add membership type data to schema for form generation
@@ -90,6 +91,7 @@ class MembershipRegisterViewset(
                     "shares_number_custom_max",
                     "shares_number_standard",
                     "shares_number_social",
+                    "shares_amount_per_share",
                     "has_fees",
                     "fees_amount_custom",
                     "fees_amount_custom_min",

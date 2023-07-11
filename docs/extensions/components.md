@@ -27,7 +27,7 @@ Component.objects.register(
 There are two types of components:
 
 - `iframe`: The component is displayed as an iframe.
-- `remote`: The component is displayed as a remote webcomponent, using [vite-plugin-federation](https://github.com/originjs/vite-plugin-federation). The path must point towards a remote entry point. This is an experimental feature and can be subject to errors.
+- `remote`: The component is displayed as a remote webcomponent, using [vite-plugin-federation](https://github.com/originjs/vite-plugin-federation). All Javascript frameworks that are supported by Vite can be used, including Vue, React, Svelte, and more. The path must point towards a remote entry point. This is an experimental feature and can be subject to errors.
 
 The component will be available on the frontend through the route `/<extension.name>/<component.name>`. For example, the component registered above will be available at `/my-extension/my-component` and will display an iframe to `https://example.com`.
 

@@ -1,6 +1,6 @@
 # Tags
 
-Add tags to users.
+Add tags to users. Tags can be used for any kind of clustering, filtering, or automation and can be used to describe internal processes of your organisation.
 
 ## Installation
 

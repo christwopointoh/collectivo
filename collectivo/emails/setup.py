@@ -22,17 +22,6 @@ def setup(sender, **kwargs):
         built_in=True,
     )
 
-    MenuItem.objects.register(
-        name="emails",
-        label="Emails",
-        extension=extension,
-        route=extension.name + "/admin",
-        icon_name="pi-envelope",
-        requires_perm=("admin", "core"),
-        parent="admin",
-        order=10,
-    )
-
     perm_names = [
         "view_emails",
         "edit_emails",
@@ -46,6 +35,17 @@ def setup(sender, **kwargs):
             extension=extension,
         )
         superuser.permissions.add(perm)
+
+    MenuItem.objects.register(
+        name="emails",
+        label="Emails",
+        extension=extension,
+        route=extension.name + "/admin",
+        icon_name="pi-envelope",
+        requires_perm=("view_emails", "emails"),
+        parent="admin",
+        order=10,
+    )
 
     statuses = ["success", "pending", "draft"]
     if settings.COLLECTIVO["example_data"] is True:

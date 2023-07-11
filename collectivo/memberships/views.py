@@ -1,6 +1,8 @@
 """Views of the memberships extension."""
 from django.contrib.auth import get_user_model
+from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import mixins, viewsets
+from rest_framework.decorators import action
 from rest_framework.mixins import (
     CreateModelMixin,
     ListModelMixin,
@@ -8,11 +10,13 @@ from rest_framework.mixins import (
     UpdateModelMixin,
 )
 from rest_framework.response import Response
+from rest_framework.serializers import Serializer
 from rest_framework.viewsets import GenericViewSet, ModelViewSet
 
 from collectivo.utils.filters import get_filterset, get_ordering_fields
 from collectivo.utils.mixins import BulkEditMixin, HistoryMixin, SchemaMixin
 from collectivo.utils.permissions import HasPerm, IsAuthenticated
+from collectivo.utils.schema import get_choices, get_model_schema
 
 from . import serializers
 from .models import Membership, MembershipStatus, MembershipType
@@ -51,13 +55,56 @@ class MembershipProfileViewSet(SchemaMixin, ModelViewSet):
 
 
 class MembershipRegisterViewset(
-    SchemaMixin, CreateModelMixin, RetrieveModelMixin, GenericViewSet
+    CreateModelMixin, RetrieveModelMixin, GenericViewSet
 ):
     """ViewSet to register new memberships with additional serializers."""
 
     queryset = MembershipType.objects.all()
     serializer_class = serializers.MembershipRegisterCombinedSerializer
     permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses={200: OpenApiResponse()})
+    @action(
+        detail=True,
+        url_path="schema",
+        url_name="schema",
+        permission_classes=[IsAuthenticated],
+    )
+    def _schema(self, request, pk=None):
+        """Override schema to define membership type and statuses."""
+        schema = get_model_schema(self)
+        mtype = MembershipType.objects.get(id=pk)
+        for field_name, field_obj in self.serializer_class().fields.items():
+            if (
+                isinstance(field_obj, Serializer)
+                and field_obj.Meta.model == Membership
+            ):
+                fields = schema["fields"][field_name]["schema"]["fields"]
+                fields["status"]["choices"] = get_choices(mtype.statuses.all())
+
+                # Add membership type data to schema for form generation
+                for typefield in [
+                    "has_shares",
+                    "shares_number_custom",
+                    "shares_number_custom_min",
+                    "shares_number_custom_max",
+                    "shares_number_standard",
+                    "shares_number_social",
+                    "has_fees",
+                    "fees_amount_custom",
+                    "fees_amount_custom_min",
+                    "fees_amount_custom_max",
+                    "fees_amount_standard",
+                    "fees_amount_social",
+                    "fees_repeat_each",
+                    "fees_repeat_unit",
+                    "currency",
+                ]:
+                    fields["type__" + typefield] = {
+                        "value": getattr(mtype, typefield)
+                    }
+
+        return Response(schema)
 
     def retrieve(self, request, *args, **kwargs):
         """Retrieve the membership type with additional serializers."""

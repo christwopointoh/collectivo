@@ -86,7 +86,7 @@ input_types = {
     "URLField": "url",
     "ChoiceField": "select",
     "EmailField": "email",
-    "IntegerField": "number",
+    "IntegerField": "integer",
     "FloatField": "number",
     "DateField": "date",
     "DateTimeField": "datetime",
@@ -209,6 +209,7 @@ def get_serializer_schema(serializer: Serializer):
         "label": serializer.Meta.label
         if hasattr(serializer.Meta, "label")
         else serializer.Meta.model.__name__,
+        "model": serializer.Meta.model.__name__,
         "description": serializer.Meta.description
         if hasattr(serializer.Meta, "description")
         else "",
@@ -244,4 +245,4 @@ def get_model_schema(self: GenericViewSet):
         if hasattr(self, "bulk_update"):
             actions.append("update-bulk")
 
-    return Response(schema)
+    return schema

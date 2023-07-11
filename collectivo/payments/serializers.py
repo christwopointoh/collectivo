@@ -23,7 +23,7 @@ class PaymentProfileSerializer(UserIsPk):
                 "user": {"visible": False},
                 "bank_account_iban": {
                     "label": "IBAN",
-                    "validators": ["iban"],
+                    "validators": {"iban": True},
                     "required": True,
                 },
                 "bank_account_owner": {"required": True},

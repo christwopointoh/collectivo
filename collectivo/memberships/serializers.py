@@ -234,8 +234,41 @@ class MembershipRegisterSerializer(serializers.ModelSerializer):
         model = models.Membership
         fields = ["type", "status", "shares_signed"]
         schema: Schema = {
-            "fields": {"status": {"required": True}},
-            "type": {"visible": False},
+            "fields": {
+                "status": {"required": True, "label": "Type of membership"},
+                "type": {"visible": False},
+                "shares_signed": {
+                    "required": True,
+                    "default": 0,
+                    "label": "Number of shares",
+                    "validators": {
+                        "min": "type__shares_number_custom_min",
+                        "max": "type__shares_number_custom_max",
+                    },
+                },
+                "shares_calc": {
+                    "label": "Amount to pay",
+                    "input_type": "currency",
+                    "default": 0,
+                    "read_only": True,
+                    "calculate": (
+                        "{shares_signed} * {type__shares_amount_per_share}"
+                    ),
+                },
+            },
+            "structure": [
+                {
+                    "fields": ["status"],
+                },
+                {
+                    "visible": {
+                        "field": "type__has_shares",
+                        "condition": "equals",
+                        "value": True,
+                    },
+                    "fields": ["shares_signed", "shares_calc"],
+                },
+            ],
         }
 
     # Add user id to data before saving
@@ -305,6 +338,7 @@ class MembershipRegisterCombinedSerializer(serializers.Serializer):
                     data = request.data[name]
                     model = serializer.Meta.model
                     if method == "create":
+                        data["user"] = request.user.id
                         seri = serializer(data=data)
                         seri.context.update({"request": request})
                         seri.is_valid(raise_exception=True)

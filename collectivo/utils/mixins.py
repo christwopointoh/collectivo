@@ -51,7 +51,7 @@ class SchemaMixin:
         permission_classes=[IsAuthenticated],
     )
     def _schema(self, request):
-        return get_model_schema(self)
+        return Response(get_model_schema(self))
 
 
 class HistoryMixin:

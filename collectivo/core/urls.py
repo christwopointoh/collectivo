@@ -20,9 +20,9 @@ router.register(
 router.register("permission", views.PermissionViewSet, basename="permissions")
 router.register("groups", views.PermissionGroupViewSet, basename="groups")
 router.register(
-    "group-history",
+    "groups-history",
     views.PermissionGroupHistoryViewSet,
-    basename="group-history",
+    basename="groups-history",
 )
 
 router_dd = DirectDetailRouter()

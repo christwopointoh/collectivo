@@ -2,12 +2,13 @@
 import logging
 
 from django.contrib.auth import get_user_model
-from rest_framework import mixins, viewsets
+from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 
 from collectivo.utils.filters import get_filterset, get_ordering_fields
-from collectivo.utils.mixins import HistoryMixin, SchemaMixin
+from collectivo.utils.mixins import SchemaMixin
 from collectivo.utils.permissions import HasPerm, IsSuperuser
+from collectivo.utils.viewsets import HistoryViewSet
 
 from . import models, serializers
 
@@ -54,9 +55,7 @@ class TagViewSet(SchemaMixin, viewsets.ModelViewSet):
         return super().perform_destroy(instance)
 
 
-class TagHistoryViewSet(
-    SchemaMixin, HistoryMixin, mixins.ListModelMixin, viewsets.GenericViewSet
-):
+class TagHistoryViewSet(HistoryViewSet):
     """View history of a tag."""
 
     permission_classes = [HasPerm]

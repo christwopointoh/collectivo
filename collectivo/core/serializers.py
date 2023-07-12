@@ -134,6 +134,24 @@ class UserSelfSerializer(serializers.ModelSerializer):
         many=True,
     )
 
+    permissions = serializers.SerializerMethodField()
+
+    def get_permissions(self, obj):
+        """
+        Return permissions of the user.
+
+        This field is used internally to determine the permissions of the user.
+        """
+        perms = {}
+        for name, ext in Permission.objects.filter(
+            groups__in=obj.permission_groups.all()
+        ).values_list("name", "extension__name"):
+            if ext in perms:
+                perms[ext].append(name)
+            else:
+                perms[ext] = [name]
+        return perms
+
     class Meta:
         """Serializer settings."""
 
@@ -143,10 +161,11 @@ class UserSelfSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "password",
+            "permissions",
             "permission_groups",
         ]
         read_only_fields = ["first_name", "last_name"]
-
+        schema = {"fields": {"permissions": {"visible": False}}}
         extra_kwargs = {"password": {"write_only": True, "required": False}}
 
 

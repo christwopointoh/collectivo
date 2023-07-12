@@ -4,7 +4,7 @@ Define external components that can be used in the frontend. An alternative is t
 
 ## Installation
 
-Add `collectivo.components` to `extensions` in [`collectivo.yml`](reference.md#settings).
+Add `collectivo.components` to `extensions` in [`collectivo.yml`](../reference.md#settings).
 
 ## Usage by other extensions
 
@@ -31,7 +31,7 @@ There are two types of components:
 
 The component will be available on the frontend through the route `/<extension.name>/<component.name>`. For example, the component registered above will be available at `/my-extension/my-component` and will display an iframe to `https://example.com`.
 
-A [menu item](menus.md) or [dashboard button](dashboards.md) can be used to create an internal link to this route.
+A [menu item](menus.md) or [dashboard button](dashboard.md) can be used to create an internal link to this route.
 
 ## Reference
 

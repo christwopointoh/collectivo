@@ -4,7 +4,7 @@ Manage users, permissions, and core settings. This extension is required for Col
 
 ## Installation
 
-Add `collectivo.core` to `extensions` in [`collectivo.yml`](reference.md#settings).
+Add `collectivo.core` to `extensions` in [`collectivo.yml`](../reference.md#settings).
 
 ## Usage
 

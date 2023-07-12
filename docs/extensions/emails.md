@@ -4,7 +4,7 @@ Manage email campaigns and send automated emails to your users.
 
 ## Installation
 
-Add `collectivo.emails` to `extensions` in [`collectivo.yml`](reference.md#settings).
+Add `collectivo.emails` to `extensions` in [`collectivo.yml`](../reference.md#settings).
 
 ## Reference
 

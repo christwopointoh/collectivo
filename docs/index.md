@@ -2,6 +2,8 @@
 
 ![Collectivo Logo](assets/collectivo_rgb_header.png)
 
+## Introduction
+
 Collectivo is an open-source membership platform for communities and collectives. Through modular extensions, it can be customized and extended for the needs of different organizations.
 
 The features of Collectivo include management of memberships,
@@ -36,3 +38,14 @@ This site contains the project documentation for Collectivo.
     - **[Memberships](extensions/memberships.md)** - Manage memberships and applications
     - **[Payments](extensions/payments.md)** - Manage payment methods, invoices, and subscriptions
     - **[Shifts](extensions/shifts.md)** - Create and coordinate working shifts
+
+## Screenshots
+
+![Screenshot login](assets/screenshots/login.png){ width="49%" }
+![Screenshot dashboard](assets/screenshots/dashboard.png){ width="49%" }
+![Screenshot profile](assets/screenshots/profile.png){ width="49%" }
+![Screenshot memberships_registration](assets/screenshots/memberships_registration.png){ width="49%" }
+![Screenshot memberships_shares](assets/screenshots/memberships_shares.png){ width="49%" }
+![Screenshot memberships](assets/screenshots/memberships.png){ width="49%" }
+![Screenshot emails_template](assets/screenshots/emails_template.png){ width="49%" }
+![Screenshot settings](assets/screenshots/settings.png){ width="49%" }

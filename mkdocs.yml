@@ -42,9 +42,11 @@ markdown_extensions:
   - pymdownx.snippets
   - pymdownx.superfences
   - def_list
+  - attr_list
 
 plugins:
   - search
+  - glightbox
   - mkdocstrings:
       handlers:
         python:

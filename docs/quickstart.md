@@ -20,4 +20,6 @@ cp .env.example .env
 docker compose up -d
 ```
 
-You can now go to [`127.0.0.1:8001`](http://127.0.0.1:8001) and log in to Collectivo as `test_superuser@example.com` with the pasword `Test123!`.
+You can now go to [`http://localhost:5173`](http://localhost:5173) and log in to Collectivo as `test_superuser@example.com` with the pasword `Test123!`.
+
+For further instructions, please refer to the [user guide](guide.md).

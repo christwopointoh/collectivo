@@ -8,6 +8,7 @@ from django.utils.module_loading import import_string
 from rest_framework import serializers
 
 from collectivo.utils.schema import SchemaCondition
+from collectivo.utils.serializers import create_history_serializer
 
 from .models import CoreSettings, Permission, PermissionGroup
 
@@ -80,16 +81,6 @@ class PermissionGroupSerializer(serializers.ModelSerializer):
         }
 
 
-class PermissionGroupHistorySerializer(serializers.ModelSerializer):
-    """Serializer for history of permission groups."""
-
-    class Meta:
-        """Serializer settings."""
-
-        model = PermissionGroup.history.model
-        fields = "__all__"
-
-
 class UserSerializer(serializers.ModelSerializer):
     """Serializer for users."""
 
@@ -114,16 +105,6 @@ class UserSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ["id"]
         extra_kwargs = {"password": {"write_only": True, "required": False}}
-
-
-class UserHistorySerializer(serializers.ModelSerializer):
-    """Serializer for history of users."""
-
-    class Meta:
-        """Serializer settings."""
-
-        model = User.history.model
-        fields = "__all__"
 
 
 class UserSelfSerializer(serializers.ModelSerializer):
@@ -249,3 +230,8 @@ class UserProfilesSerializer(serializers.ModelSerializer):
             "groups",
         ]
         read_only_fields = ["user"]
+
+
+UserHistorySerializer = create_history_serializer(User)
+PermissionHistorySerializer = create_history_serializer(Permission)
+PermissionGroupHistorySerializer = create_history_serializer(PermissionGroup)

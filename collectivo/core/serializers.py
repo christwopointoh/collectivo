@@ -165,7 +165,13 @@ class UserSelfSerializer(serializers.ModelSerializer):
             "permission_groups",
         ]
         read_only_fields = ["first_name", "last_name"]
-        schema = {"fields": {"permissions": {"visible": False}}}
+        schema = {
+            "fields": {
+                "permissions": {"visible": False},
+                "first_name": {"input_type": "text"},
+                "last_name": {"input_type": "text"},
+            },
+        }
         extra_kwargs = {"password": {"write_only": True, "required": False}}
 
 

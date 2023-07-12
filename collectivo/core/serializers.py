@@ -126,26 +126,13 @@ class UserHistorySerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
-    """Serializer for members to manage their own data."""
+class UserSelfSerializer(serializers.ModelSerializer):
+    """Serializer for members to manage their user account."""
 
-    # TODO: Display all permissions of the user based on their groups
-    # permissions = serializers.PrimaryKeyRelatedField(
-    #     many=True, queryset=Permission.objects.all()
-    # )
-    permissions = serializers.SerializerMethodField()
-
-    def get_permissions(self, obj):
-        """Return permissions of the user."""
-        perms = {}
-        for name, ext in Permission.objects.filter(
-            groups__in=obj.permission_groups.all()
-        ).values_list("name", "extension__name"):
-            if ext in perms:
-                perms[ext].append(name)
-            else:
-                perms[ext] = [name]
-        return perms
+    permission_groups = serializers.PrimaryKeyRelatedField(
+        read_only=True,
+        many=True,
+    )
 
     class Meta:
         """Serializer settings."""
@@ -156,9 +143,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
             "last_name",
             "email",
             "password",
-            "permissions",
+            "permission_groups",
         ]
         read_only_fields = ["first_name", "last_name"]
+
         extra_kwargs = {"password": {"write_only": True, "required": False}}
 
 

@@ -94,7 +94,10 @@ class UserSerializer(serializers.ModelSerializer):
     """Serializer for users."""
 
     permission_groups = serializers.PrimaryKeyRelatedField(
-        many=True, queryset=PermissionGroup.objects.all()
+        many=True,
+        queryset=PermissionGroup.objects.all(),
+        required=False,
+        allow_null=True,
     )
 
     class Meta:
@@ -106,9 +109,11 @@ class UserSerializer(serializers.ModelSerializer):
             "first_name",
             "last_name",
             "email",
+            "password",
             "permission_groups",
         ]
         read_only_fields = ["id"]
+        extra_kwargs = {"password": {"write_only": True, "required": False}}
 
 
 class UserHistorySerializer(serializers.ModelSerializer):

@@ -3,6 +3,36 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from simple_history.models import HistoricalRecords
 
+from collectivo.utils.managers import NameManager
+from collectivo.utils.models import SingleInstance
+
+
+class ProfileSettingsField(models.Model):
+    """A field of the user profile. For choices in settings."""
+
+    objects = NameManager()
+    name = models.CharField(max_length=255)
+    label = models.CharField(max_length=255)
+
+    def __str__(self):
+        """Return the name of the field."""
+        return self.label
+
+
+class ProfileSettings(SingleInstance, models.Model):
+    """Settings for the profile extension."""
+
+    history = HistoricalRecords()
+
+    registration_fields = models.ManyToManyField(
+        ProfileSettingsField,
+        blank=True,
+        verbose_name="Registration fields",
+        help_text=(
+            "These fields cannot be changed by the user once they are set."
+        ),
+    )
+
 
 class UserProfile(models.Model):
     """Extension of the user model with a user profile."""
@@ -54,6 +84,7 @@ class UserProfile(models.Model):
     # Admin data
     notes = models.TextField(blank=True)
     history = HistoricalRecords()
+    is_registered = models.BooleanField(default=False)
 
     def __str__(self):
         """Return string representation."""

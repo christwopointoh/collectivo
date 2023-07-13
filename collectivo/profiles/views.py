@@ -3,10 +3,23 @@ from rest_framework import mixins, viewsets
 
 from collectivo.utils.filters import get_filterset, get_ordering_fields
 from collectivo.utils.mixins import HistoryMixin, SchemaMixin, SelfMixin
-from collectivo.utils.permissions import HasPerm, IsAuthenticated
+from collectivo.utils.permissions import (
+    HasPerm,
+    IsAuthenticated,
+    ReadOrIsSuperuser,
+)
+from collectivo.utils.viewsets import SingleModelViewSet
 
 from . import models, serializers
-from .models import UserProfile
+from .models import ProfileSettings, UserProfile
+
+
+class ProfileSettingsViewSet(SingleModelViewSet):
+    """Viewset for core settings."""
+
+    queryset = ProfileSettings.objects.all()
+    serializer_class = serializers.ProfileSettingsSerializer
+    permission_classes = [ReadOrIsSuperuser]
 
 
 class ProfileUserViewSet(

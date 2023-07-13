@@ -3,8 +3,6 @@
 
 from os.path import abspath, dirname
 
-from django.conf import settings
-
 
 def load_tests(loader, tests, pattern):
     """Load tests only if app is installed."""

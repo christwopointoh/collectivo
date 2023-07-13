@@ -14,7 +14,13 @@ router.register("profiles", views.ProfileAdminViewSet, basename="profile")
 self_router = DirectDetailRouter()
 self_router.register("self", views.ProfileUserViewSet, basename="profile-self")
 
+dd_router = DirectDetailRouter()
+dd_router.register(
+    "settings", views.ProfileSettingsViewSet, basename="settings"
+)
+
 urlpatterns = [
     path("api/profiles/profiles/", include(self_router.urls)),
+    path("api/profiles/", include(dd_router.urls)),
     path("api/profiles/", include(router.urls)),
 ]

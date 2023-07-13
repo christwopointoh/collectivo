@@ -137,7 +137,10 @@ def get_endpoint(model: models.Model, source: str = None) -> str:
 def get_serializer_schema(serializer: Serializer):
     """Get the schema for a serializer."""
     if hasattr(serializer.Meta, "schema"):
-        settings = serializer.Meta.schema
+        if callable(serializer.Meta.schema):
+            settings = serializer.Meta.schema(serializer)
+        else:
+            settings = serializer.Meta.schema
     else:
         settings = {}
 
@@ -232,6 +235,27 @@ def get_model_schema(self: GenericViewSet):
     """Return model schema."""
     serializer: Serializer = self.get_serializer_class()()
     schema = get_serializer_schema(serializer)
+
+    # Dynamic changes from database settings
+    if "settings" in schema and hasattr(serializer.Meta, "settings"):
+        dbsettings = serializer.Meta.settings.object()
+        schemasettings = schema["settings"]
+        schemafields = schema["fields"]
+
+        # Disable editing fields if setting is true and field is not empty
+        freeze_setting = "freeze_registration_fields"
+        if freeze_setting in schemasettings and schemasettings[freeze_setting]:
+            obj = self.get_object()
+            for field in dbsettings.registration_fields.all():
+                if getattr(obj, field.name) is None:
+                    continue
+                if field.name not in schemafields:
+                    schemafields[field.name] = {
+                        "label": field.label,
+                        "field_type": "Custom",
+                        "input_type": "Custom",
+                    }
+                schemafields[field.name]["read_only"] = True
 
     # Add allowed actions based on viewset mixins
     if "actions" not in schema:

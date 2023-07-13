@@ -2,7 +2,7 @@
 
 ## Set up a development environment
 
-The following instructions will help you set up a local system for the development of Collectivo. If you want to work on custom extensions, this is not needed (see [develop custom extensions](#develop-custom-extensions)).
+The following instructions will help you set up a local system for the development of Collectivo. This setup is not necessary for the development custom extensions (see [backend extensions](#backend-extensions) and [frontend extensions](#frontend-extensions)).
 
 ### Backend
 
@@ -78,11 +78,11 @@ If `example_data` is `true` in [collectivo.yml](reference.md#settings), the foll
 
 The password for all users is `Test123!`.
 
-## Develop custom extensions
+## Backend extensions
 
-Extensions can be added to the backend of Collectivo as [Django applications](https://docs.djangoproject.com/en/4.2/ref/applications/) and to the frontend as [Vue components](https://vuejs.org/guide/introduction.html). In both cases, the extension code is added to the application through a [Docker volume](https://docs.docker.com/storage/volumes/). An alternative to extensions is to use [external services](extensions/components.md).
+Extensions can be added to the backend of Collectivo as [Django applications](https://docs.djangoproject.com/en/4.2/ref/applications/). The extension code is added to the application through a [Docker volume](https://docs.docker.com/storage/volumes/). An alternative to extensions is to use [external services](extensions/components.md).
 
-### Backend extensions
+### Installation
 
 Start from a clone of the [quickstart repository](quickstart.md) and create a copy of the extension template:
 
@@ -95,21 +95,15 @@ Adapt the name of the extension in the app configuration:
 
 ```python title="collectivo/extensions/my_extension/apps.py"
 class ExtensionConfig(AppConfig):
-    name = "extensions.my_extension"
+    name = "my_extension"
 ```
 
 Add the name of the extension to [`collectivo.yml`](reference.md#settings):
 
 ```yaml title="collectivo/collectivo.yml"
 extensions:
-  - extensions.my_extension
+  - my_extension
 ```
-
-### Frontend components
-
-!!! warning "Under construction"
-
-    This part of the documentation is still missing.
 
 
 ### Background tasks
@@ -132,5 +126,26 @@ To define periodic tasks, create a file `schedules.py` in your extension folder 
 schedules = {
     # Execute my_extension_task every 10 seconds
     "my_extension_task-10sec": {"task": "my_extension_task", "schedule": 10.0},
+}
+```
+
+## Frontend extensions
+
+Extensions can be added to the frontend of Collectivo as [Vue components](https://vuejs.org/guide/introduction.html). The extension code is added to the application in the build stage of the Docker container. An alternative to extensions is to use [external services](extensions/components.md).
+
+### Installation
+
+Start from a clone of the [quickstart repository](quickstart.md) and create a copy of the extension template:
+
+```shell
+cd collectivo-ux/extensions/
+cp -r extension_template my_extension
+```
+
+Add the name of the extension to [`collectivo.json`](reference.md#settings):
+
+```yaml title="collectivo-ux/collectivo.json"
+{
+  "extensions": ["my_extension"]
 }
 ```

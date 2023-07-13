@@ -3,7 +3,7 @@
 Manage menus and menu items.
 ## Installation
 
-Add `collectivo.menus` to `extensions` in [`collectivo.yml`](reference.md#settings).
+Add `collectivo.menus` to `extensions` in [`collectivo.yml`](../reference.md#settings).
 
 ## Usage by other extensions
 

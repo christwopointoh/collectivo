@@ -4,7 +4,7 @@ Manage extensions. This extension is required to register other extensions.
 
 ## Installation
 
-Add `collectivo.extensions` to `extensions` in [`collectivo.yml`](reference.md#settings).
+Add `collectivo.extensions` to `extensions` in [`collectivo.yml`](../reference.md#settings).
 
 ## Usage by other extensions
 

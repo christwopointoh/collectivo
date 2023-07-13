@@ -6,7 +6,7 @@ At the moment, no payment provider is included in this extension. There is, howe
 
 ## Installation
 
-Add `collectivo.payments` to `extensions` in [`collectivo.yml`](reference.md#settings).
+Add `collectivo.payments` to `extensions` in [`collectivo.yml`](../reference.md#settings).
 
 ## Reference
 

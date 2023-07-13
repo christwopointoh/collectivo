@@ -4,7 +4,7 @@ Enable authentication with [keycloak](https://www.keycloak.org/) and [python-key
 
 ## Installation
 
-Add the following entry to [`collectivo.yml`](reference.md#settings):
+Add the following entry to [`collectivo.yml`](../reference.md#settings):
 
 ```yaml
 - extensions:

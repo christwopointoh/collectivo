@@ -4,7 +4,7 @@ Add tags to users. Tags can be used for any kind of clustering, filtering, or au
 
 ## Installation
 
-Add `collectivo.tags` to `extensions` in [`collectivo.yml`](reference.md#settings).
+Add `collectivo.tags` to `extensions` in [`collectivo.yml`](../reference.md#settings).
 
 ## Reference
 

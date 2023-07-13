@@ -16,7 +16,7 @@ Limitations:
 
 ## Installation
 
-Add `collectivo.emails` to `extensions` in [`collectivo.yml`](reference.md#settings).
+Add `collectivo.emails` to `extensions` in [`collectivo.yml`](../reference.md#settings).
 
 ### Custom registration form
 
@@ -33,7 +33,7 @@ In the following example, the registration form will consist of two pages to upd
           - create: collectivo.memberships.serializers.MembershipRegisterSerializer
 ```
 
-[Custom extensions]((../development.md#develop-custom-extensions)) can be used to define additional serializers. The following rules apply:
+[Custom extensions](../development.md#backend-extensions) can be used to define additional serializers. The following rules apply:
 
 - Each serializer must have a unique field `user` that will automatically be set to the currently authenticated user. When `update` is used, the model instance to be updated is selected based on the user.
 

@@ -27,17 +27,6 @@ def setup(sender, **kwargs):
         order=0,
     )
 
-    MenuItem.objects.register(
-        name="admin",
-        label="Dashboard",
-        extension=extension,
-        route=extension.name + "/admin",
-        icon_name="pi-th-large",
-        requires_perm=("admin", "core"),
-        parent="admin",
-        order=80,
-    )
-
     if settings.COLLECTIVO["example_data"]:
         DashboardTile.objects.register(
             name="welcome_tile",

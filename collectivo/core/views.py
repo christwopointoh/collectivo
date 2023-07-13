@@ -148,7 +148,7 @@ class UserProfileViewSet(
     """Viewset for django users to manage their own data."""
 
     queryset = User.objects.all()
-    serializer_class = serializers.UserProfileSerializer
+    serializer_class = serializers.UserSelfSerializer
     permission_classes = [IsAuthenticated]
 
     def get_object(self):

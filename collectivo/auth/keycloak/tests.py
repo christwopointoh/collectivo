@@ -110,10 +110,10 @@ class KeycloakSynchronizationTests(TestCase):
 
     def test_updating_user_updates_keycloak_user(self):
         """Test that updating a user updates a keycloak user."""
-        self.user.first_name = "new name"
+        self.user.first_name = "New name"
         self.user.save()
         user = self.keycloak.admin.get_user(self.user.keycloak.uuid)
-        self.assertEqual(user["firstName"], "new name")
+        self.assertEqual(user["firstName"], "New name")
 
     def test_updating_email_sets_verified_to_false(self):
         """Test that updating a user's email sets verified to false."""

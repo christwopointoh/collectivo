@@ -138,7 +138,7 @@ class EmailTemplateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         """Update an existing template."""
         if "tag" not in validated_data:
-            return super().create(validated_data)
+            return super().update(instance, validated_data)
 
         tag = validated_data.pop("tag")["tag"]
         obj = super().update(instance, validated_data)

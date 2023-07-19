@@ -63,7 +63,7 @@ nav:
   - "guide.md"
   - "development.md"
   - "reference.md"
-
+  - "contact.md"
   - Core extensions:
       - "extensions/core.md"
       - "extensions/keycloak.md"

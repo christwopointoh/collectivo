@@ -16,6 +16,8 @@ the Austrian cooperative [MILA Mitmach-Supermarkt](https://mila.wien/) and the I
 
 If you are interested to use this software or contribute to development, please write to [info@collectivo.io](mailto:info@collectivo.io).
 
+[![Funded by AK Digifond](assets/digifonds.jpg){ width="30%" }](https://wien.arbeiterkammer.at/digifonds)
+
 ## Overview
 
 This site contains the project documentation for Collectivo.

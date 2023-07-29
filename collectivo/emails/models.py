@@ -156,17 +156,12 @@ class EmailCampaign(models.Model):
 
     def send(self, context=None):
         """Send emails to recipients."""
-        campaign = self
-        campaign.sent = timezone.now()
-        campaign.status = "pending"
-        campaign.save()
+        self.sent = timezone.now()
+        self.status = "pending"
+        self.save()
 
         # Generate emails from template
-        email_batches = self.create_email_batches(
-            self.campaign.template,
-            self.recipients.all(),
-            context=context,
-        )
+        email_batches = self.create_email_batches(context=context)
 
         # Create a chain of async tasks to send emails
         results = {"n_sent": 0, "campaign": self}
@@ -183,20 +178,17 @@ class EmailCampaign(models.Model):
             self.save()
             raise e
 
-    def create_email_batches(
-        self, template, recipients, context=None
-    ):
+    def create_email_batches(self, context=None):
         """Create a list of emails, split into batches."""
-        design = template.design
-        subject = template.subject
-        body = template.body
-
-        if design is not None:
-            body = design.body.replace("{{content}}", body)
+        if self.template.design is not None:
+            body_with_design_applied = self.template.design.body.replace("{{content}}", self.template.body)
+        else:
+            body_with_design_applied = self.template.body
+            
         from_email = settings.DEFAULT_FROM_EMAIL
         emails = []
-        for recipient in recipients:
-            body_html = Template(body).render(
+        for recipient in self.recipients.all():
+            body_html = Template(body_with_design_applied).render(
                 Context({"user": recipient, **(context or {})})
             )
             body_text = html2text(body_html)
@@ -206,7 +198,7 @@ class EmailCampaign(models.Model):
                 self.save()
                 raise ValueError(self.status_message)
             email = EmailMultiAlternatives(
-                subject, body_text, from_email, [recipient.email]
+                self.template.subject, body_text, from_email, [recipient.email]
             )
             email.attach_alternative(body_html, "text/html")
             emails.append(email)

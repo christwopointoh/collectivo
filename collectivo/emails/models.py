@@ -67,13 +67,24 @@ class EmailAutomation(models.Model):
     def send(self, recipients, context=None):
         """Send emails to recipients."""
         if self.is_active:
-            campaign = EmailCampaign.objects.create(
-                automation=self,
+            # Generate email campaign for admins from automation
+            admin_campaign = EmailCampaign.objects.create(
+                template=self.admin_template,
+                recipients=self.admin_recipients.all(),
                 extension=self.extension,
             )
-            campaign.recipients.set(recipients)
-            campaign.save()
-            campaign.send(context=context)
+            admin_campaign.save()
+            admin_campaign.send(context=context)
+            
+            if not self.automation.admin_only:
+                # Generate email campaign for end users from automation
+                user_campaign = EmailCampaign.objects.create(
+                    template=self.template,
+                    recipients=recipients,
+                    extension=self.extension,
+                )
+                user_campaign.save()
+                user_campaign.send(context=context)
 
 
 class EmailDesign(models.Model):
@@ -116,9 +127,6 @@ class EmailCampaign(models.Model):
     template = models.ForeignKey(
         "emails.EmailTemplate", on_delete=models.SET_NULL, null=True
     )
-    automation = models.ForeignKey(
-        "emails.EmailAutomation", on_delete=models.SET_NULL, null=True
-    )
     status = models.CharField(
         max_length=10,
         default="draft",
@@ -153,27 +161,12 @@ class EmailCampaign(models.Model):
         campaign.status = "pending"
         campaign.save()
 
-        # Generate emails from automation
-        if self.automation:
-            email_batches = self.create_email_batches(
-                self.automation.admin_template,
-                self.automation.admin_recipients.all(),
-                context=context,
-            )
-            if not self.automation.admin_only:
-                email_batches += self.create_email_batches(
-                    self.automation.template,
-                    self.recipients.all(),
-                    context=context,
-                )
-
         # Generate emails from template
-        else:
-            email_batches = self.create_email_batches(
-                self.campaign.template,
-                self.recipients.all(),
-                context=context,
-            )
+        email_batches = self.create_email_batches(
+            self.campaign.template,
+            self.recipients.all(),
+            context=context,
+        )
 
         # Create a chain of async tasks to send emails
         results = {"n_sent": 0, "campaign": self}

@@ -41,32 +41,22 @@ class EmailAutomation(models.Model):
     )
     admin_only = models.BooleanField(default=False)
 
-    design = models.ForeignKey(
-        "emails.EmailDesign",
+    template = models.ForeignKey(
+        "emails.EmailTemplate",
         on_delete=models.PROTECT,
         null=True,
         blank=True,
         related_name="automations",
     )
-    subject = models.CharField(
-        max_length=255,
-        blank=True,
-    )
-    body = models.TextField(
-        blank=True,
-    )
-
-    admin_design = models.ForeignKey(
-        "emails.EmailDesign",
+    
+    admin_template = models.ForeignKey(
+        "emails.EmailTemplate",
         on_delete=models.PROTECT,
         null=True,
+        blank=True,
         related_name="automations_admin",
-        verbose_name="Design",
     )
-    admin_subject = models.CharField(
-        max_length=255, verbose_name="Subject", blank=True
-    )
-    admin_body = models.TextField(verbose_name="Body", blank=True)
+    
     admin_recipients = models.ManyToManyField(
         get_user_model(),
         verbose_name="Recipients",
@@ -166,17 +156,13 @@ class EmailCampaign(models.Model):
         # Generate emails from automation
         if self.automation:
             email_batches = self.create_email_batches(
-                self.automation.admin_design,
-                self.automation.admin_subject,
-                self.automation.admin_body,
+                self.automation.admin_template,
                 self.automation.admin_recipients.all(),
                 context=context,
             )
             if not self.automation.admin_only:
                 email_batches += self.create_email_batches(
-                    self.automation.design,
-                    self.automation.subject,
-                    self.automation.body,
+                    self.automation.template,
                     self.recipients.all(),
                     context=context,
                 )
@@ -184,9 +170,7 @@ class EmailCampaign(models.Model):
         # Generate emails from template
         else:
             email_batches = self.create_email_batches(
-                self.campaign.template.design,
-                self.campaign.template.subject,
-                self.campaign.template.body,
+                self.campaign.template,
                 self.recipients.all(),
                 context=context,
             )
@@ -207,9 +191,12 @@ class EmailCampaign(models.Model):
             raise e
 
     def create_email_batches(
-        self, design, subject, body, recipients, context=None
+        self, template, recipients, context=None
     ):
         """Create a list of emails, split into batches."""
+        design = template.design
+        subject = template.subject
+        body = template.body
 
         if design is not None:
             body = design.body.replace("{{content}}", body)

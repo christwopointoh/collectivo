@@ -84,24 +84,17 @@ class EmailAutomationSerializer(serializers.ModelSerializer):
                     "label": "Email to users",
                     "description": "This template will be sent to users.",
                 },
-                {"fields": ["subject", "design"], "style": "row"},
-                {"fields": ["body"]},
+                {"fields": ["template"]},
                 {
                     "label": "Email to admins",
                     "description": "This template will be sent to admins.",
                 },
                 {
                     "fields": [
-                        "admin_subject",
-                        "admin_design",
+                        "admin_template",
                         "admin_recipients",
                     ],
                     "style": "row",
-                },
-                {
-                    "fields": [
-                        "admin_body",
-                    ],
                 },
             ],
         }

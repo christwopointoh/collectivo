@@ -72,9 +72,9 @@ class EmailAutomation(models.Model):
             # Generate email campaign for admins from automation
             admin_campaign = EmailCampaign.objects.create(
                 template=self.admin_template,
-                recipients=self.admin_recipients.all(),
                 extension=self.extension,
             )
+            admin_campaign.recipients.set(self.admin_recipients.all())
             admin_campaign.save()
             admin_campaign.send(context=context)
             
@@ -82,9 +82,9 @@ class EmailAutomation(models.Model):
                 # Generate email campaign for end users from automation
                 user_campaign = EmailCampaign.objects.create(
                     template=self.template,
-                    recipients=recipients,
                     extension=self.extension,
                 )
+                user_campaign.recipients.set(recipients)
                 user_campaign.save()
                 user_campaign.send(context=context)
     

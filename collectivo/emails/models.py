@@ -78,7 +78,7 @@ class EmailAutomation(models.Model):
             admin_campaign.save()
             admin_campaign.send(context=context)
             
-            if not self.automation.admin_only:
+            if not self.admin_only:
                 # Generate email campaign for end users from automation
                 user_campaign = EmailCampaign.objects.create(
                     template=self.template,

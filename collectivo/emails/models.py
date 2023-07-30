@@ -117,6 +117,27 @@ class EmailTemplate(models.Model):
     def __str__(self):
         """Return a string representation of the object."""
         return self.name
+    
+    def render(self, recipient, context=None):
+        """Render the email template for the given recipient"""
+        assert recipient.email not in (None, "")
+        
+        if self.design is not None:
+            body_with_design_applied = self.design.body.replace("{{content}}", self.body)
+        else:
+            body_with_design_applied = self.body
+            
+        from_email = settings.DEFAULT_FROM_EMAIL
+    
+        body_html = Template(body_with_design_applied).render(
+            Context({"user": recipient, **(context or {})})
+        )
+        body_text = html2text(body_html)
+        email = EmailMultiAlternatives(
+            self.subject, body_text, from_email, [recipient.email]
+        )
+        email.attach_alternative(body_html, "text/html")
+        return email
 
 
 class EmailCampaign(models.Model):
@@ -180,27 +201,14 @@ class EmailCampaign(models.Model):
 
     def create_email_batches(self, context=None):
         """Create a list of emails, split into batches."""
-        if self.template.design is not None:
-            body_with_design_applied = self.template.design.body.replace("{{content}}", self.template.body)
-        else:
-            body_with_design_applied = self.template.body
-            
-        from_email = settings.DEFAULT_FROM_EMAIL
         emails = []
         for recipient in self.recipients.all():
-            body_html = Template(body_with_design_applied).render(
-                Context({"user": recipient, **(context or {})})
-            )
-            body_text = html2text(body_html)
             if recipient.email in (None, ""):
                 self.status = "failure"
                 self.status_message = f"{recipient} has no email."
                 self.save()
                 raise ValueError(self.status_message)
-            email = EmailMultiAlternatives(
-                self.template.subject, body_text, from_email, [recipient.email]
-            )
-            email.attach_alternative(body_html, "text/html")
+            email = self.template.render(recipient, context=context)
             emails.append(email)
 
         # Split recipients into batches

@@ -20,7 +20,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255, unique='True')),
-                ('from_email', models.CharField(validators=[django.core.validators.EmailValidator()])),
+                ('from_email', models.CharField(max_length=255, validators=[django.core.validators.EmailValidator()])),
                 ('host', models.CharField(max_length=255)),
                 ('port', models.SmallIntegerField()),
                 ('security_protocol', models.CharField(choices=[('none', 'none'), ('ssl', 'SSL'), ('tls', 'TLS')], default='none', max_length=4)),
@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.BigIntegerField(auto_created=True, blank=True, db_index=True, verbose_name='ID')),
                 ('name', models.CharField(db_index=True, max_length=255)),
-                ('from_email', models.CharField(validators=[django.core.validators.EmailValidator()])),
+                ('from_email', models.CharField(max_length=255, validators=[django.core.validators.EmailValidator()])),
                 ('host', models.CharField(max_length=255)),
                 ('port', models.SmallIntegerField()),
                 ('security_protocol', models.CharField(choices=[('none', 'none'), ('ssl', 'SSL'), ('tls', 'TLS')], default='none', max_length=4)),

@@ -96,7 +96,7 @@ class EmailSenderConfig(models.Model):
     history = HistoricalRecords()
 
     name = models.CharField(max_length=255, unique="True")
-    from_email = models.CharField(validators=[validate_email])
+    from_email = models.CharField(max_length=255, validators=[validate_email])
     
     host = models.CharField(max_length=255)
     port = models.SmallIntegerField()

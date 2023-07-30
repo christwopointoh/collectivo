@@ -3,6 +3,8 @@ from celery import chain
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.mail import EmailMultiAlternatives
+from django.core.mail.backends.smtp import EmailBackend
+from django.core.validators import validate_email
 from django.db import models
 from django.template import Context, Template
 from django.utils import timezone
@@ -85,6 +87,44 @@ class EmailAutomation(models.Model):
                 )
                 user_campaign.save()
                 user_campaign.send(context=context)
+    
+    
+class EmailSenderConfig(models.Model):
+    """The configuration for sending emails (email server config, etc.)"""
+
+    objects = NameManager()
+    history = HistoricalRecords()
+
+    name = models.CharField(max_length=255, unique="True")
+    from_email = models.CharField(validators=[validate_email])
+    
+    host = models.CharField(max_length=255)
+    port = models.SmallIntegerField()
+    
+    security_protocol = models.CharField(
+        max_length=4,
+        default="none",
+        choices=[
+            ("none", "none"),
+            ("ssl", "SSL"),
+            ("tls", "TLS"),
+        ],
+    )
+    
+    host_user = models.CharField(max_length=255)
+    host_password = models.CharField(max_length=255)
+
+    def __str__(self):
+        """Return a string representation of the object."""
+        return self.name
+
+    def construct_email_backend(self):
+        return EmailBackend(host=self.host,
+                            port=self.port,
+                            username=self.host_user,
+                            password=self.host_password,
+                            use_tls=self.security_protocol == "tls",
+                            use_ssl=self.security_protocol == "ssl")
 
 
 class EmailDesign(models.Model):
@@ -113,6 +153,9 @@ class EmailTemplate(models.Model):
     )
     subject = models.CharField(max_length=255)
     body = models.TextField()
+    sender_config = models.ForeignKey(
+        "emails.EmailSenderConfig", on_delete=models.SET_NULL, null=True
+    )
 
     def __str__(self):
         """Return a string representation of the object."""
@@ -127,7 +170,7 @@ class EmailTemplate(models.Model):
         else:
             body_with_design_applied = self.body
             
-        from_email = settings.DEFAULT_FROM_EMAIL
+        from_email = settings.DEFAULT_FROM_EMAIL if self.sender_config is None else self.sender_config.from_email
     
         body_html = Template(body_with_design_applied).render(
             Context({"user": recipient, **(context or {})})
@@ -214,3 +257,10 @@ class EmailCampaign(models.Model):
         # Split recipients into batches
         n = 20  # TODO Get this number from the settings
         return [emails[i : i + n] for i in range(0, len(emails), n)]
+    
+    def construct_email_backend_to_use(self):
+        if self.template.sender_config is not None:
+            return self.template.sender_config.construct_email_backend()
+        else:
+            # Return the default backend using the values from settings.py
+            return EmailBackend()

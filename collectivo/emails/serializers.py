@@ -46,6 +46,16 @@ class EmailDesignSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class EmailSenderConfigSerializer(serializers.ModelSerializer):
+    """Serializer for email sender configs."""
+    
+    class Meta:
+        """Serializer settings."""
+
+        model = models.EmailSenderConfig
+        fields = "__all__"
+
+
 if_not_admin_only = {
     "condition": "equals",
     "value": False,
@@ -224,3 +234,5 @@ EmailAutomationHistorySerializer = create_history_serializer(
     models.EmailAutomation
 )
 EmailDesignHistorySerializer = create_history_serializer(models.EmailDesign)
+
+EmailSenderConfigHistorySerializer = create_history_serializer(models.EmailSenderConfig)

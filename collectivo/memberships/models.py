@@ -402,10 +402,12 @@ class Membership(models.Model):
             name="Shares", extension=extension
         )[0]
         item_type = ItemType.objects.get_or_create(
-            name=self.type.short_name,
+            reference=self.type.id,
             category=item_category,
             extension=extension,
         )[0]
+        item_type.name = self.type.name
+        item_type.save()
         entries = ItemEntry.objects.filter(
             type=item_type,
             invoice__payment_from=self.user.account,
@@ -436,10 +438,12 @@ class Membership(models.Model):
                 name="Shares", extension=extension
             )[0]
             item_type = ItemType.objects.get_or_create(
-                name=self.type.short_name,
+                reference=self.type.id,
                 category=item_category,
                 extension=extension,
             )[0]
+            item_type.name = self.type.name
+            item_type.save()
             entries = ItemEntry.objects.filter(
                 type=item_type,
                 invoice__payment_from=self.user.account,
@@ -470,10 +474,12 @@ class Membership(models.Model):
                 name="Fees", extension=extension
             )[0]
             item_type = ItemType.objects.get_or_create(
-                name=self.type.short_name,
+                reference=self.type.id,
                 category=item_category,
                 extension=extension,
             )[0]
+            item_type.name = self.type.name
+            item_type.save()
             entries = ItemEntry.objects.filter(
                 type=item_type,
                 subscription__status="active",

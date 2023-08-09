@@ -124,7 +124,7 @@ class MembershipsPaymentsTests(TestCase):
 
         # First invoice
         entry = ItemEntry.objects.get(
-            type__name=self.membership_type.short_name,
+            type__reference=self.membership_type.id,
         )
         self.assertEqual(entry.amount, 10)
         self.assertEqual(entry.price, 15)
@@ -133,7 +133,7 @@ class MembershipsPaymentsTests(TestCase):
 
         # No second invoice if nothing changes
         entries = ItemEntry.objects.filter(
-            type__name=self.membership_type.short_name,
+            type__reference=self.membership_type.id,
         )
         self.assertEqual(len(entries), 1)
 
@@ -142,7 +142,7 @@ class MembershipsPaymentsTests(TestCase):
         self.membership.save()
 
         entries = ItemEntry.objects.filter(
-            type__name=self.membership_type.short_name,
+            type__reference=self.membership_type.id,
         )
         self.assertEqual(len(entries), 2)
         entry = entries.last()

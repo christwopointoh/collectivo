@@ -67,6 +67,9 @@ class ItemTypeCategory(models.Model):
     """A category of items for accounting."""
 
     name = models.CharField(max_length=255)
+    reference = models.IntegerField(
+        null=True,
+    )
     extension = models.ForeignKey(
         "extensions.Extension",
         on_delete=models.PROTECT,
@@ -84,6 +87,9 @@ class ItemType(models.Model):
     """A type of item for accounting."""
 
     name = models.CharField(max_length=255)
+    reference = models.IntegerField(
+        null=True,
+    )
     category = models.ForeignKey(
         "ItemTypeCategory",
         on_delete=models.PROTECT,

@@ -119,13 +119,14 @@ class EmailSenderConfig(models.Model):
         """Return a string representation of the object."""
         return self.name
 
-    def construct_email_backend(self):
-        return EmailBackend(host=self.host,
-                            port=self.port,
-                            username=self.host_user,
-                            password=self.host_password,
-                            use_tls=self.security_protocol == "tls",
-                            use_ssl=self.security_protocol == "ssl")
+    def get_email_backend_config_kwargs(self):
+        return {
+            'host':self.host,
+            'port':self.port,
+            'username':self.host_user,
+            'password':self.host_password,
+            'use_tls':self.security_protocol == "tls",
+            'use_ssl':self.security_protocol == "ssl"}
 
 
 class EmailDesign(models.Model):
@@ -259,9 +260,9 @@ class EmailCampaign(models.Model):
         n = 20  # TODO Get this number from the settings
         return [emails[i : i + n] for i in range(0, len(emails), n)]
     
-    def construct_email_backend_to_use(self):
+    def get_email_backend_config_kwargs(self):
         if self.template.sender_config is not None:
-            return self.template.sender_config.construct_email_backend()
+            return self.template.sender_config.get_email_backend_config_kwargs()
         else:
             # Return the default backend using the values from settings.py
-            return EmailBackend()
+            return {}

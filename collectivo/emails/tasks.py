@@ -14,7 +14,7 @@ User = get_user_model()
 def send_mails_async(results, emails):
     """Send a mass email."""
     campaign = results["campaign"]
-    connection = mail.get_connection(backend=campaign.construct_email_backend_to_use())
+    connection = mail.get_connection(**campaign.get_email_backend_config_kwargs())
 
     try:
         time.sleep(1)  # TODO Get this number from the settings
@@ -36,6 +36,7 @@ def send_mails_async(results, emails):
             tag.users.add(user)
             tag.save()
 
+    print(results)
     return results
 
 

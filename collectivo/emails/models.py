@@ -70,13 +70,14 @@ class EmailAutomation(models.Model):
         """Send emails to recipients."""
         if self.is_active:
             # Generate email campaign for admins from automation
-            admin_campaign = EmailCampaign.objects.create(
-                template=self.admin_template,
-                extension=self.extension,
-            )
-            admin_campaign.recipients.set(self.admin_recipients.all())
-            admin_campaign.save()
-            admin_campaign.send(context=context)
+            if (self.admin_recipients.exists()):
+                admin_campaign = EmailCampaign.objects.create(
+                    template=self.admin_template,
+                    extension=self.extension,
+                )
+                admin_campaign.recipients.set(self.admin_recipients.all())
+                admin_campaign.save()
+                admin_campaign.send(context=context)
             
             if not self.admin_only:
                 # Generate email campaign for end users from automation

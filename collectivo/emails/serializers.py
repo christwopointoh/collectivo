@@ -49,6 +49,10 @@ class EmailDesignSerializer(serializers.ModelSerializer):
 class EmailSenderConfigSerializer(serializers.ModelSerializer):
     """Serializer for email sender configs."""
     
+    host_password = serializers.CharField(
+        write_only=True,
+    )
+    
     class Meta:
         """Serializer settings."""
 

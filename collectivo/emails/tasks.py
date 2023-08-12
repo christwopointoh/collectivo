@@ -36,7 +36,6 @@ def send_mails_async(results, emails):
             tag.users.add(user)
             tag.save()
 
-    print(results)
     return results
 
 

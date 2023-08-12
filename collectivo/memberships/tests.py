@@ -57,7 +57,7 @@ class MembershipsEmailsTests(TestCase):
                 subject=f"Test Subject {stage}",
                 body=f"Test Body {stage}" + " {{ membership.type.name }}",
             )
-            
+
             auto_appl = EmailAutomation.objects.get(name=f"membership_{stage}")
             auto_appl.template = auto_template
             auto_appl.is_active = True

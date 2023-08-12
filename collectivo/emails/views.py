@@ -51,7 +51,9 @@ class EmailSenderConfigViewSet(SchemaMixin, viewsets.ModelViewSet):
     }
     serializer_class = serializers.EmailSenderConfigSerializer
     filterset_class = get_filterset(serializers.EmailSenderConfigSerializer)
-    ordering_fields = get_ordering_fields(serializers.EmailSenderConfigSerializer)
+    ordering_fields = get_ordering_fields(
+        serializers.EmailSenderConfigSerializer
+    )
     queryset = models.EmailSenderConfig.objects.all()
 
 
@@ -154,7 +156,9 @@ class EmailSenderConfigHistoryViewSet(
         "ALL": [("edit_email_servers", "emails")],
     }
     serializer_class = serializers.EmailSenderConfigHistorySerializer
-    filterset_class = get_filterset(serializers.EmailSenderConfigHistorySerializer)
+    filterset_class = get_filterset(
+        serializers.EmailSenderConfigHistorySerializer
+    )
     ordering_fields = get_ordering_fields(
         serializers.EmailSenderConfigHistorySerializer
     )

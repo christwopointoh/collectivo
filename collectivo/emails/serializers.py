@@ -1,11 +1,5 @@
 """Serializers of the emails module."""
-from celery import chain
-from django.conf import settings
 from django.contrib.auth import get_user_model
-from django.core.mail import EmailMultiAlternatives
-from django.template import Context, Template
-from django.utils import timezone
-from html2text import html2text
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
@@ -15,7 +9,6 @@ from collectivo.utils.schema import Schema
 from collectivo.utils.serializers import create_history_serializer
 
 from . import models
-from .tasks import send_mails_async, send_mails_async_end
 
 User = get_user_model()
 
@@ -48,11 +41,11 @@ class EmailDesignSerializer(serializers.ModelSerializer):
 
 class EmailSenderConfigSerializer(serializers.ModelSerializer):
     """Serializer for email sender configs."""
-    
+
     host_password = serializers.CharField(
         write_only=True,
     )
-    
+
     class Meta:
         """Serializer settings."""
 
@@ -238,5 +231,6 @@ EmailAutomationHistorySerializer = create_history_serializer(
     models.EmailAutomation
 )
 EmailDesignHistorySerializer = create_history_serializer(models.EmailDesign)
-
-EmailSenderConfigHistorySerializer = create_history_serializer(models.EmailSenderConfig)
+EmailSenderConfigHistorySerializer = create_history_serializer(
+    models.EmailSenderConfig
+)
